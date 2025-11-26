@@ -1,16 +1,180 @@
 ﻿<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Shipping Policy – Revstore</title>
+  <meta charset="UTF-8" />
+  <title>Shipping &amp; Delivery Policy – Revstore</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <style>
+    :root {
+      --bg-gradient-start: #e8f3ff;
+      --bg-gradient-end: #f4e9ff;
+      --card-bg: #ffffff;
+      --accent: #1565c0;
+      --text-main: #222222;
+      --text-muted: #555555;
+      --link: #1976d2;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+        "Helvetica Neue", Arial, sans-serif;
+      color: var(--text-main);
+      background: linear-gradient(135deg, var(--bg-gradient-start), var(--bg-gradient-end));
+      min-height: 100vh;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      padding: 24px 12px;
+    }
+
+    .card {
+      width: 100%;
+      max-width: 900px;
+      background: var(--card-bg);
+      border-radius: 18px;
+      padding: 28px 22px;
+      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.08);
+    }
+
+    @media (min-width: 768px) {
+      .card {
+        padding: 40px 48px;
+      }
+    }
+
+    h1 {
+      margin-top: 0;
+      margin-bottom: 10px;
+      font-size: 1.9rem;
+      color: var(--accent);
+      text-align: center;
+    }
+
+    .meta {
+      text-align: center;
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      margin-bottom: 24px;
+    }
+
+    p {
+      line-height: 1.6;
+      margin: 0 0 14px;
+    }
+
+    ul {
+      padding-left: 20px;
+      margin: 0 0 14px;
+    }
+
+    li {
+      margin-bottom: 10px;
+      line-height: 1.6;
+    }
+
+    a {
+      color: var(--link);
+      text-decoration: none;
+    }
+
+    a:hover,
+    a:focus {
+      text-decoration: underline;
+    }
+
+    hr {
+      border: none;
+      border-top: 1px solid #e0e0e0;
+      margin: 22px 0;
+    }
+
+    .back-link {
+      text-align: center;
+      margin-top: 18px;
+    }
+
+    .footer {
+      margin-top: 14px;
+      text-align: center;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+  </style>
 </head>
 <body>
-  <h1>Shipping Policy</h1>
-  <p><strong>Last updated:</strong> 25 November 2025</p>
+  <main class="card">
+    <h1>Shipping &amp; Delivery Policy</h1>
+    <p class="meta"><strong>Last updated:</strong> 25 November 2025</p>
 
-  <!-- 👉 Paste your full Shipping Policy here.
-       You can reuse the “Shipping & Delivery Policy” text Razorpay generated. -->
+    <p>
+      This Shipping &amp; Delivery Policy applies to all purchases made on
+      <strong>revstore.in</strong>. By placing an order on our Platform, you agree
+      to the terms set out below.
+    </p>
 
-  <p><a href="/">Back to revstore.in</a></p>
+    <ul>
+      <li>
+        For <strong>international buyers</strong>, orders are shipped and delivered
+        through registered international courier companies and/or international
+        speed post only.
+      </li>
+
+      <li>
+        For <strong>domestic buyers within India</strong>, orders are shipped
+        through registered domestic courier companies and/or speed post only.
+      </li>
+
+      <li>
+        Orders are normally shipped in accordance with the
+        <strong>delivery timeline communicated at the time of order confirmation</strong>,
+        and delivery of the shipment is subject to the norms and policies of the
+        respective courier company or postal authorities.
+      </li>
+
+      <li>
+        REV is <strong>not liable</strong> for any delay in delivery by the courier
+        company or postal authorities. Our responsibility is limited to handing
+        over the consignment to the courier company or postal authorities within
+        the timeline communicated at the time of order confirmation, after receipt
+        of full payment for the order.
+      </li>
+
+      <li>
+        Delivery of all orders will be made to the <strong>shipping address
+        provided by the buyer</strong> at the time of placing the order. Please
+        ensure that the address and contact details provided are complete and
+        accurate.
+      </li>
+
+      <li>
+        Confirmation of delivery of our services (where applicable) will be sent
+        to your <strong>registered email ID</strong> as specified during
+        registration or checkout.
+      </li>
+
+      <li>
+        For any issues, questions, or assistance in connection with shipping or
+        delivery, you may contact our helpdesk on
+        <strong>+91&nbsp;95660&nbsp;54412</strong> or write to us at
+        <strong>support@revstore.in</strong>.
+      </li>
+    </ul>
+
+    <hr />
+
+    <div class="back-link">
+      <a href="/">&#8592; Back to revstore.in</a>
+    </div>
+
+    <div class="footer">
+      &copy; 2025 Rev Technologies. All rights reserved.
+    </div>
+  </main>
 </body>
 </html>

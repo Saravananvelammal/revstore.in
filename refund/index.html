@@ -1,16 +1,177 @@
 ﻿<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Cancellation & Refund Policy – Revstore</title>
+  <meta charset="UTF-8" />
+  <title>Cancellation &amp; Refund Policy – Revstore</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <style>
+    :root {
+      --bg-gradient-start: #fdf0f3;
+      --bg-gradient-end: #f4e9ff;
+      --card-bg: #ffffff;
+      --accent: #e91e63;
+      --text-main: #222222;
+      --text-muted: #555555;
+      --link: #1976d2;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+        "Helvetica Neue", Arial, sans-serif;
+      color: var(--text-main);
+      background: linear-gradient(135deg, var(--bg-gradient-start), var(--bg-gradient-end));
+      min-height: 100vh;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      padding: 24px 12px;
+    }
+
+    .card {
+      width: 100%;
+      max-width: 900px;
+      background: var(--card-bg);
+      border-radius: 18px;
+      padding: 28px 22px;
+      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.08);
+    }
+
+    @media (min-width: 768px) {
+      .card {
+        padding: 40px 48px;
+      }
+    }
+
+    h1 {
+      margin-top: 0;
+      margin-bottom: 10px;
+      font-size: 1.9rem;
+      color: var(--accent);
+      text-align: center;
+    }
+
+    .meta {
+      text-align: center;
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      margin-bottom: 24px;
+    }
+
+    p {
+      line-height: 1.6;
+      margin: 0 0 14px;
+    }
+
+    ul {
+      padding-left: 20px;
+      margin: 0 0 14px;
+    }
+
+    li {
+      margin-bottom: 10px;
+      line-height: 1.6;
+    }
+
+    a {
+      color: var(--link);
+      text-decoration: none;
+    }
+
+    a:hover,
+    a:focus {
+      text-decoration: underline;
+    }
+
+    hr {
+      border: none;
+      border-top: 1px solid #e0e0e0;
+      margin: 22px 0;
+    }
+
+    .footer {
+      margin-top: 14px;
+      text-align: center;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+
+    .back-link {
+      text-align: center;
+      margin-top: 18px;
+    }
+  </style>
 </head>
 <body>
-  <h1>Cancellation & Refund Policy</h1>
-  <p><strong>Last updated:</strong> 25 November 2025</p>
+  <main class="card">
+    <h1>Cancellation &amp; Refund Policy</h1>
+    <p class="meta"><strong>Last updated:</strong> 25 November 2025</p>
 
-  <!-- 👉 Paste your full Cancellation & Refund Policy here.
-       You can reuse the Razorpay-generated cancellation & refund policy text. -->
+    <p>
+      REV believes in helping its customers as far as possible and therefore
+      follows a liberal cancellation and refund policy. Under this policy:
+    </p>
 
-  <p><a href="/">Back to revstore.in</a></p>
+    <ul>
+      <li>
+        Cancellations will be considered only if the request is made within the
+        <strong>same day</strong> of placing the order. However, the cancellation
+        request may not be entertained if the orders have already been
+        communicated to the vendors/merchants and they have initiated the process
+        of shipping them.
+      </li>
+
+      <li>
+        REV does not accept cancellation requests for perishable items like
+        flowers, eatables, etc. However, a refund/replacement can be made if the
+        customer establishes that the quality of the product delivered is not good.
+      </li>
+
+      <li>
+        In case of receipt of damaged or defective items, please report the same
+        to our Customer Service team. The request will be entertained once the
+        merchant has checked and determined the same at their own end. This
+        should be reported within the <strong>same day</strong> of receipt of the
+        products.
+      </li>
+
+      <li>
+        In case you feel that the product received is not as shown on the site or
+        is not as per your expectations, you must bring it to the notice of our
+        Customer Service team within the <strong>same day</strong> of receiving
+        the product. The Customer Service team, after looking into your complaint,
+        will take an appropriate decision.
+      </li>
+
+      <li>
+        In case of complaints regarding products that come with a warranty from
+        the manufacturer, please refer the issue directly to the manufacturer as
+        per the warranty terms provided with the product.
+      </li>
+
+      <li>
+        In case of any refunds approved by REV, it will take
+        <strong>1–2 days</strong> for the refund to be processed to the end
+        customer, after the approval has been confirmed. The actual time taken
+        for the amount to reflect in your account will depend on your bank or
+        payment provider.
+      </li>
+    </ul>
+
+    <hr />
+
+    <div class="back-link">
+      <a href="/">&#8592; Back to revstore.in</a>
+    </div>
+
+    <div class="footer">
+      &copy; 2025 Rev Technologies. All rights reserved.
+    </div>
+  </main>
 </body>
 </html>
