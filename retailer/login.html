@@ -6,7 +6,7 @@
     name="viewport"
     content="width=device-width, initial-scale=1, viewport-fit=cover"
   />
-  <title>Retailer Web Login</title>
+  <title>Revstore Retailer Login</title>
   <meta name="robots" content="noindex,nofollow,noarchive,nosnippet" />
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0" />
   <meta http-equiv="Pragma" content="no-cache" />
@@ -14,32 +14,33 @@
   <meta name="color-scheme" content="light dark" />
   <style>
     :root {
-      --bg: #0b1020;
-      --bg-soft: #131a2d;
-      --card: rgba(255, 255, 255, 0.92);
-      --text: #0f172a;
-      --muted: #64748b;
-      --line: rgba(15, 23, 42, 0.10);
-      --primary: #2563eb;
-      --primary-hover: #1d4ed8;
+      --bg: #3b0ca8;
+      --bg-soft: #6a11cb;
+      --bg-soft-2: #a21caf;
+      --card: rgba(255, 255, 255, 0.96);
+      --text: #1e1b4b;
+      --muted: #6b7280;
+      --line: rgba(30, 27, 75, 0.10);
+      --primary: #5b21b6;
+      --primary-hover: #4c1d95;
       --danger: #dc2626;
       --success: #059669;
       --warning: #d97706;
       --white: #ffffff;
-      --shadow: 0 16px 60px rgba(2, 6, 23, 0.22);
+      --shadow: 0 18px 60px rgba(49, 12, 120, 0.30);
       --radius: 22px;
       --radius-sm: 14px;
       --input-h: 52px;
-      --focus: 0 0 0 4px rgba(37, 99, 235, 0.18);
+      --focus: 0 0 0 4px rgba(91, 33, 182, 0.18);
     }
 
     @media (prefers-color-scheme: dark) {
       :root {
-        --card: rgba(15, 23, 42, 0.92);
-        --text: #e5e7eb;
-        --muted: #94a3b8;
-        --line: rgba(255, 255, 255, 0.09);
-        --shadow: 0 16px 60px rgba(0, 0, 0, 0.35);
+        --card: rgba(255, 255, 255, 0.95);
+        --text: #1e1b4b;
+        --muted: #6b7280;
+        --line: rgba(30, 27, 75, 0.10);
+        --shadow: 0 18px 60px rgba(20, 0, 50, 0.38);
       }
     }
 
@@ -52,9 +53,9 @@
       min-height: 100%;
       font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
       background:
-        radial-gradient(circle at top left, rgba(37, 99, 235, 0.25), transparent 28%),
-        radial-gradient(circle at bottom right, rgba(14, 165, 233, 0.18), transparent 24%),
-        linear-gradient(180deg, #09111f 0%, #0f172a 100%);
+        radial-gradient(circle at top left, rgba(255, 255, 255, 0.10), transparent 24%),
+        radial-gradient(circle at bottom right, rgba(255, 105, 180, 0.18), transparent 26%),
+        linear-gradient(135deg, #4318b8 0%, #5b21b6 38%, #7e22ce 68%, #c026d3 100%);
       color: var(--text);
     }
 
@@ -77,14 +78,14 @@
 
     .brand h1 {
       margin: 0 0 8px;
-      font-size: 1.8rem;
-      font-weight: 800;
+      font-size: 1.95rem;
+      font-weight: 900;
       letter-spacing: -0.03em;
     }
 
     .brand p {
       margin: 0;
-      color: rgba(255,255,255,0.78);
+      color: rgba(255,255,255,0.86);
       font-size: 0.96rem;
       line-height: 1.5;
     }
@@ -92,7 +93,7 @@
     .card {
       background: var(--card);
       backdrop-filter: blur(18px);
-      border: 1px solid rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.12);
       border-radius: var(--radius);
       box-shadow: var(--shadow);
       overflow: hidden;
@@ -135,8 +136,8 @@
     }
 
     .step.active .step-dot {
-      background: rgba(37, 99, 235, 0.10);
-      border-color: rgba(37, 99, 235, 0.25);
+      background: rgba(91, 33, 182, 0.10);
+      border-color: rgba(91, 33, 182, 0.25);
     }
 
     .step.done {
@@ -196,7 +197,7 @@
       height: var(--input-h);
       border-radius: var(--radius-sm);
       border: 1px solid var(--line);
-      background: transparent;
+      background: #fff;
       color: var(--text);
       padding: 0 14px;
       outline: none;
@@ -217,7 +218,7 @@
     .otp-input:focus,
     button:focus-visible,
     .link-btn:focus-visible {
-      border-color: rgba(37, 99, 235, 0.55);
+      border-color: rgba(91, 33, 182, 0.55);
       box-shadow: var(--focus);
     }
 
@@ -268,12 +269,13 @@
     }
 
     .btn-primary {
-      background: var(--primary);
+      background: linear-gradient(135deg, #5b21b6 0%, #7c3aed 55%, #a21caf 100%);
       color: var(--white);
+      box-shadow: 0 10px 24px rgba(91, 33, 182, 0.25);
     }
 
     .btn-primary:hover:not(:disabled) {
-      background: var(--primary-hover);
+      background: linear-gradient(135deg, #4c1d95 0%, #6d28d9 55%, #86198f 100%);
     }
 
     .btn-secondary {
@@ -314,40 +316,9 @@
     }
 
     .banner.info {
-      color: #1e3a8a;
-      background: rgba(59, 130, 246, 0.10);
-      border-color: rgba(59, 130, 246, 0.18);
-    }
-
-    @media (prefers-color-scheme: dark) {
-      .banner.error {
-        color: #fecaca;
-      }
-      .banner.success {
-        color: #a7f3d0;
-      }
-      .banner.info {
-        color: #bfdbfe;
-      }
-    }
-
-    .meta {
-      margin-top: 18px;
-      text-align: center;
-      font-size: 0.78rem;
-      color: var(--muted);
-      line-height: 1.5;
-      word-break: break-word;
-    }
-
-    .link-btn {
-      background: transparent;
-      border: 0;
-      color: var(--primary);
-      font: inherit;
-      font-weight: 700;
-      padding: 0;
-      cursor: pointer;
+      color: #4c1d95;
+      background: rgba(124, 58, 237, 0.10);
+      border-color: rgba(124, 58, 237, 0.18);
     }
 
     .loading {
@@ -378,7 +349,7 @@
     .footer-note {
       margin-top: 12px;
       text-align: center;
-      color: rgba(255,255,255,0.65);
+      color: rgba(255,255,255,0.80);
       font-size: 0.78rem;
       line-height: 1.5;
     }
@@ -387,7 +358,7 @@
 <body>
   <main class="shell" aria-labelledby="pageTitle">
     <section class="brand">
-      <h1 id="pageTitle">Retailer Portal</h1>
+      <h1 id="pageTitle">Revstore Retailer</h1>
       <p>Secure sign-in with password and time-based one-time code.</p>
     </section>
 
@@ -504,16 +475,11 @@
             </div>
           </form>
         </section>
-
-        <div class="meta">
-          <div><strong>Fingerprint:</strong> <span id="fpPreview">Generating...</span></div>
-          <div><strong>API base:</strong> <span id="apiBasePreview"></span></div>
-        </div>
       </div>
     </section>
 
     <div class="footer-note">
-      This page uses secure cookie-based web sessions and never sends mobile auth headers.
+      Secure retailer web access
     </div>
   </main>
 
@@ -521,21 +487,12 @@
     (function () {
       'use strict';
 
-      /**
-       * =========================================================
-       * CONFIG
-       * =========================================================
-       *
-       * Override these globally before this script if needed:
-       * window._RETAILER_WEB_API_BASE_
-       * window._RETAILER_WEB_AFTER_LOGIN_URL_
-       */
       const CONFIG = {
-        API_BASE: typeof window._RETAILER_WEB_API_BASE_ === 'string' && window._RETAILER_WEB_API_BASE_.trim()
-          ? window._RETAILER_WEB_API_BASE_.trim().replace(/\/+$/, '')
+        API_BASE: typeof window.RETAILER_WEB_API_BASE === 'string' && window.RETAILER_WEB_API_BASE.trim()
+          ? window.RETAILER_WEB_API_BASE.trim().replace(/\/+$/, '')
           : '/api/retailer/web',
-        AFTER_LOGIN_URL: typeof window._RETAILER_WEB_AFTER_LOGIN_URL_ === 'string' && window._RETAILER_WEB_AFTER_LOGIN_URL_.trim()
-          ? window._RETAILER_WEB_AFTER_LOGIN_URL_.trim()
+        AFTER_LOGIN_URL: typeof window.RETAILER_WEB_AFTER_LOGIN_URL === 'string' && window.RETAILER_WEB_AFTER_LOGIN_URL.trim()
+          ? window.RETAILER_WEB_AFTER_LOGIN_URL.trim()
           : '/retailer/dashboard',
         CHALLENGE_STORAGE_KEY: 'retailer_web_login_challenge_v1',
         FINGERPRINT_STORAGE_KEY: 'retailer_web_fp_v1'
@@ -558,10 +515,7 @@
         startLoginBtn: document.getElementById('startLoginBtn'),
         verifyOtpBtn: document.getElementById('verifyOtpBtn'),
         backBtn: document.getElementById('backBtn'),
-        togglePasswordBtn: document.getElementById('togglePasswordBtn'),
-
-        fpPreview: document.getElementById('fpPreview'),
-        apiBasePreview: document.getElementById('apiBasePreview')
+        togglePasswordBtn: document.getElementById('togglePasswordBtn')
       };
 
       let state = {
@@ -569,10 +523,6 @@
         fingerprint: '',
         busy: false
       };
-
-      function setApiBasePreview() {
-        els.apiBasePreview.textContent = CONFIG.API_BASE;
-      }
 
       function normalizeEmail(value) {
         return String(value || '').trim().toLowerCase();
@@ -925,9 +875,7 @@
       }
 
       async function bootstrap() {
-        setApiBasePreview();
         state.fingerprint = await getStableFingerprint();
-        els.fpPreview.textContent = state.fingerprint;
 
         els.loginForm.addEventListener('submit', handleStartLogin);
         els.otpForm.addEventListener('submit', handleVerifyOtp);
