@@ -1,0 +1,949 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1, viewport-fit=cover"
+  />
+  <title>Retailer Web Login</title>
+  <meta name="robots" content="noindex,nofollow,noarchive,nosnippet" />
+  <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+  <meta name="color-scheme" content="light dark" />
+  <style>
+    :root {
+      --bg: #0b1020;
+      --bg-soft: #131a2d;
+      --card: rgba(255, 255, 255, 0.92);
+      --text: #0f172a;
+      --muted: #64748b;
+      --line: rgba(15, 23, 42, 0.10);
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --danger: #dc2626;
+      --success: #059669;
+      --warning: #d97706;
+      --white: #ffffff;
+      --shadow: 0 16px 60px rgba(2, 6, 23, 0.22);
+      --radius: 22px;
+      --radius-sm: 14px;
+      --input-h: 52px;
+      --focus: 0 0 0 4px rgba(37, 99, 235, 0.18);
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --card: rgba(15, 23, 42, 0.92);
+        --text: #e5e7eb;
+        --muted: #94a3b8;
+        --line: rgba(255, 255, 255, 0.09);
+        --shadow: 0 16px 60px rgba(0, 0, 0, 0.35);
+      }
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html, body {
+      margin: 0;
+      min-height: 100%;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(37, 99, 235, 0.25), transparent 28%),
+        radial-gradient(circle at bottom right, rgba(14, 165, 233, 0.18), transparent 24%),
+        linear-gradient(180deg, #09111f 0%, #0f172a 100%);
+      color: var(--text);
+    }
+
+    body {
+      display: grid;
+      place-items: center;
+      padding: 24px;
+    }
+
+    .shell {
+      width: 100%;
+      max-width: 430px;
+    }
+
+    .brand {
+      text-align: center;
+      color: #fff;
+      margin-bottom: 16px;
+    }
+
+    .brand h1 {
+      margin: 0 0 8px;
+      font-size: 1.8rem;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+    }
+
+    .brand p {
+      margin: 0;
+      color: rgba(255,255,255,0.78);
+      font-size: 0.96rem;
+      line-height: 1.5;
+    }
+
+    .card {
+      background: var(--card);
+      backdrop-filter: blur(18px);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .card-inner {
+      padding: 26px;
+    }
+
+    .stepper {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .step {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--muted);
+      font-size: 0.88rem;
+      font-weight: 700;
+    }
+
+    .step-dot {
+      width: 26px;
+      height: 26px;
+      border-radius: 999px;
+      display: inline-grid;
+      place-items: center;
+      font-size: 0.82rem;
+      border: 1px solid var(--line);
+      background: transparent;
+      color: inherit;
+    }
+
+    .step.active {
+      color: var(--primary);
+    }
+
+    .step.active .step-dot {
+      background: rgba(37, 99, 235, 0.10);
+      border-color: rgba(37, 99, 235, 0.25);
+    }
+
+    .step.done {
+      color: var(--success);
+    }
+
+    .step.done .step-dot {
+      background: rgba(5, 150, 105, 0.10);
+      border-color: rgba(5, 150, 105, 0.25);
+    }
+
+    .divider {
+      flex: 1;
+      height: 1px;
+      background: var(--line);
+    }
+
+    h2 {
+      margin: 0 0 8px;
+      font-size: 1.35rem;
+      letter-spacing: -0.02em;
+    }
+
+    .subtitle {
+      margin: 0 0 22px;
+      color: var(--muted);
+      font-size: 0.95rem;
+      line-height: 1.55;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    form {
+      display: grid;
+      gap: 16px;
+    }
+
+    .field {
+      display: grid;
+      gap: 8px;
+    }
+
+    .field label {
+      font-size: 0.9rem;
+      font-weight: 700;
+    }
+
+    .control {
+      position: relative;
+    }
+
+    .input,
+    .otp-input {
+      width: 100%;
+      height: var(--input-h);
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--line);
+      background: transparent;
+      color: var(--text);
+      padding: 0 14px;
+      outline: none;
+      font-size: 1rem;
+      transition: border-color 0.18s ease, box-shadow 0.18s ease, background-color 0.18s ease;
+    }
+
+    .otp-input {
+      text-align: center;
+      letter-spacing: 0.35em;
+      font-weight: 800;
+      font-size: 1.15rem;
+      font-variant-numeric: tabular-nums;
+      padding-left: 18px;
+    }
+
+    .input:focus,
+    .otp-input:focus,
+    button:focus-visible,
+    .link-btn:focus-visible {
+      border-color: rgba(37, 99, 235, 0.55);
+      box-shadow: var(--focus);
+    }
+
+    .toggle-password {
+      position: absolute;
+      top: 50%;
+      right: 10px;
+      transform: translateY(-50%);
+      border: 0;
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+      padding: 8px 10px;
+      border-radius: 10px;
+      font-weight: 700;
+    }
+
+    .hint {
+      color: var(--muted);
+      font-size: 0.84rem;
+      line-height: 1.5;
+    }
+
+    .actions {
+      display: grid;
+      gap: 12px;
+      margin-top: 6px;
+    }
+
+    .btn {
+      width: 100%;
+      height: 52px;
+      border: 0;
+      border-radius: 16px;
+      cursor: pointer;
+      font-weight: 800;
+      font-size: 0.98rem;
+      transition: transform 0.05s ease, opacity 0.16s ease, background-color 0.16s ease;
+    }
+
+    .btn:active {
+      transform: translateY(1px);
+    }
+
+    .btn:disabled {
+      cursor: not-allowed;
+      opacity: 0.72;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: var(--white);
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background: var(--primary-hover);
+    }
+
+    .btn-secondary {
+      background: transparent;
+      color: var(--text);
+      border: 1px solid var(--line);
+    }
+
+    .stack {
+      display: grid;
+      gap: 12px;
+    }
+
+    .banner {
+      display: none;
+      margin-bottom: 16px;
+      padding: 13px 14px;
+      border-radius: 14px;
+      font-size: 0.92rem;
+      line-height: 1.5;
+      border: 1px solid transparent;
+    }
+
+    .banner.show {
+      display: block;
+    }
+
+    .banner.error {
+      color: #7f1d1d;
+      background: rgba(239, 68, 68, 0.10);
+      border-color: rgba(239, 68, 68, 0.18);
+    }
+
+    .banner.success {
+      color: #065f46;
+      background: rgba(16, 185, 129, 0.10);
+      border-color: rgba(16, 185, 129, 0.18);
+    }
+
+    .banner.info {
+      color: #1e3a8a;
+      background: rgba(59, 130, 246, 0.10);
+      border-color: rgba(59, 130, 246, 0.18);
+    }
+
+    @media (prefers-color-scheme: dark) {
+      .banner.error {
+        color: #fecaca;
+      }
+      .banner.success {
+        color: #a7f3d0;
+      }
+      .banner.info {
+        color: #bfdbfe;
+      }
+    }
+
+    .meta {
+      margin-top: 18px;
+      text-align: center;
+      font-size: 0.78rem;
+      color: var(--muted);
+      line-height: 1.5;
+      word-break: break-word;
+    }
+
+    .link-btn {
+      background: transparent;
+      border: 0;
+      color: var(--primary);
+      font: inherit;
+      font-weight: 700;
+      padding: 0;
+      cursor: pointer;
+    }
+
+    .loading {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .spinner {
+      width: 18px;
+      height: 18px;
+      border: 2px solid rgba(255,255,255,0.35);
+      border-top-color: rgba(255,255,255,1);
+      border-radius: 999px;
+      animation: spin 0.8s linear infinite;
+    }
+
+    .btn-secondary .spinner {
+      border: 2px solid rgba(100, 116, 139, 0.35);
+      border-top-color: rgba(100, 116, 139, 1);
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .footer-note {
+      margin-top: 12px;
+      text-align: center;
+      color: rgba(255,255,255,0.65);
+      font-size: 0.78rem;
+      line-height: 1.5;
+    }
+  </style>
+</head>
+<body>
+  <main class="shell" aria-labelledby="pageTitle">
+    <section class="brand">
+      <h1 id="pageTitle">Retailer Portal</h1>
+      <p>Secure sign-in with password and time-based one-time code.</p>
+    </section>
+
+    <section class="card" aria-label="Retailer web login">
+      <div class="card-inner">
+        <div class="stepper" aria-hidden="true">
+          <div class="step active" id="stepIndicator1">
+            <span class="step-dot">1</span>
+            <span>Credentials</span>
+          </div>
+          <div class="divider"></div>
+          <div class="step" id="stepIndicator2">
+            <span class="step-dot">2</span>
+            <span>2FA</span>
+          </div>
+        </div>
+
+        <div id="banner" class="banner" role="alert" aria-live="polite"></div>
+
+        <section id="step1Section">
+          <h2>Sign in</h2>
+          <p class="subtitle">
+            Enter your retailer email and password to continue to 2-factor verification.
+          </p>
+
+          <form id="loginForm" novalidate>
+            <div class="field">
+              <label for="email">Email</label>
+              <div class="control">
+                <input
+                  id="email"
+                  name="email"
+                  class="input"
+                  type="email"
+                  inputmode="email"
+                  autocomplete="username"
+                  spellcheck="false"
+                  maxlength="190"
+                  required
+                  placeholder="you@example.com"
+                />
+              </div>
+            </div>
+
+            <div class="field">
+              <label for="password">Password</label>
+              <div class="control">
+                <input
+                  id="password"
+                  name="password"
+                  class="input"
+                  type="password"
+                  autocomplete="current-password"
+                  maxlength="128"
+                  required
+                  placeholder="Enter password"
+                />
+                <button
+                  type="button"
+                  class="toggle-password"
+                  id="togglePasswordBtn"
+                  aria-label="Show password"
+                  aria-controls="password"
+                >
+                  Show
+                </button>
+              </div>
+            </div>
+
+            <div class="actions">
+              <button type="submit" id="startLoginBtn" class="btn btn-primary">
+                Continue to 2FA
+              </button>
+            </div>
+          </form>
+        </section>
+
+        <section id="step2Section" class="hidden">
+          <h2>Verify 2FA</h2>
+          <p class="subtitle">
+            Enter the 6-digit code from your authenticator app to complete sign-in.
+          </p>
+
+          <form id="otpForm" novalidate>
+            <div class="field">
+              <label for="otp">One-time code</label>
+              <div class="control">
+                <input
+                  id="otp"
+                  name="otp"
+                  class="otp-input"
+                  type="text"
+                  inputmode="numeric"
+                  autocomplete="one-time-code"
+                  maxlength="6"
+                  pattern="[0-9]{6}"
+                  required
+                  placeholder="000000"
+                  aria-describedby="otpHint"
+                />
+              </div>
+              <div class="hint" id="otpHint">
+                Your challenge expires after a short time. If it expires, go back and sign in again.
+              </div>
+            </div>
+
+            <div class="stack">
+              <button type="submit" id="verifyOtpBtn" class="btn btn-primary">
+                Verify and sign in
+              </button>
+              <button type="button" id="backBtn" class="btn btn-secondary">
+                Back
+              </button>
+            </div>
+          </form>
+        </section>
+
+        <div class="meta">
+          <div><strong>Fingerprint:</strong> <span id="fpPreview">Generating...</span></div>
+          <div><strong>API base:</strong> <span id="apiBasePreview"></span></div>
+        </div>
+      </div>
+    </section>
+
+    <div class="footer-note">
+      This page uses secure cookie-based web sessions and never sends mobile auth headers.
+    </div>
+  </main>
+
+  <script>
+    (function () {
+      'use strict';
+
+      /**
+       * =========================================================
+       * CONFIG
+       * =========================================================
+       *
+       * Override these globally before this script if needed:
+       * window._RETAILER_WEB_API_BASE_
+       * window._RETAILER_WEB_AFTER_LOGIN_URL_
+       */
+      const CONFIG = {
+        API_BASE: typeof window._RETAILER_WEB_API_BASE_ === 'string' && window._RETAILER_WEB_API_BASE_.trim()
+          ? window._RETAILER_WEB_API_BASE_.trim().replace(/\/+$/, '')
+          : '/api/retailer/web',
+        AFTER_LOGIN_URL: typeof window._RETAILER_WEB_AFTER_LOGIN_URL_ === 'string' && window._RETAILER_WEB_AFTER_LOGIN_URL_.trim()
+          ? window._RETAILER_WEB_AFTER_LOGIN_URL_.trim()
+          : '/retailer/dashboard',
+        CHALLENGE_STORAGE_KEY: 'retailer_web_login_challenge_v1',
+        FINGERPRINT_STORAGE_KEY: 'retailer_web_fp_v1'
+      };
+
+      const els = {
+        banner: document.getElementById('banner'),
+        step1Section: document.getElementById('step1Section'),
+        step2Section: document.getElementById('step2Section'),
+        stepIndicator1: document.getElementById('stepIndicator1'),
+        stepIndicator2: document.getElementById('stepIndicator2'),
+
+        loginForm: document.getElementById('loginForm'),
+        otpForm: document.getElementById('otpForm'),
+
+        email: document.getElementById('email'),
+        password: document.getElementById('password'),
+        otp: document.getElementById('otp'),
+
+        startLoginBtn: document.getElementById('startLoginBtn'),
+        verifyOtpBtn: document.getElementById('verifyOtpBtn'),
+        backBtn: document.getElementById('backBtn'),
+        togglePasswordBtn: document.getElementById('togglePasswordBtn'),
+
+        fpPreview: document.getElementById('fpPreview'),
+        apiBasePreview: document.getElementById('apiBasePreview')
+      };
+
+      let state = {
+        challengeToken: '',
+        fingerprint: '',
+        busy: false
+      };
+
+      function setApiBasePreview() {
+        els.apiBasePreview.textContent = CONFIG.API_BASE;
+      }
+
+      function normalizeEmail(value) {
+        return String(value || '').trim().toLowerCase();
+      }
+
+      function normalizeOtp(value) {
+        return String(value || '').replace(/\D+/g, '').slice(0, 6);
+      }
+
+      function showBanner(type, message) {
+        els.banner.className = 'banner show ' + type;
+        els.banner.textContent = message || '';
+      }
+
+      function clearBanner() {
+        els.banner.className = 'banner';
+        els.banner.textContent = '';
+      }
+
+      function setBusy(nextBusy) {
+        state.busy = !!nextBusy;
+
+        const loginBusy = state.busy && !els.step1Section.classList.contains('hidden');
+        const otpBusy = state.busy && !els.step2Section.classList.contains('hidden');
+
+        els.startLoginBtn.disabled = state.busy;
+        els.verifyOtpBtn.disabled = state.busy;
+        els.backBtn.disabled = state.busy;
+        els.email.disabled = state.busy;
+        els.password.disabled = state.busy;
+        els.otp.disabled = state.busy;
+
+        els.startLoginBtn.innerHTML = loginBusy
+          ? '<span class="loading"><span class="spinner" aria-hidden="true"></span><span>Please wait...</span></span>'
+          : 'Continue to 2FA';
+
+        els.verifyOtpBtn.innerHTML = otpBusy
+          ? '<span class="loading"><span class="spinner" aria-hidden="true"></span><span>Verifying...</span></span>'
+          : 'Verify and sign in';
+      }
+
+      function setStep(step) {
+        const isStep1 = step === 1;
+        els.step1Section.classList.toggle('hidden', !isStep1);
+        els.step2Section.classList.toggle('hidden', isStep1);
+
+        els.stepIndicator1.className = isStep1 ? 'step active' : 'step done';
+        els.stepIndicator2.className = isStep1 ? 'step' : 'step active';
+
+        if (isStep1) {
+          window.requestAnimationFrame(() => els.email.focus());
+        } else {
+          window.requestAnimationFrame(() => els.otp.focus());
+        }
+      }
+
+      function persistChallenge(data) {
+        try {
+          sessionStorage.setItem(CONFIG.CHALLENGE_STORAGE_KEY, JSON.stringify({
+            challengeToken: data.challengeToken || '',
+            email: data.email || '',
+            createdAt: Date.now()
+          }));
+        } catch (_) {}
+      }
+
+      function readPersistedChallenge() {
+        try {
+          const raw = sessionStorage.getItem(CONFIG.CHALLENGE_STORAGE_KEY);
+          if (!raw) return null;
+          const parsed = JSON.parse(raw);
+          if (!parsed || typeof parsed !== 'object') return null;
+          return parsed;
+        } catch (_) {
+          return null;
+        }
+      }
+
+      function clearPersistedChallenge() {
+        try {
+          sessionStorage.removeItem(CONFIG.CHALLENGE_STORAGE_KEY);
+        } catch (_) {}
+      }
+
+      function bytesToHex(buffer) {
+        const bytes = new Uint8Array(buffer);
+        let out = '';
+        for (let i = 0; i < bytes.length; i++) {
+          out += bytes[i].toString(16).padStart(2, '0');
+        }
+        return out;
+      }
+
+      async function sha256Hex(input) {
+        const data = new TextEncoder().encode(String(input));
+        const digest = await crypto.subtle.digest('SHA-256', data);
+        return bytesToHex(digest);
+      }
+
+      async function getStableFingerprint() {
+        try {
+          const existing = localStorage.getItem(CONFIG.FINGERPRINT_STORAGE_KEY);
+          if (existing && existing.trim()) {
+            return existing.trim().slice(0, 200);
+          }
+        } catch (_) {}
+
+        const seedParts = [
+          navigator.userAgent || '',
+          navigator.language || '',
+          String(screen.width || ''),
+          String(screen.height || ''),
+          String(screen.colorDepth || ''),
+          Intl.DateTimeFormat().resolvedOptions().timeZone || '',
+          navigator.platform || '',
+          String(navigator.hardwareConcurrency || ''),
+          String(new Date().getTimezoneOffset())
+        ];
+
+        const randomPart = (crypto.getRandomValues(new Uint32Array(4))).join('-');
+        const raw = seedParts.join('|') + '|' + randomPart;
+        const fp = (await sha256Hex(raw)).slice(0, 64);
+
+        try {
+          localStorage.setItem(CONFIG.FINGERPRINT_STORAGE_KEY, fp);
+        } catch (_) {}
+
+        return fp;
+      }
+
+      async function apiFetch(path, options) {
+        const url = CONFIG.API_BASE + path;
+        const headers = new Headers(options && options.headers ? options.headers : {});
+        headers.set('Accept', 'application/json');
+        headers.set('X-Requested-With', 'XMLHttpRequest');
+
+        if (state.fingerprint) {
+          headers.set('x-device-fingerprint', state.fingerprint);
+        }
+
+        const init = Object.assign({}, options || {}, {
+          headers,
+          credentials: 'include',
+          cache: 'no-store',
+          redirect: 'follow',
+          referrerPolicy: 'strict-origin-when-cross-origin'
+        });
+
+        const response = await fetch(url, init);
+
+        let data = null;
+        const contentType = response.headers.get('content-type') || '';
+
+        if (contentType.includes('application/json')) {
+          try {
+            data = await response.json();
+          } catch (_) {
+            data = null;
+          }
+        } else {
+          try {
+            const text = await response.text();
+            data = text ? { message: text } : null;
+          } catch (_) {
+            data = null;
+          }
+        }
+
+        if (!response.ok) {
+          const message =
+            (data && typeof data.message === 'string' && data.message.trim()) ||
+            'Request failed.';
+          const error = new Error(message);
+          error.status = response.status;
+          error.data = data;
+          throw error;
+        }
+
+        return data || {};
+      }
+
+      function validateStep1(email, password) {
+        if (!email) {
+          throw new Error('Please enter your email.');
+        }
+
+        if (email.length > 190) {
+          throw new Error('Email is too long.');
+        }
+
+        const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailPattern.test(email)) {
+          throw new Error('Please enter a valid email address.');
+        }
+
+        if (!password) {
+          throw new Error('Please enter your password.');
+        }
+
+        if (password.length > 128) {
+          throw new Error('Password is too long.');
+        }
+      }
+
+      function validateStep2(otp) {
+        if (!otp) {
+          throw new Error('Please enter the 6-digit authenticator code.');
+        }
+
+        if (!/^\d{6}$/.test(otp)) {
+          throw new Error('OTP must be exactly 6 digits.');
+        }
+
+        if (!state.challengeToken) {
+          throw new Error('Login challenge is missing. Please go back and sign in again.');
+        }
+      }
+
+      async function handleStartLogin(event) {
+        event.preventDefault();
+        if (state.busy) return;
+
+        clearBanner();
+
+        const email = normalizeEmail(els.email.value);
+        const password = String(els.password.value || '');
+
+        try {
+          validateStep1(email, password);
+          setBusy(true);
+
+          const data = await apiFetch('/auth/login/start', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              email,
+              password
+            })
+          });
+
+          if (!data || data.success !== true || data.requires2fa !== true || !data.challengeToken) {
+            throw new Error('Unexpected login response. 2FA challenge was not created.');
+          }
+
+          state.challengeToken = String(data.challengeToken).trim();
+          persistChallenge({
+            challengeToken: state.challengeToken,
+            email
+          });
+
+          els.password.value = '';
+          els.otp.value = '';
+          setStep(2);
+          showBanner('info', 'Password verified. Enter your authenticator code to complete login.');
+        } catch (err) {
+          showBanner('error', err && err.message ? err.message : 'Failed to start login.');
+        } finally {
+          setBusy(false);
+        }
+      }
+
+      async function handleVerifyOtp(event) {
+        event.preventDefault();
+        if (state.busy) return;
+
+        clearBanner();
+
+        const otp = normalizeOtp(els.otp.value);
+        els.otp.value = otp;
+
+        try {
+          validateStep2(otp);
+          setBusy(true);
+
+          const data = await apiFetch('/auth/login/verify-otp', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              challengeToken: state.challengeToken,
+              otp
+            })
+          });
+
+          if (!data || data.success !== true) {
+            throw new Error('OTP verification failed.');
+          }
+
+          clearPersistedChallenge();
+          showBanner('success', data.message || 'Login successful. Redirecting...');
+
+          setTimeout(function () {
+            window.location.replace(CONFIG.AFTER_LOGIN_URL);
+          }, 350);
+        } catch (err) {
+          const msg = err && err.message ? err.message : 'Failed to verify OTP.';
+          showBanner('error', msg);
+
+          if ((err && err.status === 401) || /expired challenge/i.test(msg)) {
+            clearPersistedChallenge();
+          }
+        } finally {
+          setBusy(false);
+        }
+      }
+
+      function handleBack() {
+        if (state.busy) return;
+        clearBanner();
+        state.challengeToken = '';
+        clearPersistedChallenge();
+        els.otp.value = '';
+        setStep(1);
+      }
+
+      function handleOtpInput() {
+        const cleaned = normalizeOtp(els.otp.value);
+        if (els.otp.value !== cleaned) {
+          els.otp.value = cleaned;
+        }
+      }
+
+      function handlePasswordToggle() {
+        const isPassword = els.password.type === 'password';
+        els.password.type = isPassword ? 'text' : 'password';
+        els.togglePasswordBtn.textContent = isPassword ? 'Hide' : 'Show';
+        els.togglePasswordBtn.setAttribute('aria-label', isPassword ? 'Hide password' : 'Show password');
+      }
+
+      function restoreChallengeIfPresent() {
+        const saved = readPersistedChallenge();
+        if (!saved || !saved.challengeToken) return;
+
+        const ageMs = Date.now() - Number(saved.createdAt || 0);
+        const maxAgeMs = 5 * 60 * 1000;
+
+        if (Number.isFinite(ageMs) && ageMs > 0 && ageMs < maxAgeMs) {
+          state.challengeToken = String(saved.challengeToken).trim();
+          if (saved.email && !els.email.value) {
+            els.email.value = String(saved.email).trim();
+          }
+          setStep(2);
+          showBanner('info', 'Restored pending 2FA step. Enter your authenticator code.');
+        } else {
+          clearPersistedChallenge();
+        }
+      }
+
+      async function bootstrap() {
+        setApiBasePreview();
+        state.fingerprint = await getStableFingerprint();
+        els.fpPreview.textContent = state.fingerprint;
+
+        els.loginForm.addEventListener('submit', handleStartLogin);
+        els.otpForm.addEventListener('submit', handleVerifyOtp);
+        els.backBtn.addEventListener('click', handleBack);
+        els.otp.addEventListener('input', handleOtpInput);
+        els.togglePasswordBtn.addEventListener('click', handlePasswordToggle);
+
+        setStep(1);
+        restoreChallengeIfPresent();
+      }
+
+      bootstrap().catch(function (err) {
+        console.error('bootstrap error:', err);
+        showBanner('error', 'Failed to initialize login page.');
+      });
+    })();
+  </script>
+</body>
+</html>
