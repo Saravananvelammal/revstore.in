@@ -527,29 +527,7 @@
           </div>
         </section>
 
-        <section class="panel">
-          <div class="panel-inner quick-meta">
-            <div class="meta-card">
-              <p class="meta-title">Session mode</p>
-              <p class="meta-value">Cookie-based web session</p>
-            </div>
-
-            <div class="meta-card">
-              <p class="meta-title">API base</p>
-              <p class="meta-value" id="apiBaseText">Loading...</p>
-            </div>
-
-            <div class="meta-card">
-              <p class="meta-title">Last refreshed</p>
-              <p class="meta-value" id="lastRefreshedText">Not loaded yet</p>
-            </div>
-
-            <div class="meta-card">
-              <p class="meta-title">View</p>
-              <p class="meta-value">Orders overview</p>
-            </div>
-          </div>
-        </section>
+        
       </aside>
 
       <section class="main">
@@ -644,9 +622,7 @@
 
       const els = {
         banner: document.getElementById('banner'),
-        apiBaseText: document.getElementById('apiBaseText'),
-        lastRefreshedText: document.getElementById('lastRefreshedText'),
-
+        
         statTotal: document.getElementById('statTotal'),
         statPending: document.getElementById('statPending'),
         statDelivered: document.getElementById('statDelivered'),
@@ -699,13 +675,7 @@
         els.statPending.textContent = '0';
         els.statDelivered.textContent = '0';
         els.statCancelled.textContent = '0';
-      }
-
-      function setLastRefreshed(date) {
-        els.lastRefreshedText.textContent = date
-          ? new Date(date).toLocaleString()
-          : 'Not loaded yet';
-      }
+      }      
 
       function bytesToHex(buffer) {
         const bytes = new Uint8Array(buffer);
@@ -855,18 +825,20 @@
       }
 
       function moneyValue(order) {
-        const candidates = [
-          order.totalToPay,
-          order.finalTotal,
-          order.total,
-          order.amount,
+        const paiseCandidates = [
+          order.retailerRevSubtotal,
+          order.revItemTotal,
+          order.priceRevAtOrder,
           order.subtotal
         ];
 
-        for (const value of candidates) {
+        for (const value of paiseCandidates) {
           const num = Number(value);
-          if (Number.isFinite(num)) return num;
+          if (Number.isFinite(num)) {
+            return num / 100;
+          }
         }
+
         return null;
       }
 
@@ -906,13 +878,17 @@
 
       function normalizeOrder(order) {
         const status = normalizeStatus(order.status || order.orderStatus || 'Unknown');
-        const id = String(order._id || order.id || order.orderId || 'N/A');
+        const shortId = String(order.shortId || '').trim();
+        const fallbackId = String(order._id || order.id || order.orderId || 'N/A');
+        const displayId = shortId ? ('#' + shortId) : fallbackId;
+
         const createdAt = order.createdAt || order.created_at || order.date || null;
         const updatedAt = order.updatedAt || order.updated_at || null;
 
         return {
           raw: order,
-          id,
+          id: displayId,
+          shortId: shortId,
           status,
           statusKey: normalizeStatusKey(status),
           createdAt,
@@ -1070,7 +1046,6 @@
             state.rawOrders = normalizedOrders;
             renderStats(normalizedOrders);
             renderOrders(normalizedOrders);
-            setLastRefreshed(new Date());
 
             if (!normalizedOrders.length) {
                 showBanner('info', 'Session is valid. No orders were returned for this retailer.');
@@ -1115,7 +1090,6 @@
       }
 
       async function bootstrap() {
-        els.apiBaseText.textContent = CONFIG.API_BASE;
         state.fingerprint = await getStableFingerprint();
         bindEvents();
         await loadOrders();
