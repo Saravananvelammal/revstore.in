@@ -1,0 +1,1130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Revstore Retailer Dashboard</title>
+  <meta name="robots" content="noindex,nofollow,noarchive,nosnippet" />
+  <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+  <meta name="color-scheme" content="light dark" />
+
+  <style>
+    :root {
+      --bg: #3b0ca8;
+      --bg-soft: #6a11cb;
+      --bg-soft-2: #a21caf;
+      --panel: rgba(255, 255, 255, 0.96);
+      --panel-soft: rgba(255, 255, 255, 0.88);
+      --text: #1e1b4b;
+      --muted: #6b7280;
+      --line: rgba(30, 27, 75, 0.10);
+      --primary: #5b21b6;
+      --primary-hover: #4c1d95;
+      --success: #059669;
+      --warning: #d97706;
+      --danger: #dc2626;
+      --info: #2563eb;
+      --white: #ffffff;
+      --shadow: 0 18px 60px rgba(49, 12, 120, 0.22);
+      --radius: 24px;
+      --radius-sm: 16px;
+      --focus: 0 0 0 4px rgba(91, 33, 182, 0.16);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html, body {
+      margin: 0;
+      min-height: 100%;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(255, 255, 255, 0.10), transparent 24%),
+        radial-gradient(circle at bottom right, rgba(255, 105, 180, 0.18), transparent 26%),
+        linear-gradient(135deg, #4318b8 0%, #5b21b6 38%, #7e22ce 68%, #c026d3 100%);
+      color: var(--text);
+    }
+
+    body {
+      padding: 22px;
+    }
+
+    .app {
+      width: 100%;
+      max-width: 1320px;
+      margin: 0 auto;
+      display: grid;
+      gap: 18px;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      color: #fff;
+    }
+
+    .brand {
+      min-width: 0;
+    }
+
+    .brand h1 {
+      margin: 0;
+      font-size: 2rem;
+      font-weight: 900;
+      letter-spacing: -0.03em;
+    }
+
+    .brand p {
+      margin: 8px 0 0;
+      color: rgba(255,255,255,0.86);
+      font-size: 0.98rem;
+      line-height: 1.5;
+    }
+
+    .topbar-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 1.1fr 2fr;
+      gap: 18px;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid rgba(255,255,255,0.14);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .panel-inner {
+      padding: 22px;
+    }
+
+    .hero {
+      display: grid;
+      gap: 18px;
+    }
+
+    .hero-card {
+      background: linear-gradient(135deg, rgba(91,33,182,0.98), rgba(162,28,175,0.92));
+      color: #fff;
+      border-radius: 22px;
+      padding: 22px;
+      box-shadow: 0 16px 32px rgba(91, 33, 182, 0.22);
+    }
+
+    .hero-card h2 {
+      margin: 0 0 8px;
+      font-size: 1.5rem;
+      letter-spacing: -0.02em;
+    }
+
+    .hero-card p {
+      margin: 0;
+      color: rgba(255,255,255,0.88);
+      line-height: 1.6;
+    }
+
+    .quick-meta {
+      display: grid;
+      gap: 12px;
+    }
+
+    .meta-card {
+      background: var(--panel-soft);
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      padding: 16px;
+    }
+
+    .meta-title {
+      margin: 0 0 6px;
+      font-size: 0.84rem;
+      font-weight: 800;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .meta-value {
+      margin: 0;
+      font-size: 1.2rem;
+      font-weight: 900;
+      color: var(--text);
+      word-break: break-word;
+    }
+
+    .main {
+      display: grid;
+      gap: 18px;
+    }
+
+    .section-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .section-head h2 {
+      margin: 0;
+      font-size: 1.28rem;
+      letter-spacing: -0.02em;
+    }
+
+    .section-head p {
+      margin: 6px 0 0;
+      color: var(--muted);
+      font-size: 0.94rem;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .stat-card {
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      padding: 16px;
+      background: #fff;
+    }
+
+    .stat-label {
+      margin: 0 0 8px;
+      color: var(--muted);
+      font-size: 0.86rem;
+      font-weight: 700;
+    }
+
+    .stat-value {
+      margin: 0;
+      font-size: 1.7rem;
+      font-weight: 900;
+      letter-spacing: -0.03em;
+    }
+
+    .toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 14px;
+    }
+
+    .search-box {
+      flex: 1;
+      min-width: 220px;
+      position: relative;
+    }
+
+    .input,
+    .select,
+    .btn {
+      border-radius: 16px;
+      outline: none;
+      border: 1px solid var(--line);
+      font: inherit;
+      transition: border-color 0.18s ease, box-shadow 0.18s ease, background-color 0.18s ease;
+    }
+
+    .input:focus,
+    .select:focus,
+    .btn:focus-visible {
+      border-color: rgba(91, 33, 182, 0.55);
+      box-shadow: var(--focus);
+    }
+
+    .input {
+      width: 100%;
+      height: 48px;
+      padding: 0 14px;
+      background: #fff;
+      color: var(--text);
+    }
+
+    .select {
+      height: 48px;
+      padding: 0 14px;
+      background: #fff;
+      color: var(--text);
+      min-width: 160px;
+    }
+
+    .btn {
+      height: 48px;
+      padding: 0 16px;
+      cursor: pointer;
+      font-weight: 800;
+      background: #fff;
+      color: var(--text);
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #5b21b6 0%, #7c3aed 55%, #a21caf 100%);
+      border: 0;
+      color: #fff;
+      box-shadow: 0 10px 24px rgba(91, 33, 182, 0.22);
+    }
+
+    .btn-primary:hover {
+      background: linear-gradient(135deg, #4c1d95 0%, #6d28d9 55%, #86198f 100%);
+    }
+
+    .btn-secondary {
+      background: #fff;
+    }
+
+    .banner {
+      display: none;
+      padding: 14px 15px;
+      border-radius: 16px;
+      border: 1px solid transparent;
+      font-size: 0.95rem;
+      line-height: 1.5;
+      margin-bottom: 14px;
+    }
+
+    .banner.show {
+      display: block;
+    }
+
+    .banner.info {
+      color: #1e3a8a;
+      background: rgba(59, 130, 246, 0.10);
+      border-color: rgba(59, 130, 246, 0.18);
+    }
+
+    .banner.success {
+      color: #065f46;
+      background: rgba(16, 185, 129, 0.10);
+      border-color: rgba(16, 185, 129, 0.18);
+    }
+
+    .banner.error {
+      color: #7f1d1d;
+      background: rgba(239, 68, 68, 0.10);
+      border-color: rgba(239, 68, 68, 0.18);
+    }
+
+    .orders-list {
+      display: grid;
+      gap: 12px;
+    }
+
+    .order-card {
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      background: #fff;
+      padding: 16px;
+      display: grid;
+      gap: 12px;
+    }
+
+    .order-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .order-id {
+      margin: 0;
+      font-size: 1rem;
+      font-weight: 900;
+      letter-spacing: -0.02em;
+      word-break: break-word;
+    }
+
+    .order-sub {
+      margin: 6px 0 0;
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 34px;
+      padding: 6px 12px;
+      border-radius: 999px;
+      font-size: 0.84rem;
+      font-weight: 800;
+      border: 1px solid transparent;
+      white-space: nowrap;
+    }
+
+    .chip-pending,
+    .chip-confirmed,
+    .chip-readyforpickup,
+    .chip-assigned {
+      color: #92400e;
+      background: rgba(245, 158, 11, 0.12);
+      border-color: rgba(245, 158, 11, 0.18);
+    }
+
+    .chip-packed,
+    .chip-riderreachedretailer,
+    .chip-pickedup,
+    .chip-ridernearcustomer {
+      color: #1e3a8a;
+      background: rgba(59, 130, 246, 0.12);
+      border-color: rgba(59, 130, 246, 0.18);
+    }
+
+    .chip-delivered {
+      color: #065f46;
+      background: rgba(16, 185, 129, 0.12);
+      border-color: rgba(16, 185, 129, 0.18);
+    }
+
+    .chip-cancelled {
+      color: #991b1b;
+      background: rgba(239, 68, 68, 0.12);
+      border-color: rgba(239, 68, 68, 0.18);
+    }
+
+    .chip-default {
+      color: #374151;
+      background: rgba(107, 114, 128, 0.10);
+      border-color: rgba(107, 114, 128, 0.16);
+    }
+
+    .order-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .order-cell {
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 12px;
+      background: rgba(255,255,255,0.72);
+    }
+
+    .order-cell-label {
+      margin: 0 0 6px;
+      font-size: 0.78rem;
+      font-weight: 800;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .order-cell-value {
+      margin: 0;
+      font-size: 0.95rem;
+      font-weight: 800;
+      color: var(--text);
+      word-break: break-word;
+    }
+
+    .empty-state,
+    .loading-state {
+      padding: 34px 18px;
+      text-align: center;
+      color: var(--muted);
+      border: 1px dashed var(--line);
+      border-radius: 20px;
+      background: rgba(255,255,255,0.72);
+    }
+
+    .footer-note {
+      color: rgba(255,255,255,0.84);
+      text-align: center;
+      font-size: 0.82rem;
+      line-height: 1.5;
+      padding-bottom: 6px;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    @media (max-width: 1080px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+
+      .stats {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .order-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 640px) {
+      body {
+        padding: 14px;
+      }
+
+      .topbar {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .stats,
+      .order-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .panel-inner {
+        padding: 16px;
+      }
+
+      .brand h1 {
+        font-size: 1.6rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="app" aria-labelledby="pageTitle">
+    <header class="topbar">
+      <div class="brand">
+        <h1 id="pageTitle">Revstore Retailer Dashboard</h1>
+        <p>Secure retailer web dashboard with session-based access and live order visibility.</p>
+      </div>
+
+      <div class="topbar-actions">
+        <button type="button" id="refreshBtn" class="btn btn-primary">Refresh</button>
+        <button type="button" id="logoutBtn" class="btn btn-secondary">Logout</button>
+      </div>
+    </header>
+
+    <section id="banner" class="banner" role="alert" aria-live="polite"></section>
+
+    <section class="layout">
+      <aside class="hero">
+        <section class="panel">
+          <div class="panel-inner">
+            <div class="hero-card">
+              <h2>Welcome</h2>
+              <p>
+                This dashboard reads protected retailer order data using your secure web session.
+                If your session expires, you will be redirected to the login page automatically.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-inner quick-meta">
+            <div class="meta-card">
+              <p class="meta-title">Session mode</p>
+              <p class="meta-value">Cookie-based web session</p>
+            </div>
+
+            <div class="meta-card">
+              <p class="meta-title">API base</p>
+              <p class="meta-value" id="apiBaseText">Loading...</p>
+            </div>
+
+            <div class="meta-card">
+              <p class="meta-title">Last refreshed</p>
+              <p class="meta-value" id="lastRefreshedText">Not loaded yet</p>
+            </div>
+
+            <div class="meta-card">
+              <p class="meta-title">View</p>
+              <p class="meta-value">Orders overview</p>
+            </div>
+          </div>
+        </section>
+      </aside>
+
+      <section class="main">
+        <section class="panel">
+          <div class="panel-inner">
+            <div class="section-head">
+              <div>
+                <h2>Overview</h2>
+                <p>Fast summary of your available order data.</p>
+              </div>
+            </div>
+
+            <div class="stats">
+              <article class="stat-card">
+                <p class="stat-label">Total Orders</p>
+                <p class="stat-value" id="statTotal">0</p>
+              </article>
+
+              <article class="stat-card">
+                <p class="stat-label">Pending</p>
+                <p class="stat-value" id="statPending">0</p>
+              </article>
+
+              <article class="stat-card">
+                <p class="stat-label">Delivered</p>
+                <p class="stat-value" id="statDelivered">0</p>
+              </article>
+
+              <article class="stat-card">
+                <p class="stat-label">Cancelled</p>
+                <p class="stat-value" id="statCancelled">0</p>
+              </article>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-inner">
+            <div class="toolbar">
+              <div class="search-box">
+                <input
+                  id="searchInput"
+                  class="input"
+                  type="text"
+                  placeholder="Search by order ID or status"
+                  autocomplete="off"
+                  spellcheck="false"
+                />
+              </div>
+
+              <select id="statusFilter" class="select" aria-label="Filter by status">
+                <option value="all">All statuses</option>
+                <option value="pending">Pending</option>
+                <option value="confirmed">Confirmed</option>
+                <option value="packed">Packed</option>
+                <option value="readyforpickup">ReadyForPickup</option>
+                <option value="assigned">Assigned</option>
+                <option value="riderreachedretailer">RiderReachedRetailer</option>
+                <option value="pickedup">PickedUp</option>
+                <option value="ridernearcustomer">RiderNearCustomer</option>
+                <option value="delivered">Delivered</option>
+                <option value="cancelled">Cancelled</option>
+              </select>
+            </div>
+
+            <div id="ordersLoading" class="loading-state">Loading retailer orders...</div>
+            <div id="ordersEmpty" class="empty-state hidden">No orders found for this view.</div>
+            <div id="ordersList" class="orders-list hidden"></div>
+          </div>
+        </section>
+      </section>
+    </section>
+
+    <div class="footer-note">
+      This page uses secure cookie-based web sessions and protected API reads only.
+    </div>
+  </main>
+
+  <script>
+    (function () {
+      'use strict';
+
+      const CONFIG = {
+        API_BASE: typeof window.RETAILER_WEB_API_BASE === 'string' && window.RETAILER_WEB_API_BASE.trim()
+          ? window.RETAILER_WEB_API_BASE.trim().replace(/\/+$/, '')
+          : 'https://api.revstore.in/api/retailer-web/v1',
+        LOGIN_URL: typeof window.RETAILER_WEB_LOGIN_URL === 'string' && window.RETAILER_WEB_LOGIN_URL.trim()
+          ? window.RETAILER_WEB_LOGIN_URL.trim()
+          : '/retailer/login.html',
+        FINGERPRINT_STORAGE_KEY: 'retailer_web_fp_v1'
+      };
+
+      const els = {
+        banner: document.getElementById('banner'),
+        apiBaseText: document.getElementById('apiBaseText'),
+        lastRefreshedText: document.getElementById('lastRefreshedText'),
+
+        statTotal: document.getElementById('statTotal'),
+        statPending: document.getElementById('statPending'),
+        statDelivered: document.getElementById('statDelivered'),
+        statCancelled: document.getElementById('statCancelled'),
+
+        searchInput: document.getElementById('searchInput'),
+        statusFilter: document.getElementById('statusFilter'),
+        refreshBtn: document.getElementById('refreshBtn'),
+        logoutBtn: document.getElementById('logoutBtn'),
+
+        ordersLoading: document.getElementById('ordersLoading'),
+        ordersEmpty: document.getElementById('ordersEmpty'),
+        ordersList: document.getElementById('ordersList')
+      };
+
+      const state = {
+        fingerprint: '',
+        loading: false,
+        rawOrders: []
+      };
+
+      function showBanner(type, message) {
+        els.banner.className = 'banner show ' + type;
+        els.banner.textContent = message || '';
+      }
+
+      function clearBanner() {
+        els.banner.className = 'banner';
+        els.banner.textContent = '';
+      }
+
+      function setLoading(isLoading) {
+        state.loading = !!isLoading;
+
+        els.refreshBtn.disabled = state.loading;
+        els.logoutBtn.disabled = state.loading;
+        els.searchInput.disabled = state.loading;
+        els.statusFilter.disabled = state.loading;
+
+        els.ordersLoading.classList.toggle('hidden', !state.loading);
+
+        if (state.loading) {
+          els.ordersEmpty.classList.add('hidden');
+          els.ordersList.classList.add('hidden');
+        }
+      }
+
+      function resetStats() {
+        els.statTotal.textContent = '0';
+        els.statPending.textContent = '0';
+        els.statDelivered.textContent = '0';
+        els.statCancelled.textContent = '0';
+      }
+
+      function setLastRefreshed(date) {
+        els.lastRefreshedText.textContent = date
+          ? new Date(date).toLocaleString()
+          : 'Not loaded yet';
+      }
+
+      function bytesToHex(buffer) {
+        const bytes = new Uint8Array(buffer);
+        let out = '';
+        for (let i = 0; i < bytes.length; i++) {
+          out += bytes[i].toString(16).padStart(2, '0');
+        }
+        return out;
+      }
+
+      async function sha256Hex(input) {
+        const data = new TextEncoder().encode(String(input));
+        const digest = await crypto.subtle.digest('SHA-256', data);
+        return bytesToHex(digest);
+      }
+
+      async function getStableFingerprint() {
+        try {
+          const existing = localStorage.getItem(CONFIG.FINGERPRINT_STORAGE_KEY);
+          if (existing && existing.trim()) {
+            return existing.trim().slice(0, 200);
+          }
+        } catch (_) {}
+
+        const seedParts = [
+          navigator.userAgent || '',
+          navigator.language || '',
+          String(screen.width || ''),
+          String(screen.height || ''),
+          String(screen.colorDepth || ''),
+          Intl.DateTimeFormat().resolvedOptions().timeZone || '',
+          navigator.platform || '',
+          String(navigator.hardwareConcurrency || ''),
+          String(new Date().getTimezoneOffset())
+        ];
+
+        const randomPart = (crypto.getRandomValues(new Uint32Array(4))).join('-');
+        const raw = seedParts.join('|') + '|' + randomPart;
+        const fp = (await sha256Hex(raw)).slice(0, 64);
+
+        try {
+          localStorage.setItem(CONFIG.FINGERPRINT_STORAGE_KEY, fp);
+        } catch (_) {}
+
+        return fp;
+      }
+
+      function redirectToLogin() {
+        window.location.replace(String(CONFIG.LOGIN_URL || '/retailer/login.html'));
+      }
+
+
+      async function logoutAndRedirect() {
+        if (state.loading) return;
+
+        try {
+          els.logoutBtn.disabled = true;
+
+          await apiFetch('/auth/logout', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+          });
+        } catch (_) {
+          // ignore logout failure and still move user to login
+        } finally {
+          redirectToLogin();
+        }
+      }
+
+
+      async function apiFetch(path, options) {
+        const url = CONFIG.API_BASE + path;
+        const headers = new Headers(options && options.headers ? options.headers : {});
+        headers.set('Accept', 'application/json');
+        headers.set('X-Requested-With', 'XMLHttpRequest');
+
+        if (state.fingerprint) {
+            headers.set('x-device-fingerprint', state.fingerprint);
+        }
+
+        const init = Object.assign({}, options || {}, {
+            headers,
+            credentials: 'include',
+            cache: 'no-store',
+            redirect: 'follow',
+            referrerPolicy: 'strict-origin-when-cross-origin'
+        });
+
+        let response;
+        try {
+            response = await fetch(url, init);
+        } catch (_err) {
+            throw new Error('Unable to reach the server.');
+        }
+
+        let data = null;
+        const contentType = response.headers.get('content-type') || '';
+
+        if (contentType.includes('application/json')) {
+            try {
+            data = await response.json();
+            } catch (_) {
+            data = null;
+            }
+        } else {
+            try {
+            const text = await response.text();
+            data = text ? { message: text } : null;
+            } catch (_) {
+            data = null;
+            }
+        }
+
+        if (response.status === 401 || response.status === 403) {
+            const err = new Error((data && data.message) || 'Session expired.');
+            err.status = response.status;
+            throw err;
+        }
+
+        if (!response.ok) {
+            const err = new Error((data && data.message) || 'Request failed.');
+            err.status = response.status;
+            throw err;
+        }
+
+        return data || {};
+      }
+
+      function normalizeStatus(status) {
+        return String(status || '').trim();
+      }
+
+      function normalizeStatusKey(status) {
+        return normalizeStatus(status).toLowerCase().replace(/\s+/g, '');
+      }
+
+      function prettyStatus(status) {
+        const raw = normalizeStatus(status);
+        if (!raw) return 'Unknown';
+
+        return raw
+          .replace(/([a-z])([A-Z])/g, '$1 $2')
+          .replace(/_/g, ' ')
+          .replace(/\b\w/g, function (c) { return c.toUpperCase(); });
+      }
+
+      function moneyValue(order) {
+        const candidates = [
+          order.totalToPay,
+          order.finalTotal,
+          order.total,
+          order.amount,
+          order.subtotal
+        ];
+
+        for (const value of candidates) {
+          const num = Number(value);
+          if (Number.isFinite(num)) return num;
+        }
+        return null;
+      }
+
+      function formatMoney(order) {
+        const amount = moneyValue(order);
+        if (!Number.isFinite(amount)) return '—';
+
+        try {
+          return new Intl.NumberFormat('en-IN', {
+            style: 'currency',
+            currency: 'INR',
+            maximumFractionDigits: 2
+          }).format(amount);
+        } catch (_) {
+          return '₹' + amount.toFixed(2);
+        }
+      }
+
+      function extractOrders(payload) {
+        if (Array.isArray(payload)) return payload;
+        if (!payload || typeof payload !== 'object') return [];
+
+        const possible = [
+          payload.orders,
+          payload.items,
+          payload.data,
+          payload.results,
+          payload.rows
+        ];
+
+        for (const entry of possible) {
+          if (Array.isArray(entry)) return entry;
+        }
+
+        return [];
+      }
+
+      function normalizeOrder(order) {
+        const status = normalizeStatus(order.status || order.orderStatus || 'Unknown');
+        const id = String(order._id || order.id || order.orderId || 'N/A');
+        const createdAt = order.createdAt || order.created_at || order.date || null;
+        const updatedAt = order.updatedAt || order.updated_at || null;
+
+        return {
+          raw: order,
+          id,
+          status,
+          statusKey: normalizeStatusKey(status),
+          createdAt,
+          updatedAt,
+          amountLabel: formatMoney(order),
+          itemCount: Array.isArray(order.products) ? order.products.length :
+            Array.isArray(order.items) ? order.items.length :
+            Number.isFinite(Number(order.itemCount)) ? Number(order.itemCount) : null
+        };
+      }
+
+      function renderStats(orders) {
+        const totals = {
+          total: orders.length,
+          pending: 0,
+          delivered: 0,
+          cancelled: 0
+        };
+
+        orders.forEach(function (order) {
+          const key = order.statusKey;
+          if (key === 'pending') totals.pending += 1;
+          if (key === 'delivered') totals.delivered += 1;
+          if (key === 'cancelled') totals.cancelled += 1;
+        });
+
+        els.statTotal.textContent = String(totals.total);
+        els.statPending.textContent = String(totals.pending);
+        els.statDelivered.textContent = String(totals.delivered);
+        els.statCancelled.textContent = String(totals.cancelled);
+      }
+
+      function chipClass(statusKey) {
+        if (!statusKey) return 'chip chip-default';
+        const safe = [
+          'pending',
+          'confirmed',
+          'packed',
+          'readyforpickup',
+          'assigned',
+          'riderreachedretailer',
+          'pickedup',
+          'ridernearcustomer',
+          'delivered',
+          'cancelled'
+        ];
+
+        return safe.includes(statusKey)
+          ? 'chip chip-' + statusKey
+          : 'chip chip-default';
+      }
+
+      function safeText(value) {
+        return String(value == null ? '—' : value);
+      }
+
+      function formatDate(value) {
+        if (!value) return '—';
+        const d = new Date(value);
+        if (Number.isNaN(d.getTime())) return safeText(value);
+        return d.toLocaleString();
+      }
+
+      function escapeHtml(value) {
+        return String(value)
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#39;');
+      }
+
+      function renderOrders(orders) {
+        const query = String(els.searchInput.value || '').trim().toLowerCase();
+        const selectedStatus = String(els.statusFilter.value || 'all').trim().toLowerCase();
+
+        const filtered = orders.filter(function (order) {
+          const matchesSearch =
+            !query ||
+            order.id.toLowerCase().includes(query) ||
+            order.status.toLowerCase().includes(query);
+
+          const matchesStatus =
+            selectedStatus === 'all' ||
+            order.statusKey === selectedStatus;
+
+          return matchesSearch && matchesStatus;
+        });
+
+        if (!filtered.length) {
+          els.ordersList.classList.add('hidden');
+          els.ordersEmpty.classList.remove('hidden');
+          els.ordersEmpty.textContent = 'No orders found for this view.';
+          return;
+        }
+
+        const html = filtered.map(function (order) {
+          const orderType = safeText(order.raw.type || order.raw.orderType || 'Retail Order');
+          const itemCount = order.itemCount == null ? '—' : String(order.itemCount);
+          const updatedAt = formatDate(order.updatedAt);
+          const createdAt = formatDate(order.createdAt);
+
+          return `
+            <article class="order-card">
+              <div class="order-top">
+                <div>
+                  <p class="order-id">Order ${escapeHtml(order.id)}</p>
+                  <p class="order-sub">${escapeHtml(orderType)}</p>
+                </div>
+                <span class="${escapeHtml(chipClass(order.statusKey))}">${escapeHtml(prettyStatus(order.status))}</span>
+              </div>
+
+              <div class="order-grid">
+                <div class="order-cell">
+                  <p class="order-cell-label">Amount</p>
+                  <p class="order-cell-value">${escapeHtml(order.amountLabel)}</p>
+                </div>
+
+                <div class="order-cell">
+                  <p class="order-cell-label">Items</p>
+                  <p class="order-cell-value">${escapeHtml(itemCount)}</p>
+                </div>
+
+                <div class="order-cell">
+                  <p class="order-cell-label">Created</p>
+                  <p class="order-cell-value">${escapeHtml(createdAt)}</p>
+                </div>
+
+                <div class="order-cell">
+                  <p class="order-cell-label">Updated</p>
+                  <p class="order-cell-value">${escapeHtml(updatedAt)}</p>
+                </div>
+              </div>
+            </article>
+          `;
+        }).join('');
+
+        els.ordersList.innerHTML = html;
+        els.ordersEmpty.classList.add('hidden');
+        els.ordersList.classList.remove('hidden');
+      }
+
+      async function loadOrders() {
+        clearBanner();
+        setLoading(true);
+
+        try {
+            const payload = await apiFetch('/orders/me', {
+            method: 'GET'
+            });
+
+            const rawOrders = extractOrders(payload);
+            const normalizedOrders = rawOrders.map(normalizeOrder);
+
+            state.rawOrders = normalizedOrders;
+            renderStats(normalizedOrders);
+            renderOrders(normalizedOrders);
+            setLastRefreshed(new Date());
+
+            if (!normalizedOrders.length) {
+                showBanner('info', 'Session is valid. No orders were returned for this retailer.');
+            }
+        } catch (err) {
+            state.rawOrders = [];
+            resetStats();
+            setLastRefreshed(null);
+
+            if (err && (err.status === 401 || err.status === 403)) {
+            showBanner('error', 'Session expired. Redirecting to login...');
+            setTimeout(redirectToLogin, 450);
+            return;
+            }
+
+            showBanner('error', err && err.message ? err.message : 'Failed to load dashboard data.');
+            els.ordersList.innerHTML = '';
+            els.ordersList.classList.add('hidden');
+            els.ordersEmpty.classList.remove('hidden');
+            els.ordersEmpty.textContent = 'Could not load orders right now.';
+        } finally {
+            setLoading(false);
+        }
+      }
+
+      function bindEvents() {
+        els.refreshBtn.addEventListener('click', function () {
+          if (!state.loading) loadOrders();
+        });
+
+        els.logoutBtn.addEventListener('click', function () {
+          logoutAndRedirect();
+        });
+
+        els.searchInput.addEventListener('input', function () {
+          renderOrders(state.rawOrders);
+        });
+
+        els.statusFilter.addEventListener('change', function () {
+          renderOrders(state.rawOrders);
+        });
+      }
+
+      async function bootstrap() {
+        els.apiBaseText.textContent = CONFIG.API_BASE;
+        state.fingerprint = await getStableFingerprint();
+        bindEvents();
+        await loadOrders();
+      }
+
+      bootstrap().catch(function () {
+        showBanner('error', 'Failed to initialize dashboard.');
+      });
+    })();
+  </script>
+</body>
+</html>
