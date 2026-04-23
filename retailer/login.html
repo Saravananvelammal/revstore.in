@@ -570,7 +570,7 @@
       const CONFIG = {
         API_BASE: typeof window.RETAILER_WEB_API_BASE === 'string' && window.RETAILER_WEB_API_BASE.trim()
           ? window.RETAILER_WEB_API_BASE.trim().replace(/\/+$/, '')
-          : '/api/retailer-web/v1',
+          : 'https://api.revstore.in/api/retailer-web/v1',
         AFTER_LOGIN_URL: typeof window.RETAILER_WEB_AFTER_LOGIN_URL === 'string' && window.RETAILER_WEB_AFTER_LOGIN_URL.trim()
           ? window.RETAILER_WEB_AFTER_LOGIN_URL.trim()
           : '/retailer/dashboard',
