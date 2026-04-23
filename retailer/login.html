@@ -196,7 +196,7 @@
     }
 
     .input-with-action {
-      padding-right: 88px;
+      padding-right: 96px;
     }
 
     .input,
@@ -232,21 +232,22 @@
     .toggle-password {
       position: absolute;
       top: 50%;
-      right: 8px;
+      right: 10px;
       transform: translateY(-50%);
-      min-width: 64px;
+      min-width: 68px;
       height: 36px;
       border: 0;
       background: transparent;
       color: var(--muted);
       cursor: pointer;
-      padding: 0 12px;
+      padding: 0 10px;
       border-radius: 10px;
       font-weight: 700;
       display: inline-flex;
       align-items: center;
       justify-content: center;
       white-space: nowrap;
+      line-height: 1;
     }
 
     .toggle-password:hover {
@@ -569,7 +570,7 @@
       const CONFIG = {
         API_BASE: typeof window.RETAILER_WEB_API_BASE === 'string' && window.RETAILER_WEB_API_BASE.trim()
           ? window.RETAILER_WEB_API_BASE.trim().replace(/\/+$/, '')
-          : '/api/retailer/web',
+          : '/api/retailer-web/v1',
         AFTER_LOGIN_URL: typeof window.RETAILER_WEB_AFTER_LOGIN_URL === 'string' && window.RETAILER_WEB_AFTER_LOGIN_URL.trim()
           ? window.RETAILER_WEB_AFTER_LOGIN_URL.trim()
           : '/retailer/dashboard',
@@ -896,8 +897,18 @@
 
             if (data.mode === 'setup') {
               setMode('setup');
-              els.qrImage.src = String(data.qrDataUrl || '').trim();
-              els.manualKey.value = String(data.manualKey || '').trim();
+              const qrDataUrl = String(data.qrDataUrl || '').trim();
+              const manualKey = String(data.manualKey || '').trim();
+
+              els.manualKey.value = manualKey;
+
+              if (qrDataUrl) {
+                els.qrImage.src = qrDataUrl;
+                els.qrImage.classList.remove('hidden');
+              } else {
+                els.qrImage.removeAttribute('src');
+                els.qrImage.classList.add('hidden');
+              }
               showBanner('info', 'Scan the QR code in Google Authenticator, then enter the 6-digit code.');
             } else {
               setMode('verify');
@@ -973,6 +984,9 @@
         setMode('verify');
         clearPersistedChallenge();
         els.otp.value = '';
+        els.manualKey.value = '';
+        els.qrImage.removeAttribute('src');
+        els.qrImage.classList.add('hidden');
         setStep(1);
       }
 
@@ -996,6 +1010,11 @@
           'aria-label',
           isPassword ? 'Hide password' : 'Show password'
         );
+
+        els.togglePasswordBtn.setAttribute(
+          'title',
+          isPassword ? 'Hide password' : 'Show password'
+        );
       }
 
       function restoreChallengeIfPresent() {
@@ -1014,8 +1033,16 @@
 
           if (saved.mode === 'setup') {
             setMode('setup');
-            els.qrImage.src = String(saved.qrDataUrl || '').trim();
+            const qrDataUrl = String(saved.qrDataUrl || '').trim();
             els.manualKey.value = String(saved.manualKey || '').trim();
+
+            if (qrDataUrl) {
+              els.qrImage.src = qrDataUrl;
+              els.qrImage.classList.remove('hidden');
+            } else {
+              els.qrImage.removeAttribute('src');
+              els.qrImage.classList.add('hidden');
+            }
             showBanner('info', 'Restored pending 2FA setup. Scan the QR code if needed, then enter your code.');
           } else {
             setMode('verify');
