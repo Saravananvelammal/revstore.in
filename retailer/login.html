@@ -191,6 +191,14 @@
       position: relative;
     }
 
+    .control.password-control {
+      position: relative;
+    }
+
+    .input-with-action {
+      padding-right: 88px;
+    }
+
     .input,
     .otp-input {
       width: 100%;
@@ -216,8 +224,7 @@
 
     .input:focus,
     .otp-input:focus,
-    button:focus-visible,
-    .link-btn:focus-visible {
+    button:focus-visible {
       border-color: rgba(91, 33, 182, 0.55);
       box-shadow: var(--focus);
     }
@@ -225,15 +232,30 @@
     .toggle-password {
       position: absolute;
       top: 50%;
-      right: 10px;
+      right: 8px;
       transform: translateY(-50%);
+      min-width: 64px;
+      height: 36px;
       border: 0;
       background: transparent;
       color: var(--muted);
       cursor: pointer;
-      padding: 8px 10px;
+      padding: 0 12px;
       border-radius: 10px;
       font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      white-space: nowrap;
+    }
+
+    .toggle-password:hover {
+      background: rgba(91, 33, 182, 0.06);
+    }
+
+    .toggle-password:focus-visible {
+      outline: none;
+      box-shadow: var(--focus);
     }
 
     .hint {
@@ -321,6 +343,33 @@
       border-color: rgba(124, 58, 237, 0.18);
     }
 
+    .setup-box {
+      display: grid;
+      gap: 12px;
+      margin-bottom: 6px;
+    }
+
+    .qr-wrap {
+      display: grid;
+      justify-items: center;
+      gap: 10px;
+    }
+
+    .qr-image {
+      width: 220px;
+      height: 220px;
+      border-radius: 14px;
+      border: 1px solid var(--line);
+      background: #fff;
+      object-fit: contain;
+      padding: 8px;
+    }
+
+    .manual-key {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      letter-spacing: 0.03em;
+    }
+
     .loading {
       display: inline-flex;
       align-items: center;
@@ -405,11 +454,11 @@
 
             <div class="field">
               <label for="password">Password</label>
-              <div class="control">
+              <div class="control password-control">
                 <input
                   id="password"
                   name="password"
-                  class="input"
+                  class="input input-with-action"
                   type="password"
                   autocomplete="current-password"
                   maxlength="128"
@@ -422,8 +471,9 @@
                   id="togglePasswordBtn"
                   aria-label="Show password"
                   aria-controls="password"
+                  title="Show password"
                 >
-                  Show
+                  <span id="togglePasswordText">Show</span>
                 </button>
               </div>
             </div>
@@ -437,12 +487,43 @@
         </section>
 
         <section id="step2Section" class="hidden">
-          <h2>Verify 2FA</h2>
-          <p class="subtitle">
+          <h2 id="step2Title">Verify 2FA</h2>
+          <p class="subtitle" id="step2Subtitle">
             Enter the 6-digit code from your authenticator app to complete sign-in.
           </p>
 
           <form id="otpForm" novalidate>
+            <div id="setupBlock" class="setup-box hidden">
+              <div class="field">
+                <label>Google Authenticator Setup</label>
+                <div class="qr-wrap">
+                  <img
+                    id="qrImage"
+                    class="qr-image"
+                    alt="Google Authenticator QR Code"
+                  />
+                  <div class="hint" style="text-align:center;">
+                    Scan this QR code in Google Authenticator or any TOTP app.
+                  </div>
+                </div>
+              </div>
+
+              <div class="field">
+                <label for="manualKey">Manual setup key</label>
+                <input
+                  id="manualKey"
+                  class="input manual-key"
+                  type="text"
+                  readonly
+                  spellcheck="false"
+                  autocomplete="off"
+                />
+                <div class="hint">
+                  If you cannot scan the QR code, enter this key manually in your authenticator app.
+                </div>
+              </div>
+            </div>
+
             <div class="field">
               <label for="otp">One-time code</label>
               <div class="control">
@@ -478,8 +559,7 @@
       </div>
     </section>
 
-    <div class="footer-note">
-    </div>
+    <div class="footer-note"></div>
   </main>
 
   <script>
@@ -514,13 +594,20 @@
         startLoginBtn: document.getElementById('startLoginBtn'),
         verifyOtpBtn: document.getElementById('verifyOtpBtn'),
         backBtn: document.getElementById('backBtn'),
-        togglePasswordBtn: document.getElementById('togglePasswordBtn')
+        togglePasswordBtn: document.getElementById('togglePasswordBtn'),
+
+        setupBlock: document.getElementById('setupBlock'),
+        qrImage: document.getElementById('qrImage'),
+        manualKey: document.getElementById('manualKey'),
+        step2Title: document.getElementById('step2Title'),
+        step2Subtitle: document.getElementById('step2Subtitle')
       };
 
       let state = {
         challengeToken: '',
         fingerprint: '',
-        busy: false
+        busy: false,
+        mode: 'verify'
       };
 
       function normalizeEmail(value) {
@@ -560,7 +647,7 @@
 
         els.verifyOtpBtn.innerHTML = otpBusy
           ? '<span class="loading"><span class="spinner" aria-hidden="true"></span><span>Verifying...</span></span>'
-          : 'Verify and sign in';
+          : (state.mode === 'setup' ? 'Activate 2FA and sign in' : 'Verify and sign in');
       }
 
       function setStep(step) {
@@ -578,11 +665,36 @@
         }
       }
 
+      function setMode(mode) {
+        state.mode = mode === 'setup' ? 'setup' : 'verify';
+
+        if (state.mode === 'setup') {
+          els.setupBlock.classList.remove('hidden');
+          els.step2Title.textContent = 'Set up Google Authenticator';
+          els.step2Subtitle.textContent = 'Scan the QR code or use the manual key, then enter the 6-digit code from your authenticator app.';
+        } else {
+          els.setupBlock.classList.add('hidden');
+          els.qrImage.removeAttribute('src');
+          els.manualKey.value = '';
+          els.step2Title.textContent = 'Verify 2FA';
+          els.step2Subtitle.textContent = 'Enter the 6-digit code from your authenticator app to complete sign-in.';
+        }
+
+        if (!state.busy) {
+          els.verifyOtpBtn.innerHTML = state.mode === 'setup'
+            ? 'Activate 2FA and sign in'
+            : 'Verify and sign in';
+        }
+      }
+
       function persistChallenge(data) {
         try {
           sessionStorage.setItem(CONFIG.CHALLENGE_STORAGE_KEY, JSON.stringify({
             challengeToken: data.challengeToken || '',
             email: data.email || '',
+            mode: data.mode || 'verify',
+            manualKey: data.manualKey || '',
+            qrDataUrl: data.qrDataUrl || '',
             createdAt: Date.now()
           }));
         } catch (_) {}
@@ -764,20 +876,39 @@
             })
           });
 
-          if (!data || data.success !== true || data.requires2fa !== true || !data.challengeToken) {
-            throw new Error('Unexpected login response. 2FA challenge was not created.');
+          if (!data || data.success !== true) {
+            throw new Error('Unexpected login response.');
           }
 
-          state.challengeToken = String(data.challengeToken).trim();
-          persistChallenge({
-            challengeToken: state.challengeToken,
-            email
-          });
+          if (data.requires2fa === true && data.challengeToken) {
+            state.challengeToken = String(data.challengeToken).trim();
 
-          els.password.value = '';
-          els.otp.value = '';
-          setStep(2);
-          showBanner('info', 'Password verified. Enter your authenticator code to complete login.');
+            persistChallenge({
+              challengeToken: state.challengeToken,
+              email,
+              mode: data.mode || 'verify',
+              manualKey: data.manualKey || '',
+              qrDataUrl: data.qrDataUrl || ''
+            });
+
+            els.password.value = '';
+            els.otp.value = '';
+
+            if (data.mode === 'setup') {
+              setMode('setup');
+              els.qrImage.src = String(data.qrDataUrl || '').trim();
+              els.manualKey.value = String(data.manualKey || '').trim();
+              showBanner('info', 'Scan the QR code in Google Authenticator, then enter the 6-digit code.');
+            } else {
+              setMode('verify');
+              showBanner('info', 'Password verified. Enter your authenticator code to complete login.');
+            }
+
+            setStep(2);
+            return;
+          }
+
+          throw new Error('Unexpected login response. 2FA challenge was not created.');
         } catch (err) {
           showBanner('error', err && err.message ? err.message : 'Failed to start login.');
         } finally {
@@ -798,7 +929,11 @@
           validateStep2(otp);
           setBusy(true);
 
-          const data = await apiFetch('/auth/login/verify-otp', {
+          const endpoint = state.mode === 'setup'
+            ? '/auth/login/setup-2fa'
+            : '/auth/login/verify-otp';
+
+          const data = await apiFetch(endpoint, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json'
@@ -835,6 +970,7 @@
         if (state.busy) return;
         clearBanner();
         state.challengeToken = '';
+        setMode('verify');
         clearPersistedChallenge();
         els.otp.value = '';
         setStep(1);
@@ -850,8 +986,16 @@
       function handlePasswordToggle() {
         const isPassword = els.password.type === 'password';
         els.password.type = isPassword ? 'text' : 'password';
-        els.togglePasswordBtn.textContent = isPassword ? 'Hide' : 'Show';
-        els.togglePasswordBtn.setAttribute('aria-label', isPassword ? 'Hide password' : 'Show password');
+
+        const textEl = document.getElementById('togglePasswordText');
+        if (textEl) {
+          textEl.textContent = isPassword ? 'Hide' : 'Show';
+        }
+
+        els.togglePasswordBtn.setAttribute(
+          'aria-label',
+          isPassword ? 'Hide password' : 'Show password'
+        );
       }
 
       function restoreChallengeIfPresent() {
@@ -863,11 +1007,22 @@
 
         if (Number.isFinite(ageMs) && ageMs > 0 && ageMs < maxAgeMs) {
           state.challengeToken = String(saved.challengeToken).trim();
+
           if (saved.email && !els.email.value) {
             els.email.value = String(saved.email).trim();
           }
+
+          if (saved.mode === 'setup') {
+            setMode('setup');
+            els.qrImage.src = String(saved.qrDataUrl || '').trim();
+            els.manualKey.value = String(saved.manualKey || '').trim();
+            showBanner('info', 'Restored pending 2FA setup. Scan the QR code if needed, then enter your code.');
+          } else {
+            setMode('verify');
+            showBanner('info', 'Restored pending 2FA verification. Enter your authenticator code.');
+          }
+
           setStep(2);
-          showBanner('info', 'Restored pending 2FA step. Enter your authenticator code.');
         } else {
           clearPersistedChallenge();
         }
@@ -882,6 +1037,7 @@
         els.otp.addEventListener('input', handleOtpInput);
         els.togglePasswordBtn.addEventListener('click', handlePasswordToggle);
 
+        setMode('verify');
         setStep(1);
         restoreChallengeIfPresent();
       }
