@@ -1381,6 +1381,20 @@
         return [];
       }
 
+      function getCookie(name) {
+        const target = String(name || '') + '=';
+        const parts = String(document.cookie || '').split(';');
+
+        for (let i = 0; i < parts.length; i += 1) {
+          const part = parts[i].trim();
+          if (part.indexOf(target) === 0) {
+          return decodeURIComponent(part.slice(target.length));
+          }
+        }
+
+        return '';
+      }
+
       function getPrimaryRetailerName(order) {
         if (!order || typeof order !== 'object') return '';
         const candidates = [
@@ -1692,22 +1706,19 @@
       }
 
       async function tryUpdateStatus(orderId, nextStatus) {
-        let lastErr = null;
-        for (let i = 0; i < CONFIG.STATUS_UPDATE_ATTEMPTS.length; i += 1) {
-          const attempt = CONFIG.STATUS_UPDATE_ATTEMPTS[i];
-          try {
-            return await apiFetch(attempt.path(orderId), {
-              method: attempt.method,
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ status: nextStatus })
-            });
-          } catch (err) {
-            lastErr = err;
-            if (err && (err.status === 401 || err.status === 403)) throw err;
-            if (err && err.status && err.status !== 404 && err.status !== 405) throw err;
-          }
-        }
-        throw lastErr || new Error('Failed to update order status.');
+        if (!orderId) throw new Error('Missing order id.');
+        if (!nextStatus) throw new Error('Missing order status.');
+
+        const csrfToken = getCookie('csrf_token');
+
+        return apiFetch('/orders/' + encodeURIComponent(orderId) + '/status', {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-csrf-token': csrfToken
+          },
+          body: JSON.stringify({ status: nextStatus })
+        });
       }
 
       async function handleStatusChange(nextStatus) {
@@ -1725,9 +1736,14 @@
           await loadOrders({ preserveSelection: true, preferredOrderId: state.selectedOrderId, silentSuccess: true });
           await fetchOrderDetail(state.selectedOrderId);
         } catch (err) {
-          if (err && (err.status === 401 || err.status === 403)) {
+          if (err && err.status === 401) {
             showBanner('error', 'Session expired. Redirecting to login...');
             setTimeout(redirectToLogin, 450);
+            return;
+          }
+
+          if (err && err.status === 403) {
+            showBanner('error', err.message || 'Access denied. Please refresh and try again.');
             return;
           }
           showBanner('error', err && err.message ? err.message : 'Failed to update order status.');
