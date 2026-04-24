@@ -622,31 +622,215 @@
       background: rgba(255,255,255,0.72);
     }
 
+    .print-bill-header,
+    .print-total-items,
+    .print-thanks {
+      display: none;
+    }
+
     .hidden { display: none !important; }
 
     @media print {
-      body {
-        padding: 0;
-        background: #fff;
+      @page {
+        size: 80mm auto;
+        margin: 4mm;
       }
-      .topbar, .panel.orders-panel, .banner, .status-actions, .summary-actions {
+
+      html,
+      body {
+        width: 80mm;
+        margin: 0;
+        padding: 0;
+        background: #fff !important;
+        color: #000 !important;
+        font-family: "Courier New", monospace !important;
+      }
+
+      body * {
+        visibility: hidden !important;
+      }
+
+      .summary-card,
+      .summary-card * {
+        visibility: visible !important;
+      }
+
+      .summary-card {
+        position: absolute !important;
+        left: 0 !important;
+        top: 0 !important;
+        width: 72mm !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        border: 0 !important;
+        border-radius: 0 !important;
+        box-shadow: none !important;
+        background: #fff !important;
+        overflow: visible !important;
+      }
+
+      .summary-head,
+      .summary-actions,
+      .status-actions,
+      #summarySubtext,
+      .summary-section-title {
         display: none !important;
       }
-      .app, .layout {
-        display: block;
-        max-width: none;
-        margin: 0;
+
+      .summary-body {
+        padding: 0 !important;
       }
-      .summary-shell { position: static; }
-      .panel, .summary-card, .welcome-card {
-        box-shadow: none;
-        border: 1px solid #ddd;
+
+      .summary-meta,
+      .meta-card,
+      .table-wrap,
+      .total-box {
+        border: 0 !important;
+        background: #fff !important;
+        box-shadow: none !important;
+        border-radius: 0 !important;
       }
-      .welcome-card {
-        color: #111;
-        background: #fff;
+
+      .summary-meta {
+        display: block !important;
+        margin: 0 0 8px !important;
       }
-      .eyebrow, .welcome-subtitle { color: #333; }
+
+      .meta-card {
+        padding: 0 !important;
+        margin: 0 0 4px !important;
+      }
+
+      .meta-title {
+        display: inline !important;
+        font-size: 11px !important;
+        color: #000 !important;
+        letter-spacing: 0 !important;
+      }
+
+      .meta-title::after {
+        content: " : ";
+      }
+
+      .meta-value {
+        display: inline !important;
+        font-size: 12px !important;
+        color: #000 !important;
+        font-weight: 700 !important;
+      }
+
+      .print-bill-header {
+        display: block !important;
+        text-align: center !important;
+        margin-bottom: 8px !important;
+        padding-bottom: 6px !important;
+        border-bottom: 1px dashed #000 !important;
+      }
+
+      .print-bill-title {
+        font-size: 18px !important;
+        font-weight: 900 !important;
+        letter-spacing: 1px !important;
+        text-transform: uppercase !important;
+        margin: 0 !important;
+      }
+
+      .print-bill-sub {
+        font-size: 11px !important;
+        margin: 3px 0 0 !important;
+      }
+
+      .summary-section {
+        margin-top: 8px !important;
+      }
+
+      table {
+        width: 100% !important;
+        table-layout: fixed !important;
+        border-collapse: collapse !important;
+        font-size: 11px !important;
+      }
+
+      th,
+      td {
+        padding: 4px 2px !important;
+        border-bottom: 0 !important;
+        color: #000 !important;
+        font-size: 11px !important;
+        vertical-align: top !important;
+      }
+
+      thead {
+        border-top: 1px dashed #000 !important;
+        border-bottom: 1px dashed #000 !important;
+      }
+
+      th {
+        background: #fff !important;
+        color: #000 !important;
+        font-weight: 900 !important;
+        letter-spacing: 0 !important;
+      }
+
+      .product-name {
+        font-size: 11px !important;
+        color: #000 !important;
+        font-weight: 700 !important;
+      }
+
+      .product-sub {
+        display: none !important;
+      }
+
+      .summary-total {
+        display: block !important;
+        padding-top: 8px !important;
+        margin-top: 8px !important;
+        border-top: 1px dashed #000 !important;
+      }
+
+      .total-box {
+        min-width: 0 !important;
+        padding: 0 !important;
+        text-align: right !important;
+      }
+
+      .total-label {
+        display: inline !important;
+        font-size: 13px !important;
+        color: #000 !important;
+        letter-spacing: 0 !important;
+      }
+
+      .total-label::after {
+        content: " : ";
+      }
+
+      .total-value {
+        display: inline !important;
+        font-size: 16px !important;
+        color: #000 !important;
+        font-weight: 900 !important;
+      }
+
+      .print-total-items {
+        display: block !important;
+        margin-top: 8px !important;
+        padding-top: 6px !important;
+        border-top: 1px dashed #000 !important;
+        font-size: 12px !important;
+        font-weight: 700 !important;
+      }
+
+      .print-thanks {
+        display: block !important;
+        text-align: center !important;
+        margin-top: 10px !important;
+        padding-top: 6px !important;
+        border-top: 1px dashed #000 !important;
+        font-size: 12px !important;
+        font-weight: 700 !important;
+      }
     }
 
     @media (max-width: 1180px) {
@@ -708,6 +892,10 @@
             </div>
 
             <div id="summaryContent" class="hidden">
+              <div class="print-bill-header hidden-print-screen">
+                <p class="print-bill-title" id="printShopName">REVSTORE</p>
+                <p class="print-bill-sub">ORDER BILL</p>
+              </div>
               <div class="summary-meta">
                 <article class="meta-card">
                   <p class="meta-title">Order ID</p>
@@ -746,12 +934,17 @@
                   </table>
                 </div>
               </section>
-
+              <div class="print-total-items" id="printTotalItems">
+                Total Items : 0
+              </div>
               <div class="summary-total">
                 <div class="total-box">
                   <p class="total-label">Total Price</p>
                   <p class="total-value" id="summaryTotal">—</p>
                 </div>
+              </div>
+              <div class="print-thanks">
+                Thank you, visit again
               </div>
             </div>
           </div>
@@ -848,6 +1041,8 @@
         banner: document.getElementById('banner'),
         welcomeTitle: document.getElementById('welcomeTitle'),
         printBtn: document.getElementById('printBtn'),
+        printShopName: document.getElementById('printShopName'),
+        printTotalItems: document.getElementById('printTotalItems'),
         summarySubtext: document.getElementById('summarySubtext'),
         summaryPlaceholder: document.getElementById('summaryPlaceholder'),
         summaryContent: document.getElementById('summaryContent'),
@@ -1133,12 +1328,23 @@
         return '';
       }
 
-      function getImageUrl(path) {
-        const raw = String(path || '').trim();
-        if (!raw) return '';
-        if (/^https?:\/\//i.test(raw)) return raw;
-        return CONFIG.IMAGE_BASE + (raw.charAt(0) === '/' ? raw : '/' + raw);
+      function getShopName(order) {
+        const candidates = [
+          order.shopName,
+          order.retailer && order.retailer.shopName,
+          order.retailer && order.retailer.name,
+          order.retailerName,
+          state.retailerName
+        ];
+
+        for (let i = 0; i < candidates.length; i += 1) {
+          const value = String(candidates[i] || '').trim();
+          if (value) return value;
+        }
+
+        return 'REVSTORE';
       }
+
 
       function deriveListAmount(order) {
         const candidates = [
@@ -1329,27 +1535,61 @@
         els.summaryStatus.textContent = prettyStatus(order.status);
         els.summaryCreatedAt.textContent = formatDate(order.createdAt);
         els.summaryTotal.textContent = deriveSummaryTotal(order);
+        els.printShopName.textContent = getShopName(order);
 
         renderStatusButtons(order);
 
-        const items = Array.isArray(order.products) ? order.products : Array.isArray(order.items) ? order.items : [];
+        const items = Array.isArray(order.products)
+          ? order.products
+          : Array.isArray(order.items)
+            ? order.items
+            : [];
+
+        const totalQty = items.reduce(function (sum, item) {
+          const itemQty = Number(item.quantity);
+          return sum + (Number.isFinite(itemQty) ? itemQty : 0);
+        }, 0);
+
+        els.printTotalItems.textContent =
+          'Total Items : ' + String(totalQty || items.length || 0);
+
         els.summaryItemsBody.innerHTML = items.map(function (item, index) {
-          const qty = Number(item.quantity);
-          const quantity = Number.isFinite(qty) ? qty : 0;
+          const rowQty = Number(item.quantity);
+          const quantity = Number.isFinite(rowQty) ? rowQty : 0;
+
           const unitPricePaise = Number(item.priceRevAtOrder);
           const fallbackUnitPricePaise = Number(item.priceAtOrder);
-          const useUnitPrice = Number.isFinite(unitPricePaise) ? unitPricePaise : fallbackUnitPricePaise;
+          const useUnitPrice = Number.isFinite(unitPricePaise)
+            ? unitPricePaise
+            : fallbackUnitPricePaise;
+
           const lineTotalPaise = Number(item.revLineTotal);
-          const fallbackLineTotalPaise = Number.isFinite(useUnitPrice) ? useUnitPrice * quantity : NaN;
+          const fallbackLineTotalPaise = Number.isFinite(useUnitPrice)
+            ? useUnitPrice * quantity
+            : NaN;
+
           const unitLabel = formatCurrencyFromPaise(useUnitPrice) || '—';
-          const totalLabel = formatCurrencyFromPaise(Number.isFinite(lineTotalPaise) ? lineTotalPaise : fallbackLineTotalPaise) || '—';
-          const productName = safeText(item.name || (item.productId && item.productId.name) || 'Unnamed product');
-          const description = String(item.description || (item.productId && item.productId.description) || '').trim();
+          const totalLabel =
+            formatCurrencyFromPaise(
+              Number.isFinite(lineTotalPaise) ? lineTotalPaise : fallbackLineTotalPaise
+            ) || '—';
+
+          const productName = safeText(
+            item.name || (item.productId && item.productId.name) || 'Unnamed product'
+          );
+
+          const description = String(
+            item.description || (item.productId && item.productId.description) || ''
+          ).trim();
 
           return '' +
             '<tr>' +
               '<td>' + escapeHtml(index + 1) + '</td>' +
-              '<td><div class="product-cell"><p class="product-name">' + escapeHtml(productName) + '</p>' + (description ? '<p class="product-sub">' + escapeHtml(description) + '</p>' : '') + '</div></td>' +
+              '<td><div class="product-cell"><p class="product-name">' +
+                escapeHtml(productName) +
+              '</p>' +
+                (description ? '<p class="product-sub">' + escapeHtml(description) + '</p>' : '') +
+              '</div></td>' +
               '<td>' + escapeHtml(quantity || 0) + '</td>' +
               '<td>' + escapeHtml(unitLabel) + '</td>' +
               '<td>' + escapeHtml(totalLabel) + '</td>' +
@@ -1524,7 +1764,11 @@
         });
 
         els.printBtn.addEventListener('click', function () {
-          if (!state.selectedOrderId) return;
+          if (!state.selectedOrderId || !state.selectedOrder) {
+            showBanner('error', 'Please select an order before printing.');
+            return;
+          }
+
           window.print();
         });
       }
