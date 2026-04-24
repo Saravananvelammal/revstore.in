@@ -140,6 +140,16 @@
       color: rgba(255,255,255,0.88);
     }
 
+    .main {
+      display: grid;
+      gap: 22px;
+      min-width: 0;
+    }
+
+    .orders-panel {
+      margin-top: 4px;
+    }
+
     .summary-card {
       background: #fff;
       border-radius: 22px;
@@ -277,7 +287,7 @@
 
     .table-wrap {
       width: 100%;
-      overflow: auto;
+      overflow: hidden;
       border: 1px solid var(--line);
       border-radius: 18px;
       background: #fff;
@@ -286,7 +296,8 @@
     table {
       width: 100%;
       border-collapse: collapse;
-      min-width: 520px;
+      table-layout: fixed;
+      min-width: 0;
     }
 
     th, td {
@@ -312,34 +323,8 @@
     tbody tr:last-child td { border-bottom: 0; }
 
     .product-cell {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      min-width: 220px;
-    }
-
-    .thumb {
-      width: 48px;
-      height: 48px;
-      border-radius: 12px;
-      object-fit: cover;
-      flex-shrink: 0;
-      border: 1px solid var(--line);
-      background: #f8fafc;
-    }
-
-    .thumb-fallback {
-      width: 48px;
-      height: 48px;
-      border-radius: 12px;
-      flex-shrink: 0;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      border: 1px solid var(--line);
-      background: #f8fafc;
-      font-weight: 900;
-      color: var(--muted);
+      display: block;
+      min-width: 0;
     }
 
     .product-name {
@@ -736,21 +721,13 @@
                   <p class="meta-title">Created</p>
                   <p class="meta-value" id="summaryCreatedAt">—</p>
                 </article>
-                <article class="meta-card">
-                  <p class="meta-title">Customer</p>
-                  <p class="meta-value" id="summaryCustomer">—</p>
-                </article>
+                
               </div>
 
               <section class="summary-section">
                 <h3 class="summary-section-title">Update Order Status</h3>
                 <div class="status-actions" id="statusActions"></div>
-              </section>
-
-              <section class="summary-section">
-                <h3 class="summary-section-title">Delivery Address</h3>
-                <div class="address-box" id="summaryAddress">—</div>
-              </section>
+              </section>              
 
               <section class="summary-section">
                 <h3 class="summary-section-title">Items</h3>
@@ -758,11 +735,11 @@
                   <table aria-label="Selected order items">
                     <thead>
                       <tr>
-                        <th style="width: 70px;">S.No</th>
+                        <th style="width: 58px;">S.No</th>
                         <th>Product</th>
-                        <th style="width: 90px;">Qty</th>
-                        <th style="width: 120px;">Price</th>
-                        <th style="width: 140px;">Item Total</th>
+                        <th style="width: 70px;">Qty</th>
+                        <th style="width: 105px;">Price</th>
+                        <th style="width: 115px;">Item Total</th>
                       </tr>
                     </thead>
                     <tbody id="summaryItemsBody"></tbody>
@@ -858,7 +835,7 @@
         IMAGE_BASE: typeof window.RETAILER_IMAGE_BASE === 'string' && window.RETAILER_IMAGE_BASE.trim()
           ? window.RETAILER_IMAGE_BASE.trim().replace(/\/+$/, '')
           : 'https://api.revstore.in',
-        STATUS_OPTIONS: ['Confirmed', 'Processing', 'ReadyForPickup'],
+        STATUS_FLOW: ['Confirmed', 'Processing', 'ReadyForPickup'],
         STATUS_UPDATE_ATTEMPTS: [
           { path: function (id) { return '/orders/' + encodeURIComponent(id) + '/status'; }, method: 'PATCH' },
           { path: function (id) { return '/orders/' + encodeURIComponent(id) + '/status'; }, method: 'PUT' },
@@ -877,8 +854,6 @@
         summaryOrderId: document.getElementById('summaryOrderId'),
         summaryStatus: document.getElementById('summaryStatus'),
         summaryCreatedAt: document.getElementById('summaryCreatedAt'),
-        summaryCustomer: document.getElementById('summaryCustomer'),
-        summaryAddress: document.getElementById('summaryAddress'),
         summaryItemsBody: document.getElementById('summaryItemsBody'),
         summaryTotal: document.getElementById('summaryTotal'),
         statusActions: document.getElementById('statusActions'),
@@ -1310,29 +1285,35 @@
         renderOrders(state.rawOrders);
       }
 
+      function getNextRetailerStatus(currentStatus) {
+        const currentKey = normalizeStatusKey(currentStatus);
+
+        if (currentKey === 'pending') return 'Confirmed';
+        if (currentKey === 'confirmed') return 'Processing';
+        if (currentKey === 'processing') return 'ReadyForPickup';
+
+        return '';
+      }
+
       function renderStatusButtons(order) {
-        const currentKey = normalizeStatusKey(order && order.status);
-        const html = CONFIG.STATUS_OPTIONS.map(function (status) {
-          const key = normalizeStatusKey(status);
-          const active = currentKey === key ? ' is-active' : '';
-          const disabled = state.statusLoading ? ' disabled' : '';
-          return '<button type="button" class="status-btn' + active + '" data-status="' + escapeHtml(status) + '"' + disabled + '>' + escapeHtml(prettyStatus(status)) + '</button>';
-        }).join('');
-        els.statusActions.innerHTML = html;
-      }
+        const nextStatus = getNextRetailerStatus(order && order.status);
 
-      function getCustomerDisplay(order) {
-        const customer = order.customer || order.customerId || {};
-        const name = String(order.customerName || order.receiverName || customer.name || '').trim();
-        const mobile = String(order.receiverMobile || order.mobile || customer.mobile || '').trim();
-        if (name && mobile) return name + ' • ' + mobile;
-        if (name) return name;
-        if (mobile) return mobile;
-        return '—';
-      }
+        if (!nextStatus) {
+          els.statusActions.innerHTML =
+            '<span class="chip chip-readyforpickup">No retailer action needed</span>';
+          return;
+        }
 
-      function getAddressDisplay(order) {
-        return safeText(order.address || order.deliveryAddress || order.customerAddress || '—');
+        const disabled = state.statusLoading ? ' disabled' : '';
+
+        els.statusActions.innerHTML =
+          '<button type="button" class="status-btn is-active" data-status="' +
+          escapeHtml(nextStatus) +
+          '"' +
+          disabled +
+          '>Mark as ' +
+          escapeHtml(prettyStatus(nextStatus)) +
+          '</button>';
       }
 
       function renderSummary(order) {
@@ -1347,8 +1328,6 @@
         els.summaryOrderId.textContent = extractShortOrderId(order);
         els.summaryStatus.textContent = prettyStatus(order.status);
         els.summaryCreatedAt.textContent = formatDate(order.createdAt);
-        els.summaryCustomer.textContent = getCustomerDisplay(order);
-        els.summaryAddress.textContent = getAddressDisplay(order);
         els.summaryTotal.textContent = deriveSummaryTotal(order);
 
         renderStatusButtons(order);
@@ -1364,16 +1343,13 @@
           const fallbackLineTotalPaise = Number.isFinite(useUnitPrice) ? useUnitPrice * quantity : NaN;
           const unitLabel = formatCurrencyFromPaise(useUnitPrice) || '—';
           const totalLabel = formatCurrencyFromPaise(Number.isFinite(lineTotalPaise) ? lineTotalPaise : fallbackLineTotalPaise) || '—';
-          const imagePath = getImageUrl(item.image || (item.productId && item.productId.image) || (item.productId && item.productId.images && item.productId.images[0]) || '');
           const productName = safeText(item.name || (item.productId && item.productId.name) || 'Unnamed product');
           const description = String(item.description || (item.productId && item.productId.description) || '').trim();
-          const thumb = imagePath
-            ? '<img class="thumb" src="' + escapeHtml(imagePath) + '" alt="' + escapeHtml(productName) + '" loading="lazy" onerror="this.outerHTML=\'<span class=&quot;thumb-fallback&quot; aria-hidden=&quot;true&quot;>📦</span>\'" />'
-            : '<span class="thumb-fallback" aria-hidden="true">📦</span>';
+
           return '' +
             '<tr>' +
               '<td>' + escapeHtml(index + 1) + '</td>' +
-              '<td><div class="product-cell">' + thumb + '<div><p class="product-name">' + escapeHtml(productName) + '</p>' + (description ? '<p class="product-sub">' + escapeHtml(description) + '</p>' : '') + '</div></div></td>' +
+              '<td><div class="product-cell"><p class="product-name">' + escapeHtml(productName) + '</p>' + (description ? '<p class="product-sub">' + escapeHtml(description) + '</p>' : '') + '</div></td>' +
               '<td>' + escapeHtml(quantity || 0) + '</td>' +
               '<td>' + escapeHtml(unitLabel) + '</td>' +
               '<td>' + escapeHtml(totalLabel) + '</td>' +
