@@ -1227,7 +1227,10 @@
           els.logoutBtn.disabled = true;
           await apiFetch('/auth/logout', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' }
+            headers: {
+              'Content-Type': 'application/json',
+              'x-csrf-token': getCookie('csrf_token')
+            }
           });
         } catch (_) {
         } finally {

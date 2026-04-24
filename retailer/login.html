@@ -629,6 +629,20 @@
         els.banner.textContent = '';
       }
 
+      function getCookie(name) {
+        const target = String(name || '') + '=';
+        const parts = String(document.cookie || '').split(';');
+
+        for (let i = 0; i < parts.length; i += 1) {
+          const part = parts[i].trim();
+          if (part.indexOf(target) === 0) {
+            return decodeURIComponent(part.slice(target.length));
+          }
+        }
+
+        return '';
+      }
+
       function setBusy(nextBusy) {
         state.busy = !!nextBusy;
 
@@ -960,6 +974,12 @@
           }
 
           clearPersistedChallenge();
+
+          if (!getCookie('csrf_token')) {
+            showBanner('error', 'Login succeeded, but security token was not created. Please contact admin.');
+           return;
+          }
+
           showBanner('success', data.message || 'Login successful. Redirecting...');
 
           setTimeout(function () {
