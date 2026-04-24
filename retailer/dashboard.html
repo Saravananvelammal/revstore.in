@@ -1332,6 +1332,20 @@
         return d.toLocaleString('en-IN');
       }
 
+      function getStatusUpdatedAt(order) {
+        const currentStatusKey = normalizeStatusKey(order && order.status);
+        const history = Array.isArray(order && order.statusHistory) ? order.statusHistory : [];
+
+        for (let i = history.length - 1; i >= 0; i -= 1) {
+          const item = history[i];
+          if (normalizeStatusKey(item && item.status) === currentStatusKey && item.timestamp) {
+            return item.timestamp;
+          }
+        }
+
+        return order && (order.updatedAt || order.updated_at || order.createdAt || order.created_at);
+      }
+
       function formatCurrencyFromPaise(value) {
         const num = Number(value);
         if (!Number.isFinite(num)) return null;
@@ -1452,7 +1466,7 @@
           status: status,
           statusKey: normalizeStatusKey(status),
           createdAt: order.createdAt || order.created_at || order.date || null,
-          updatedAt: order.updatedAt || order.updated_at || null,
+          updatedAt: getStatusUpdatedAt(order),
           amountLabel: deriveListAmount(order),
           itemCount: getItemCount(order)
         };
