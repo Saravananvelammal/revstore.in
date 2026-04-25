@@ -272,6 +272,7 @@
           : 'https://api.revstore.in/api/admin-web/v1',
         LOGIN_URL: '/admin/login',
         DASHBOARD_URL: '/admin/dashboard',
+        ALLOWED_CATEGORY_URL: '/admin/retailerallowedcategory',
         IMAGE_BASE: 'https://api.revstore.in',
         FINGERPRINT_STORAGE_KEY: 'admin_web_fp_v1'
       };
@@ -737,7 +738,15 @@
             );
           }
           if (action === 'wallet') showBanner('info', 'Wallet action can be wired to your wallet settlement API next.');
-          if (action === 'security') showBanner('info', 'Security action can be wired for password/session reset next.');
+          if (action === 'security') {
+            if (!retailer || !retailer._id) {
+              showBanner('error', 'Retailer id missing.');
+              return;
+            }
+
+            window.location.href =
+              CONFIG.ALLOWED_CATEGORY_URL + '?retailerId=' + encodeURIComponent(retailer._id);
+            }
         });
       }
 

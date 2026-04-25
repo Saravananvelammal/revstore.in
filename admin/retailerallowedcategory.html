@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Revstore Admin - Retailer Categories</title>
+  <meta name="robots" content="noindex,nofollow,noarchive,nosnippet" />
+  <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+
+  <style>
+    :root{
+      --bg1:#4318b8;--bg2:#7e22ce;--bg3:#c026d3;
+      --card:rgba(255,255,255,.96);--text:#1e1b4b;--muted:#6b7280;
+      --line:rgba(30,27,75,.12);--primary:#5b21b6;--success:#059669;
+      --warning:#d97706;--danger:#dc2626;--shadow:0 18px 60px rgba(49,12,120,.24);
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;min-height:100vh;padding:18px;
+      font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+      color:var(--text);
+      background:linear-gradient(135deg,var(--bg1),var(--bg2),var(--bg3));
+    }
+    .app{max-width:1100px;margin:0 auto;display:grid;gap:16px}
+    .topbar{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;color:#fff}
+    h1{margin:0;font-size:1.8rem;font-weight:900}
+    .sub{margin:7px 0 0;color:rgba(255,255,255,.86)}
+    .actions{display:flex;gap:10px;flex-wrap:wrap}
+    .btn{
+      height:46px;padding:0 16px;border-radius:15px;border:1px solid var(--line);
+      background:#fff;color:var(--text);font-weight:850;cursor:pointer
+    }
+    .btn-primary{border:0;color:#fff;background:linear-gradient(135deg,#5b21b6,#7c3aed,#a21caf)}
+    .btn-danger{border:0;color:#fff;background:linear-gradient(135deg,#dc2626,#b91c1c)}
+    .btn:disabled{opacity:.65;cursor:not-allowed}
+    .panel{background:var(--card);border-radius:22px;box-shadow:var(--shadow);padding:18px}
+    .banner{display:none;padding:13px 14px;border-radius:15px;margin-bottom:14px;line-height:1.5}
+    .banner.show{display:block}
+    .banner.error{background:rgba(239,68,68,.12);color:#7f1d1d}
+    .banner.success{background:rgba(16,185,129,.12);color:#065f46}
+    .banner.info{background:rgba(59,130,246,.12);color:#1e3a8a}
+    .toolbar{display:grid;grid-template-columns:minmax(320px,1fr) 260px;gap:10px;margin-bottom:14px}
+    input,select{
+      width:100%;height:48px;border:1px solid var(--line);border-radius:15px;
+      padding:0 14px;font:inherit;outline:none;background:#fff;color:var(--text)
+    }
+    input:focus,select:focus{box-shadow:0 0 0 4px rgba(91,33,182,.14);border-color:#7c3aed}
+    .layout{display:grid;grid-template-columns:1fr 1.05fr;gap:16px}
+    .list{display:grid;gap:12px;max-height:65vh;overflow:auto;padding-right:4px}
+    .retailer-card{
+      border:1px solid var(--line);border-radius:18px;background:#fff;padding:14px;
+      cursor:pointer;display:grid;gap:6px
+    }
+    .retailer-card.active{border-color:#7c3aed;box-shadow:0 10px 28px rgba(91,33,182,.16)}
+    .name{font-weight:900;font-size:1.05rem}
+    .muted{color:var(--muted);font-size:.92rem;line-height:1.45;word-break:break-word}
+    .editor{background:#fff;border:1px solid var(--line);border-radius:20px;padding:16px}
+    .editor h2{margin:0 0 6px;font-size:1.3rem}
+    .category-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:16px}
+    .cat{
+      border:1px solid var(--line);border-radius:15px;padding:12px;background:#fff;
+      display:flex;align-items:center;gap:10px;cursor:pointer;font-weight:850
+    }
+    .cat input{width:20px;height:20px}
+    .editor-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:16px;flex-wrap:wrap}
+    .empty,.loading{text-align:center;padding:26px;color:var(--muted);border:1px dashed var(--line);border-radius:18px;background:#fff}
+    @media(max-width:850px){
+      .topbar{flex-direction:column}
+      .toolbar,.layout{grid-template-columns:1fr}
+      .category-grid{grid-template-columns:1fr}
+      .list{max-height:none}
+    }
+  </style>
+</head>
+
+<body>
+  <main class="app">
+    <header class="topbar">
+      <div>
+        <h1>Retailer Allowed Categories</h1>
+        <p class="sub">Choose which categories each retailer can access.</p>
+      </div>
+      <div class="actions">
+        <button id="dashboardBtn" class="btn">Dashboard</button>
+        <button id="retailersBtn" class="btn">Retailers</button>
+        <button id="refreshBtn" class="btn btn-primary">Refresh</button>
+      </div>
+    </header>
+
+    <section class="panel">
+      <div id="banner" class="banner"></div>
+
+      <div class="toolbar">
+        <input id="searchInput" type="search" placeholder="Search retailer by name, shop, email, or mobile..." />
+        <select id="quickFilter">
+          <option value="all">All retailers</option>
+          <option value="no_categories">No allowed categories</option>
+          <option value="has_categories">Has allowed categories</option>
+        </select>
+      </div>
+
+      <section class="layout">
+        <div>
+          <div id="loading" class="loading">Loading retailers...</div>
+          <div id="empty" class="empty" style="display:none;">No retailers found.</div>
+          <div id="retailerList" class="list"></div>
+        </div>
+
+        <aside class="editor">
+          <h2 id="editorTitle">Select a retailer</h2>
+          <div id="editorSub" class="muted">Allowed categories will load here.</div>
+
+          <div id="categoryGrid" class="category-grid"></div>
+
+          <div class="editor-actions">
+            <button id="selectAllBtn" class="btn">Select All</button>
+            <button id="clearAllBtn" class="btn">Clear</button>
+            <button id="saveBtn" class="btn btn-primary">Save Categories</button>
+          </div>
+        </aside>
+      </section>
+    </section>
+  </main>
+
+  <script>
+    (function () {
+      'use strict';
+
+      const CONFIG = {
+        API_BASE: typeof window.ADMIN_WEB_API_BASE === 'string' && window.ADMIN_WEB_API_BASE.trim()
+          ? window.ADMIN_WEB_API_BASE.trim().replace(/\/+$/, '')
+          : 'https://api.revstore.in/api/admin-web/v1',
+        LOGIN_URL: '/admin/login',
+        DASHBOARD_URL: '/admin/dashboard',
+        RETAILERS_URL: '/admin/retailers',
+        FINGERPRINT_STORAGE_KEY: 'admin_web_fp_v1'
+      };
+
+      const CATEGORIES = [
+        { key:'grocery', name:'Grocery' },
+        { key:'restaurant', name:'Restaurant' },
+        { key:'pharmacy', name:'Pharmacy' },
+        { key:'electronics', name:'Electronics' },
+        { key:'fashion', name:'Fashion' },
+        { key:'salon', name:'Salon' },
+        { key:'bakery', name:'Bakery' },
+        { key:'cafe', name:'Cafe' },
+        { key:'hardware', name:'Hardware' },
+        { key:'services', name:'Services' },
+        { key:'other', name:'Other' }
+      ];
+
+      const els = {
+        banner: document.getElementById('banner'),
+        loading: document.getElementById('loading'),
+        empty: document.getElementById('empty'),
+        retailerList: document.getElementById('retailerList'),
+        searchInput: document.getElementById('searchInput'),
+        quickFilter: document.getElementById('quickFilter'),
+        editorTitle: document.getElementById('editorTitle'),
+        editorSub: document.getElementById('editorSub'),
+        categoryGrid: document.getElementById('categoryGrid'),
+        saveBtn: document.getElementById('saveBtn'),
+        selectAllBtn: document.getElementById('selectAllBtn'),
+        clearAllBtn: document.getElementById('clearAllBtn'),
+        refreshBtn: document.getElementById('refreshBtn'),
+        dashboardBtn: document.getElementById('dashboardBtn'),
+        retailersBtn: document.getElementById('retailersBtn')
+      };
+
+      const state = {
+        fingerprint: '',
+        retailers: [],
+        selectedRetailerId: '',
+        selectedAllowed: new Set(),
+        busy: false
+      };
+
+      function showBanner(type, message) {
+        els.banner.className = 'banner show ' + type;
+        els.banner.textContent = message || '';
+      }
+
+      function clearBanner() {
+        els.banner.className = 'banner';
+        els.banner.textContent = '';
+      }
+
+      function getCookie(name) {
+        const target = String(name || '') + '=';
+        const found = String(document.cookie || '').split(';').map(v => v.trim()).find(v => v.indexOf(target) === 0);
+        return found ? decodeURIComponent(found.slice(target.length)) : '';
+      }
+
+      function getQueryParam(name) {
+        const params = new URLSearchParams(window.location.search || '');
+        return String(params.get(name) || '').trim();
+      }
+
+      async function sha256Hex(input) {
+        const data = new TextEncoder().encode(String(input));
+        const digest = await crypto.subtle.digest('SHA-256', data);
+        return Array.from(new Uint8Array(digest)).map(b => b.toString(16).padStart(2, '0')).join('');
+      }
+
+      async function getStableFingerprint() {
+        try {
+          const existing = localStorage.getItem(CONFIG.FINGERPRINT_STORAGE_KEY);
+          if (existing && existing.trim()) return existing.trim().slice(0, 200);
+        } catch (_) {}
+
+        const raw = [
+          navigator.userAgent || '',
+          navigator.language || '',
+          screen.width || '',
+          screen.height || '',
+          screen.colorDepth || '',
+          Intl.DateTimeFormat().resolvedOptions().timeZone || '',
+          navigator.platform || '',
+          crypto.getRandomValues(new Uint32Array(4)).join('-')
+        ].join('|');
+
+        const fp = (await sha256Hex(raw)).slice(0, 64);
+        try { localStorage.setItem(CONFIG.FINGERPRINT_STORAGE_KEY, fp); } catch (_) {}
+        return fp;
+      }
+
+      function redirectToLogin() {
+        window.location.replace(CONFIG.LOGIN_URL);
+      }
+
+      async function apiFetch(path, options) {
+        const headers = new Headers(options && options.headers ? options.headers : {});
+        headers.set('Accept', 'application/json');
+        headers.set('X-Requested-With', 'XMLHttpRequest');
+        if (state.fingerprint) headers.set('x-device-fingerprint', state.fingerprint);
+
+        const res = await fetch(CONFIG.API_BASE + path, {
+          ...(options || {}),
+          headers,
+          credentials: 'include',
+          cache: 'no-store',
+          redirect: 'follow',
+          referrerPolicy: 'strict-origin-when-cross-origin'
+        });
+
+        let data = {};
+        try { data = await res.json(); } catch (_) {}
+
+        if (res.status === 401 || res.status === 403) {
+          throw Object.assign(new Error(data.message || 'Session expired.'), { status: res.status });
+        }
+
+        if (!res.ok) {
+          throw Object.assign(new Error(data.message || 'Request failed.'), { status: res.status, data });
+        }
+
+        return data;
+      }
+
+      function escapeHtml(v) {
+        return String(v == null ? '' : v)
+          .replace(/&/g,'&amp;')
+          .replace(/</g,'&lt;')
+          .replace(/>/g,'&gt;')
+          .replace(/"/g,'&quot;')
+          .replace(/'/g,'&#39;');
+      }
+
+      function selectedRetailer() {
+        return state.retailers.find(r => String(r._id) === String(state.selectedRetailerId)) || null;
+      }
+
+      function retailerSearchBlob(r) {
+        return [
+          r.name, r.shopName, r.email, r.mobile, r.category,
+          Array.isArray(r.allowedCategories) ? r.allowedCategories.join(' ') : ''
+        ].join(' ').toLowerCase();
+      }
+
+      function renderRetailers() {
+        const q = String(els.searchInput.value || '').trim().toLowerCase();
+        const filter = String(els.quickFilter.value || 'all');
+
+        let rows = state.retailers.slice();
+
+        if (q) rows = rows.filter(r => retailerSearchBlob(r).includes(q));
+
+        if (filter === 'no_categories') {
+          rows = rows.filter(r => !Array.isArray(r.allowedCategories) || !r.allowedCategories.length);
+        }
+
+        if (filter === 'has_categories') {
+          rows = rows.filter(r => Array.isArray(r.allowedCategories) && r.allowedCategories.length);
+        }
+
+        els.empty.style.display = rows.length ? 'none' : 'block';
+
+        els.retailerList.innerHTML = rows.map(r => {
+          const active = String(r._id) === String(state.selectedRetailerId) ? ' active' : '';
+          const count = Array.isArray(r.allowedCategories) ? r.allowedCategories.length : 0;
+
+          return `
+            <article class="retailer-card${active}" data-id="${escapeHtml(r._id)}">
+              <div class="name">${escapeHtml(r.name || 'Unnamed Retailer')}</div>
+              <div class="muted">${escapeHtml(r.shopName || 'Shop name not added')}</div>
+              <div class="muted">${escapeHtml(r.email || '')} ${r.mobile ? '• ' + escapeHtml(r.mobile) : ''}</div>
+              <div class="muted">Allowed categories: ${escapeHtml(count)}</div>
+            </article>
+          `;
+        }).join('');
+      }
+
+      function renderCategoryEditor() {
+        const retailer = selectedRetailer();
+
+        if (!retailer) {
+          els.editorTitle.textContent = 'Select a retailer';
+          els.editorSub.textContent = 'Allowed categories will load here.';
+        } else {
+          els.editorTitle.textContent = retailer.name || 'Unnamed Retailer';
+          els.editorSub.textContent = (retailer.shopName || retailer.email || '') + ' • Select allowed categories';
+        }
+
+        els.categoryGrid.innerHTML = CATEGORIES.map(cat => {
+          const checked = state.selectedAllowed.has(cat.key) ? 'checked' : '';
+          return `
+            <label class="cat">
+              <input type="checkbox" value="${escapeHtml(cat.key)}" ${checked} />
+              <span>${escapeHtml(cat.name)}</span>
+            </label>
+          `;
+        }).join('');
+      }
+
+      async function loadRetailers() {
+        clearBanner();
+        els.loading.style.display = 'block';
+        els.empty.style.display = 'none';
+        els.retailerList.innerHTML = '';
+
+        try {
+          await apiFetch('/auth/me', { method:'GET' });
+
+          const incomingRetailerId = getQueryParam('retailerId') || getQueryParam('id');
+
+          if (incomingRetailerId) {
+            const data = await apiFetch('/retailers/' + encodeURIComponent(incomingRetailerId), {
+              method:'GET'
+            });
+
+            const retailer = data && data.retailer ? data.retailer : null;
+
+            if (!retailer || !retailer._id) {
+              throw new Error('Retailer not found.');
+            }
+
+            state.retailers = [retailer];
+            state.selectedRetailerId = String(retailer._id);
+
+            if (Array.isArray(retailer.allowedCategories)) {
+              state.selectedAllowed = new Set(
+                retailer.allowedCategories.map(k => String(k).toLowerCase())
+              );
+            } else {
+              state.selectedAllowed = new Set();
+            }
+
+            renderRetailers();
+            renderCategoryEditor();
+            await selectRetailer(retailer._id);
+            return;
+          }
+
+          const data = await apiFetch('/retailers?includeDeleted=false&sort=name&order=asc', {
+            method:'GET'
+          });
+
+          state.retailers = Array.isArray(data.retailers) ? data.retailers : [];
+
+          if (state.selectedRetailerId) {
+            const stillExists = state.retailers.some(r => String(r._id) === String(state.selectedRetailerId));
+            if (!stillExists) {
+              state.selectedRetailerId = '';
+              state.selectedAllowed = new Set();
+            }
+          }
+
+          renderRetailers();
+          renderCategoryEditor();
+        } catch (err) {
+          if (err.status === 401 || err.status === 403) {
+            showBanner('error', 'Session expired. Redirecting to login...');
+            setTimeout(redirectToLogin, 500);
+            return;
+          }
+          showBanner('error', err.message || 'Failed to load retailers.');
+        } finally {
+          els.loading.style.display = 'none';
+        }
+      }
+
+      async function selectRetailer(id) {
+        clearBanner();
+        state.selectedRetailerId = String(id || '');
+        state.selectedAllowed = new Set();
+
+        const local = selectedRetailer();
+        if (local && Array.isArray(local.allowedCategories)) {
+          local.allowedCategories.forEach(k => state.selectedAllowed.add(String(k).toLowerCase()));
+        }
+
+        renderRetailers();
+        renderCategoryEditor();
+
+        try {
+          const data = await apiFetch('/retailers/' + encodeURIComponent(id) + '/allowed-categories?includeNames=true', {
+            method:'GET'
+          });
+
+          const allowed = data && data.retailer && Array.isArray(data.retailer.allowedCategories)
+            ? data.retailer.allowedCategories
+            : [];
+
+          state.selectedAllowed = new Set(allowed.map(k => String(k).toLowerCase()));
+
+          const r = selectedRetailer();
+          if (r) r.allowedCategories = Array.from(state.selectedAllowed);
+
+          renderRetailers();
+          renderCategoryEditor();
+        } catch (err) {
+          if (err.status === 401 || err.status === 403) {
+            showBanner('error', 'Session expired. Redirecting to login...');
+            setTimeout(redirectToLogin, 500);
+            return;
+          }
+          showBanner('error', err.message || 'Failed to load allowed categories.');
+        }
+      }
+
+      async function saveCategories() {
+        const retailer = selectedRetailer();
+        if (!retailer) {
+          showBanner('error', 'Please select a retailer first.');
+          return;
+        }
+
+        const selected = Array.from(els.categoryGrid.querySelectorAll('input[type="checkbox"]:checked'))
+          .map(input => String(input.value || '').trim().toLowerCase())
+          .filter(Boolean);
+
+        try {
+          state.busy = true;
+          els.saveBtn.disabled = true;
+          els.saveBtn.textContent = 'Saving...';
+
+          const data = await apiFetch('/retailers/' + encodeURIComponent(retailer._id) + '/allowed-categories', {
+            method:'PUT',
+            headers:{
+              'Content-Type':'application/json',
+              'x-csrf-token': getCookie('csrf_token')
+            },
+            body: JSON.stringify({ allowedCategories: selected })
+          });
+
+          const allowed = data && data.retailer && Array.isArray(data.retailer.allowedCategories)
+            ? data.retailer.allowedCategories
+            : selected;
+
+          retailer.allowedCategories = allowed;
+          state.selectedAllowed = new Set(allowed.map(k => String(k).toLowerCase()));
+
+          renderRetailers();
+          renderCategoryEditor();
+
+          const rejected = Array.isArray(data.rejected) && data.rejected.length
+            ? ' Rejected: ' + data.rejected.join(', ')
+            : '';
+
+          showBanner('success', 'Allowed categories updated successfully.' + rejected);
+        } catch (err) {
+          showBanner('error', err.message || 'Failed to save categories.');
+        } finally {
+          state.busy = false;
+          els.saveBtn.disabled = false;
+          els.saveBtn.textContent = 'Save Categories';
+        }
+      }
+
+      function selectAll() {
+        state.selectedAllowed = new Set(CATEGORIES.map(c => c.key));
+        renderCategoryEditor();
+      }
+
+      function clearAll() {
+        state.selectedAllowed = new Set();
+        renderCategoryEditor();
+      }
+
+      function bindEvents() {
+        els.dashboardBtn.addEventListener('click', () => window.location.href = CONFIG.DASHBOARD_URL);
+        els.retailersBtn.addEventListener('click', () => window.location.href = CONFIG.RETAILERS_URL);
+        els.refreshBtn.addEventListener('click', loadRetailers);
+        els.searchInput.addEventListener('input', renderRetailers);
+        els.quickFilter.addEventListener('change', renderRetailers);
+        els.saveBtn.addEventListener('click', saveCategories);
+        els.selectAllBtn.addEventListener('click', selectAll);
+        els.clearAllBtn.addEventListener('click', clearAll);
+
+        els.retailerList.addEventListener('click', e => {
+          const card = e.target.closest('[data-id]');
+          if (!card) return;
+          selectRetailer(card.getAttribute('data-id'));
+        });
+
+        els.categoryGrid.addEventListener('change', e => {
+          const input = e.target.closest('input[type="checkbox"]');
+          if (!input) return;
+
+          const key = String(input.value || '').trim().toLowerCase();
+          if (!key) return;
+
+          if (input.checked) state.selectedAllowed.add(key);
+          else state.selectedAllowed.delete(key);
+        });
+      }
+
+      async function bootstrap() {
+        state.fingerprint = await getStableFingerprint();
+        bindEvents();
+        await loadRetailers();
+      }
+
+      bootstrap().catch(() => {
+        showBanner('error', 'Failed to initialize category page.');
+      });
+    })();
+  </script>
+</body>
+</html>
