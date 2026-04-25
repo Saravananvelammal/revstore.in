@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Revstore Admin Dashboard</title>
+  <meta name="robots" content="noindex,nofollow,noarchive,nosnippet" />
+  <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+
+  <style>
+    :root {
+      --bg1:#4318b8; --bg2:#7e22ce; --bg3:#c026d3;
+      --card:rgba(255,255,255,.96); --text:#1e1b4b; --muted:#6b7280;
+      --line:rgba(30,27,75,.12); --primary:#5b21b6; --danger:#dc2626;
+      --shadow:0 18px 60px rgba(49,12,120,.25); --radius:24px;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0; min-height:100vh; padding:22px;
+      font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+      color:var(--text);
+      background:linear-gradient(135deg,var(--bg1),var(--bg2),var(--bg3));
+    }
+    .app{max-width:1100px;margin:0 auto;display:grid;gap:18px}
+    .topbar{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;color:#fff}
+    h1{margin:0;font-size:2rem;font-weight:900}
+    .sub{margin:8px 0 0;color:rgba(255,255,255,.86)}
+    .actions{display:flex;gap:10px;flex-wrap:wrap}
+    .btn{
+      height:48px;padding:0 18px;border-radius:16px;border:1px solid var(--line);
+      cursor:pointer;font-weight:850;background:#fff;color:var(--text)
+    }
+    .btn-primary{border:0;color:#fff;background:linear-gradient(135deg,#5b21b6,#7c3aed,#a21caf)}
+    .btn-danger{border:0;color:#fff;background:linear-gradient(135deg,#dc2626,#b91c1c)}
+    .panel{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:24px}
+    .welcome{
+      background:linear-gradient(135deg,#5b21b6,#a21caf);
+      color:#fff;border-radius:22px;padding:26px;margin-bottom:20px
+    }
+    .welcome h2{margin:0;font-size:1.8rem}
+    .welcome p{margin:10px 0 0;color:rgba(255,255,255,.88);line-height:1.6}
+    .grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+    .tile{
+      min-height:160px;border:1px solid var(--line);border-radius:22px;background:#fff;
+      display:grid;place-items:center;text-align:center;padding:20px;cursor:pointer;
+      transition:.16s ease;text-decoration:none;color:var(--text)
+    }
+    .tile:hover{transform:translateY(-2px);box-shadow:0 16px 34px rgba(91,33,182,.16)}
+    .icon{font-size:2.4rem;margin-bottom:12px}
+    .tile h3{margin:0;font-size:1.15rem;letter-spacing:.04em;text-transform:uppercase}
+    .tile p{margin:8px 0 0;color:var(--muted);font-size:.92rem}
+    .banner{display:none;padding:14px 16px;border-radius:16px;margin-bottom:14px}
+    .banner.show{display:block}
+    .banner.error{background:rgba(239,68,68,.12);color:#7f1d1d}
+    .banner.success{background:rgba(16,185,129,.12);color:#065f46}
+    .modal{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;place-items:center;padding:18px}
+    .modal.show{display:grid}
+    .modal-card{width:100%;max-width:420px;background:#fff;border-radius:22px;padding:22px;box-shadow:var(--shadow)}
+    .modal-card h2{margin:0 0 14px}
+    .field{display:grid;gap:8px;margin-bottom:14px}
+    label{font-weight:800;font-size:.9rem}
+    input{height:48px;border:1px solid var(--line);border-radius:14px;padding:0 14px;font:inherit}
+    .modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:10px}
+    @media(max-width:780px){.topbar{flex-direction:column}.grid{grid-template-columns:1fr}}
+  </style>
+</head>
+
+<body>
+  <main class="app">
+    <header class="topbar">
+      <div>
+        <h1>Revstore Admin Dashboard</h1>
+        <p class="sub">Secure admin web dashboard with session-based access.</p>
+      </div>
+      <div class="actions">
+        <button id="refreshBtn" class="btn btn-primary">Refresh</button>
+        <button id="changePasswordBtn" class="btn">Change Password</button>
+        <button id="logoutBtn" class="btn">Logout</button>
+      </div>
+    </header>
+
+    <section class="panel">
+      <div id="banner" class="banner"></div>
+
+      <div class="welcome">
+        <h2 id="welcomeTitle">Welcome, Admin</h2>
+        <p id="welcomeSub">Manage retailers, riders, and support operations from one secure web dashboard.</p>
+      </div>
+
+      <div class="grid">
+        <a class="tile" href="/admin/retailers">
+          <div>
+            <div class="icon">🏪</div>
+            <h3>Retailers</h3>
+            <p>Add, update, and view retailer accounts.</p>
+          </div>
+        </a>
+
+        <a class="tile" href="/admin/riders">
+          <div>
+            <div class="icon">🛵</div>
+            <h3>Riders</h3>
+            <p>Manage rider accounts and delivery access.</p>
+          </div>
+        </a>
+
+        <a class="tile" href="/admin/support">
+          <div>
+            <div class="icon">🎧</div>
+            <h3>Support</h3>
+            <p>Handle support and operational issues.</p>
+          </div>
+        </a>
+      </div>
+    </section>
+  </main>
+
+  <div id="passwordModal" class="modal">
+    <div class="modal-card">
+      <h2>Change Password</h2>
+
+      <form id="changePasswordForm">
+        <div class="field">
+          <label for="oldPassword">Current Password</label>
+          <input id="oldPassword" type="password" autocomplete="current-password" required />
+        </div>
+
+        <div class="field">
+          <label for="newPassword">New Password</label>
+          <input id="newPassword" type="password" autocomplete="new-password" minlength="8" required />
+        </div>
+
+        <div class="field">
+          <label for="confirmPassword">Confirm Password</label>
+          <input id="confirmPassword" type="password" autocomplete="new-password" minlength="8" required />
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" id="cancelPasswordBtn" class="btn">Cancel</button>
+          <button type="submit" class="btn btn-primary">Update</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      'use strict';
+
+      const CONFIG = {
+        API_BASE: typeof window.ADMIN_WEB_API_BASE === 'string' && window.ADMIN_WEB_API_BASE.trim()
+          ? window.ADMIN_WEB_API_BASE.trim().replace(/\/+$/, '')
+          : 'https://api.revstore.in/api/admin-web/v1',
+        LOGIN_URL: typeof window.ADMIN_WEB_LOGIN_URL === 'string' && window.ADMIN_WEB_LOGIN_URL.trim()
+          ? window.ADMIN_WEB_LOGIN_URL.trim()
+          : '/admin/login',
+        FINGERPRINT_STORAGE_KEY: 'admin_web_fp_v1'
+      };
+
+      const els = {
+        banner: document.getElementById('banner'),
+        welcomeTitle: document.getElementById('welcomeTitle'),
+        welcomeSub: document.getElementById('welcomeSub'),
+        refreshBtn: document.getElementById('refreshBtn'),
+        logoutBtn: document.getElementById('logoutBtn'),
+        changePasswordBtn: document.getElementById('changePasswordBtn'),
+        modal: document.getElementById('passwordModal'),
+        form: document.getElementById('changePasswordForm'),
+        cancelPasswordBtn: document.getElementById('cancelPasswordBtn'),
+        oldPassword: document.getElementById('oldPassword'),
+        newPassword: document.getElementById('newPassword'),
+        confirmPassword: document.getElementById('confirmPassword')
+      };
+
+      const state = { fingerprint: '', busy: false };
+
+      function showBanner(type, message) {
+        els.banner.className = 'banner show ' + type;
+        els.banner.textContent = message || '';
+      }
+
+      function clearBanner() {
+        els.banner.className = 'banner';
+        els.banner.textContent = '';
+      }
+
+      function getCookie(name) {
+        const target = String(name || '') + '=';
+        return String(document.cookie || '')
+          .split(';')
+          .map(v => v.trim())
+          .find(v => v.indexOf(target) === 0)
+          ?.slice(target.length) || '';
+      }
+
+      async function sha256Hex(input) {
+        const data = new TextEncoder().encode(String(input));
+        const digest = await crypto.subtle.digest('SHA-256', data);
+        return Array.from(new Uint8Array(digest)).map(b => b.toString(16).padStart(2, '0')).join('');
+      }
+
+      async function getStableFingerprint() {
+        try {
+          const existing = localStorage.getItem(CONFIG.FINGERPRINT_STORAGE_KEY);
+          if (existing) return existing.slice(0, 200);
+        } catch (_) {}
+
+        const raw = [
+          navigator.userAgent,
+          navigator.language,
+          screen.width,
+          screen.height,
+          screen.colorDepth,
+          Intl.DateTimeFormat().resolvedOptions().timeZone,
+          navigator.platform,
+          crypto.getRandomValues(new Uint32Array(4)).join('-')
+        ].join('|');
+
+        const fp = (await sha256Hex(raw)).slice(0, 64);
+        try { localStorage.setItem(CONFIG.FINGERPRINT_STORAGE_KEY, fp); } catch (_) {}
+        return fp;
+      }
+
+      function redirectToLogin() {
+        window.location.replace(CONFIG.LOGIN_URL);
+      }
+
+      async function apiFetch(path, options) {
+        const headers = new Headers(options?.headers || {});
+        headers.set('Accept', 'application/json');
+        headers.set('X-Requested-With', 'XMLHttpRequest');
+        if (state.fingerprint) headers.set('x-device-fingerprint', state.fingerprint);
+
+        const res = await fetch(CONFIG.API_BASE + path, {
+          ...(options || {}),
+          headers,
+          credentials: 'include',
+          cache: 'no-store',
+          redirect: 'follow',
+          referrerPolicy: 'strict-origin-when-cross-origin'
+        });
+
+        let data = {};
+        try { data = await res.json(); } catch (_) {}
+
+        if (res.status === 401 || res.status === 403) {
+          throw Object.assign(new Error(data.message || 'Session expired.'), { status: res.status });
+        }
+
+        if (!res.ok) {
+          throw Object.assign(new Error(data.message || 'Request failed.'), { status: res.status });
+        }
+
+        return data;
+      }
+
+      async function loadMe() {
+        clearBanner();
+        try {
+          const data = await apiFetch('/auth/me', { method: 'GET' });
+          const admin = data.admin || {};
+          const name = String(admin.name || admin.email || 'Admin').trim();
+
+          els.welcomeTitle.textContent = 'Welcome, ' + name;
+          els.welcomeSub.textContent = admin.email
+            ? 'Signed in as ' + admin.email + '. Manage retailers, riders, and support operations.'
+            : 'Manage retailers, riders, and support operations.';
+        } catch (err) {
+          showBanner('error', 'Session expired. Redirecting to login...');
+          setTimeout(redirectToLogin, 500);
+        }
+      }
+
+      async function logout() {
+        try {
+          await apiFetch('/auth/logout', {
+            method: 'POST',
+            headers: { 'x-csrf-token': getCookie('csrf_token') }
+          });
+        } catch (_) {}
+        redirectToLogin();
+      }
+
+      function openPasswordModal() {
+        clearBanner();
+        els.form.reset();
+        els.modal.classList.add('show');
+        setTimeout(() => els.oldPassword.focus(), 50);
+      }
+
+      function closePasswordModal() {
+        els.modal.classList.remove('show');
+        els.form.reset();
+      }
+
+      async function changePassword(e) {
+        e.preventDefault();
+
+        const oldPassword = els.oldPassword.value.trim();
+        const newPassword = els.newPassword.value.trim();
+        const confirmPassword = els.confirmPassword.value.trim();
+
+        if (!oldPassword || !newPassword || !confirmPassword) {
+          showBanner('error', 'All password fields are required.');
+          return;
+        }
+
+        if (newPassword.length < 8) {
+          showBanner('error', 'New password must be at least 8 characters.');
+          return;
+        }
+
+        if (newPassword !== confirmPassword) {
+          showBanner('error', 'New password and confirm password do not match.');
+          return;
+        }
+
+        try {
+          await apiFetch('/auth/change-password', {
+            method: 'PATCH',
+            headers: {
+              'Content-Type': 'application/json',
+              'x-csrf-token': getCookie('csrf_token')
+            },
+            body: JSON.stringify({ oldPassword, newPassword })
+          });
+
+          closePasswordModal();
+          showBanner('success', 'Password changed successfully. Please login again.');
+          setTimeout(redirectToLogin, 900);
+        } catch (err) {
+          showBanner('error', err.message || 'Failed to change password.');
+        }
+      }
+
+      async function bootstrap() {
+        state.fingerprint = await getStableFingerprint();
+
+        els.refreshBtn.addEventListener('click', loadMe);
+        els.logoutBtn.addEventListener('click', logout);
+        els.changePasswordBtn.addEventListener('click', openPasswordModal);
+        els.cancelPasswordBtn.addEventListener('click', closePasswordModal);
+        els.form.addEventListener('submit', changePassword);
+
+        els.modal.addEventListener('click', function (e) {
+          if (e.target === els.modal) closePasswordModal();
+        });
+
+        await loadMe();
+      }
+
+      bootstrap();
+    })();
+  </script>
+</body>
+</html>
