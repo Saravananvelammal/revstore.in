@@ -138,19 +138,7 @@
         FINGERPRINT_STORAGE_KEY: 'admin_web_fp_v1'
       };
 
-      const CATEGORIES = [
-        { key:'grocery', name:'Grocery' },
-        { key:'restaurant', name:'Restaurant' },
-        { key:'pharmacy', name:'Pharmacy' },
-        { key:'electronics', name:'Electronics' },
-        { key:'fashion', name:'Fashion' },
-        { key:'salon', name:'Salon' },
-        { key:'bakery', name:'Bakery' },
-        { key:'cafe', name:'Cafe' },
-        { key:'hardware', name:'Hardware' },
-        { key:'services', name:'Services' },
-        { key:'other', name:'Other' }
-      ];
+      let CATEGORIES = [];
 
       const els = {
         banner: document.getElementById('banner'),
@@ -334,6 +322,24 @@
           `;
         }).join('');
       }
+
+      async function loadCategories() {
+        const data = await apiFetch('/categories', { method: 'GET' });
+
+        const rows = Array.isArray(data.categories) ? data.categories : [];
+
+        CATEGORIES = rows
+          .map(c => ({
+            key: String(c.key || '').trim().toLowerCase(),
+            name: String(c.name || c.key || '').trim()
+          }))
+          .filter(c => c.key && c.name);
+
+        if (!CATEGORIES.length) {
+          throw new Error('No categories found. Please add categories first.');
+        }
+      }
+
 
       async function loadRetailers() {
         clearBanner();
@@ -531,6 +537,7 @@
       async function bootstrap() {
         state.fingerprint = await getStableFingerprint();
         bindEvents();
+        await loadCategories();
         await loadRetailers();
       }
 
