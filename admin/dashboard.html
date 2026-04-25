@@ -90,7 +90,7 @@
       </div>
 
       <div class="grid">
-        <a class="tile" href="/admin/retailers">
+        <a class="tile" href="./retailers">
           <div>
             <div class="icon">🏪</div>
             <h3>Retailers</h3>
@@ -264,9 +264,8 @@
           const name = String(admin.name || admin.email || 'Admin').trim();
 
           els.welcomeTitle.textContent = 'Welcome, ' + name;
-          els.welcomeSub.textContent = admin.email
-            ? 'Signed in as ' + admin.email + '. Manage retailers, riders, and support operations.'
-            : 'Manage retailers, riders, and support operations.';
+          els.welcomeSub.textContent = 
+          'Manage retailers, riders, and support operations.';
         } catch (err) {
           showBanner('error', 'Session expired. Redirecting to login...');
           setTimeout(redirectToLogin, 500);
