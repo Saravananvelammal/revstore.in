@@ -509,7 +509,20 @@
       function bindEvents() {
         els.dashboardBtn.addEventListener('click', () => window.location.href = CONFIG.DASHBOARD_URL);
         els.retailersBtn.addEventListener('click', () => window.location.href = CONFIG.RETAILERS_URL);
-        els.refreshBtn.addEventListener('click', loadRetailers);
+        els.refreshBtn.addEventListener('click', async () => {
+          try {
+            await loadCategories();
+            await loadRetailers();
+          } catch (err) {
+            if (err && (err.status === 401 || err.status === 403)) {
+              showBanner('error', 'Session expired. Redirecting to login...');
+              setTimeout(redirectToLogin, 500);
+              return;
+            }
+
+            showBanner('error', err && err.message ? err.message : 'Failed to refresh page.');
+          }
+        });
         els.searchInput.addEventListener('input', renderRetailers);
         els.quickFilter.addEventListener('change', renderRetailers);
         els.saveBtn.addEventListener('click', saveCategories);
@@ -541,8 +554,14 @@
         await loadRetailers();
       }
 
-      bootstrap().catch(() => {
-        showBanner('error', 'Failed to initialize category page.');
+      bootstrap().catch((err) => {
+        if (err && (err.status === 401 || err.status === 403)) {
+          showBanner('error', 'Session expired. Redirecting to login...');
+          setTimeout(redirectToLogin, 500);
+          return;
+        }
+
+        showBanner('error', err && err.message ? err.message : 'Failed to initialize category page.');
       });
     })();
   </script>
