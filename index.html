@@ -142,21 +142,24 @@
     .play-btn {
       display: inline-flex;
       align-items: center;
-      gap: 12px;
+      justify-content: center;
       text-decoration: none;
-      background: #111827;
-      color: #ffffff;
-      padding: 15px 22px;
-      border-radius: 18px;
-      font-size: 17px;
-      font-weight: 700;
-      box-shadow: 0 18px 32px rgba(17, 24, 39, 0.24);
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      line-height: 0;
+      border-radius: 14px;
+      transition: transform 0.2s ease, filter 0.2s ease;
     }
 
-    .play-btn:hover {
+    .play-btn:hover,
+    .play-btn:focus {
       transform: translateY(-2px);
-      box-shadow: 0 22px 38px rgba(17, 24, 39, 0.30);
+      filter: drop-shadow(0 14px 24px rgba(17, 24, 39, 0.25));
+    }
+
+    .play-store-badge {
+      display: block;
+      width: 210px;
+      max-width: 100%;
+      height: auto;
     }
 
     .qr-card {
@@ -277,9 +280,13 @@
             href="https://play.google.com/store/apps/details?id=com.revstore.customer&pcampaignid=web_share"
             target="_blank"
             rel="noopener noreferrer"
-            aria-label="Install RevStore from Google Play"
+            aria-label="Get RevStore on Google Play"
           >
-            ▶️ Install from Google Play
+            <img
+              src="https://upload.wikimedia.org/wikipedia/commons/7/78/Google_Play_Store_badge_EN.svg"
+              alt="Get it on Google Play"
+              class="play-store-badge"
+            />
           </a>
 
           <a
