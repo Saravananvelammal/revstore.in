@@ -218,30 +218,41 @@
 
     .visual {
       display: flex;
-      justify-content: flex-end;
+      justify-content: center;
       align-items: center;
+      min-width: 0;
     }
 
     .hero-frame {
-      width: 100%;
-      max-width: 560px;
+      width: min(100%, 560px);
       padding: 18px;
       border-radius: 34px;
       background: linear-gradient(145deg, #290039, #97005f);
       box-shadow: 0 28px 54px rgba(123, 0, 87, 0.28);
+      overflow: hidden;
+      transform: translateZ(0);
     }
 
     .hero-image {
-      width: min(100%, 560px);
+      width: 100%;
+      aspect-ratio: 1 / 0.78;
+      object-fit: contain;
+      object-position: center;
       border-radius: 26px;
       display: block;
-      filter: drop-shadow(0 22px 30px rgba(30, 0, 45, 0.25));
+      background: #eef7ff;
+      filter: drop-shadow(0 22px 30px rgba(30, 0, 45, 0.22));
       animation: floatCart 4.5s ease-in-out infinite;
+      will-change: transform;
     }
 
     @keyframes floatCart {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-12px); }
+      0%, 100% {
+        transform: translate3d(0, 0, 0) scale(1);
+      }
+      50% {
+        transform: translate3d(0, -10px, 0) scale(1.015);
+      }
     }
 
     footer {
@@ -280,12 +291,20 @@
 
       .visual {
         justify-content: center;
+        width: 100%;
       }
 
       .hero-frame {
-        max-width: 100%;
+        width: 100%;
+        max-width: 440px;
+        padding: 14px;
+        border-radius: 28px;
       }
 
+      .hero-image {
+        aspect-ratio: 1 / 0.82;
+        border-radius: 22px;
+      }
 
       .subtitle {
         margin-left: auto;
@@ -294,11 +313,7 @@
 
       .actions {
         justify-content: center;
-      }
-
-      .hero-frame {
-        padding: 16px;
-      }
+      }      
 
       footer {
         text-align: center;
@@ -310,6 +325,25 @@
         margin: 5px 8px;
       }
     }
+
+    @media (max-width: 480px) {
+    .hero {
+      padding: 34px 18px;
+      gap: 28px;
+    }
+
+    .hero-frame {
+      max-width: 100%;
+      padding: 12px;
+      border-radius: 24px;
+    }
+
+    .hero-image {
+      aspect-ratio: 1 / 0.86;
+      border-radius: 18px;
+      animation-duration: 5.5s;
+    }
+  }
   </style>
 </head>
 
