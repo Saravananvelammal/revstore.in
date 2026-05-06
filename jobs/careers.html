@@ -25,11 +25,11 @@
     body {
       margin: 0;
       font-family: "Poppins", sans-serif;
-      color: #102033;
+      color: #190022;
       background:
-        radial-gradient(circle at top left, rgba(37, 99, 235, 0.28), transparent 32%),
-        radial-gradient(circle at bottom right, rgba(245, 158, 11, 0.24), transparent 32%),
-        linear-gradient(135deg, #eef6ff 0%, #ffffff 48%, #e0ecff 100%);
+        radial-gradient(circle at top left, rgba(126, 0, 120, 0.25), transparent 32%),
+        radial-gradient(circle at bottom right, rgba(255, 204, 0, 0.24), transparent 32%),
+        linear-gradient(135deg, #fff7fb 0%, #ffffff 45%, #f4e8ff 100%);
       overflow-x: hidden;
     }
 
@@ -63,7 +63,7 @@
     }
 
     .brand span {
-      color: #0b4fc4;
+      color: #7b0057;
     }
 
     .nav-actions {
@@ -94,8 +94,8 @@
 
     .btn-primary {
       color: #ffffff;
-      background: linear-gradient(135deg, #0b4fc4, #023e9f);
-      box-shadow: 0 14px 28px rgba(11, 79, 196, 0.25);
+      background: linear-gradient(135deg, #4b006e, #9b005d);
+      box-shadow: 0 14px 28px rgba(123, 0, 87, 0.25);
     }
 
     .btn-primary:hover {
@@ -117,9 +117,9 @@
       gap: 10px;
       padding: 10px 18px;
       border-radius: 999px;
-      color: #0b4fc4;
-      background: #ffffff;
-      border: 1px solid rgba(11, 79, 196, 0.14);
+      color: #7b0057;
+      background: #fff7d6;
+      border: 1px solid rgba(123, 0, 87, 0.14);
       font-weight: 700;
       box-shadow: 0 14px 30px rgba(15, 23, 42, 0.08);
     }
@@ -133,7 +133,7 @@
     }
 
     .highlight {
-      color: #0b4fc4;
+      color: #7b0057;
     }
 
     .hero-text {
@@ -161,9 +161,9 @@
       position: relative;
       overflow: hidden;
       border-radius: 34px;
-      background: linear-gradient(145deg, #07132b, #0b4fc4);
+      background: linear-gradient(145deg, #290039, #97005f);
       padding: 24px;
-      box-shadow: 0 28px 54px rgba(11, 79, 196, 0.28);
+      box-shadow: 0 28px 54px rgba(123, 0, 87, 0.28);
     }
 
     .hero-card img {
@@ -226,7 +226,7 @@
       display: grid;
       place-items: center;
       border-radius: 18px;
-      background: linear-gradient(135deg, #fde047, #f59e0b);
+      background: linear-gradient(135deg, #ffcc00, #ff8a00);
       font-size: 26px;
       margin-bottom: 14px;
     }
@@ -249,8 +249,8 @@
       display: inline-flex;
       padding: 8px 12px;
       border-radius: 999px;
-      background: #eff6ff;
-      color: #0b4fc4;
+      background: #fff7d6;
+      color: #7b0057;
       font-weight: 800;
       font-size: 13px;
     }
@@ -459,6 +459,55 @@
         margin-top: 14px;
       }
 
+      .team-banner-section {
+        padding-top: 10px;
+      }
+
+      .team-banner {
+        display: grid;
+        grid-template-columns: 1fr 0.9fr;
+        gap: 28px;
+        align-items: center;
+        padding: 34px;
+        border-radius: 32px;
+        background: linear-gradient(135deg, #30003f, #9b005d);
+        color: #ffffff;
+        box-shadow: 0 24px 50px rgba(75, 0, 110, 0.28);
+        overflow: hidden;
+      }
+
+      .team-banner h2 {
+        margin: 16px 0 12px;
+        font-size: clamp(30px, 4vw, 54px);
+        line-height: 1.08;
+      }
+
+      .team-banner p {
+        color: #ffe7f6;
+        font-size: 17px;
+        line-height: 1.7;
+        max-width: 620px;
+      }
+
+      .team-banner img {
+        width: 100%;
+        border-radius: 24px;
+        display: block;
+        object-fit: cover;
+        box-shadow: 0 20px 40px rgba(0,0,0,0.22);
+      }
+
+      .dark-pill {
+        background: rgba(255,255,255,0.14);
+        border-color: rgba(255,255,255,0.22);
+        color: #ffcc00;
+      }
+
+      .yellow-btn {
+        background: linear-gradient(135deg, #ffcc00, #ff8a00);
+        color: #230018;
+      }
+
       footer {
         text-align: center;
         justify-content: center;
@@ -505,10 +554,7 @@
       </div>
 
       <div class="hero-card">
-        <img src="./logo.png" alt="RevStore careers hiring banner" />
-        <div class="hero-card-badge">
-          Attractive salary packages · Growth opportunities · Pan-India openings
-        </div>
+        <img src="./jobs/hr-executive.png" alt="RevStore HR Executive careers banner" />
       </div>
     </section>
 
@@ -575,6 +621,21 @@
           <p>Grow retailer partnerships and business opportunities.</p>
           <div class="salary">Based on experience</div>
         </div>
+      </div>
+    </section>
+
+    <section class="section team-banner-section">
+      <div class="team-banner">
+        <div>
+          <span class="pill dark-pill">Be a part of RevStore</span>
+          <h2>Join a fast-growing team driving the future!</h2>
+          <p>
+            Work with energetic colleagues, grow your career, and build impact across Pan-India.
+          </p>
+          <a class="btn btn-primary yellow-btn" href="#apply">Apply Now</a>
+        </div>
+
+        <img src="./jobs/team-growth.png" alt="RevStore colleagues working together" />
       </div>
     </section>
 
