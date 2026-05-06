@@ -185,6 +185,34 @@
       box-shadow: 0 20px 38px rgba(123, 0, 87, 0.34);
     }
 
+    .instagram-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      min-height: 56px;
+      padding: 0 22px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, #833ab4, #c13584, #f77737);
+      color: #ffffff;
+      font-weight: 800;
+      text-decoration: none;
+      box-shadow: 0 16px 30px rgba(193, 53, 132, 0.25);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .instagram-btn:hover,
+    .instagram-btn:focus {
+      transform: translateY(-2px);
+      box-shadow: 0 20px 38px rgba(193, 53, 132, 0.34);
+    }
+
+    .instagram-icon {
+      width: 22px;
+      height: 22px;
+      flex-shrink: 0;
+    }
+
     .play-store-badge {
       display: block;
       width: 210px;
@@ -404,6 +432,21 @@
             aria-label="Apply for RevStore jobs and careers"
           >
             We’re Hiring · Apply Now
+          </a>
+          <a
+            class="instagram-btn"
+            href="https://www.instagram.com/revstore2026/"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Follow RevStore on Instagram"
+          >
+            <svg class="instagram-icon" viewBox="0 0 24 24" aria-hidden="true">
+              <path
+                fill="currentColor"
+                d="M7.75 2h8.5A5.76 5.76 0 0 1 22 7.75v8.5A5.76 5.76 0 0 1 16.25 22h-8.5A5.76 5.76 0 0 1 2 16.25v-8.5A5.76 5.76 0 0 1 7.75 2Zm0 2A3.75 3.75 0 0 0 4 7.75v8.5A3.75 3.75 0 0 0 7.75 20h8.5A3.75 3.75 0 0 0 20 16.25v-8.5A3.75 3.75 0 0 0 16.25 4h-8.5ZM12 7a5 5 0 1 1 0 10a5 5 0 0 1 0-10Zm0 2a3 3 0 1 0 0 6a3 3 0 0 0 0-6Zm5.25-2.25a1.25 1.25 0 1 1 0 2.5a1.25 1.25 0 0 1 0-2.5Z"
+              />
+            </svg>
+            Follow Instagram
           </a>
         </div>
       </div>
