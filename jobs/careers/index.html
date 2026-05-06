@@ -508,6 +508,57 @@
         color: #230018;
       }
 
+      .track-card {
+        border-radius: 28px;
+        background: #ffffff;
+        border: 1px solid rgba(15, 23, 42, 0.08);
+        box-shadow: 0 22px 45px rgba(15, 23, 42, 0.08);
+        padding: 30px;
+        max-width: 760px;
+      }
+
+      .track-row {
+        display: flex;
+        gap: 12px;
+        align-items: stretch;
+      }
+
+      .track-row input {
+        flex: 1;
+        text-transform: uppercase;
+      }
+
+      .status-box {
+        display: none;
+        margin-top: 18px;
+        padding: 18px;
+        border-radius: 18px;
+        background: #fff7d6;
+        border: 1px solid rgba(123, 0, 87, 0.18);
+        color: #190022;
+        line-height: 1.7;
+      }
+
+      .status-box.show {
+        display: block;
+      }
+
+      .status-chip {
+        display: inline-flex;
+        margin-top: 8px;
+        padding: 8px 14px;
+        border-radius: 999px;
+        background: linear-gradient(135deg, #4b006e, #9b005d);
+        color: #ffffff;
+        font-weight: 800;
+      }
+
+      @media (max-width: 700px) {
+        .track-row {
+          flex-direction: column;
+        }
+      }
+
       footer {
         text-align: center;
         justify-content: center;
@@ -528,6 +579,7 @@
 
       <div class="nav-actions">
         <a class="nav-link" href="#openings">Openings</a>
+        <a class="nav-link" href="#track">Track</a>
         <a class="btn btn-primary" href="#apply">Apply Now</a>
       </div>
     </nav>
@@ -634,6 +686,29 @@
         </div>
 
         <img src="./team-growth.png" alt="RevStore colleagues working together" />
+      </div>
+    </section>
+
+    <section class="section" id="track">
+      <h2 class="section-title">Track Application Status</h2>
+      <p class="section-subtitle">
+        Enter your Tracking ID to check your RevStore career application status.
+      </p>
+
+      <div class="track-card">
+        <div class="track-row">
+          <input
+            id="trackingIdInput"
+            type="text"
+            placeholder="Example: REV-CAR-2026-A1B2C3D4"
+            maxlength="80"
+          />
+          <button class="btn btn-primary" type="button" id="trackBtn">
+            Track Status
+          </button>
+        </div>
+
+        <div id="trackResult" class="status-box"></div>
       </div>
     </section>
 
@@ -756,6 +831,7 @@
   <script>
     const API_BASE = "https://api.revstore.in";
     const CAREER_APPLY_URL = `${API_BASE}/api/careers/apply`;
+    const CAREER_TRACK_URL = `${API_BASE}/api/careers/track`;
 
     const form = document.getElementById("careerForm");
     const submitBtn = document.getElementById("submitBtn");
@@ -764,6 +840,60 @@
     const customWrap = document.getElementById("customDesignationWrap");
     const customDesignation = document.getElementById("customDesignation");
     const resumeInput = document.getElementById("resume");
+    const trackingIdInput = document.getElementById("trackingIdInput");
+    const trackBtn = document.getElementById("trackBtn");
+    const trackResult = document.getElementById("trackResult");
+
+    function formatStatusLabel(status) {
+      return String(status || "")
+        .replace(/_/g, " ")
+        .replace(/\b\w/g, c => c.toUpperCase());
+    }
+
+    trackBtn.addEventListener("click", async () => {
+      const trackingId = trackingIdInput.value.trim().toUpperCase();
+
+      trackResult.className = "status-box";
+      trackResult.innerHTML = "";
+
+      if (!trackingId) {
+        trackResult.className = "status-box show";
+        trackResult.innerHTML = "Please enter your Tracking ID.";
+        return;
+      }
+
+      trackBtn.disabled = true;
+      trackBtn.textContent = "Checking...";
+
+      try {
+        const response = await fetch(`${CAREER_TRACK_URL}/${encodeURIComponent(trackingId)}`, {
+          method: "GET"
+        });
+
+        const result = await response.json().catch(() => ({}));
+
+        if (!response.ok || !result.success) {
+          throw new Error(result.message || "Unable to fetch application status.");
+        }
+
+        const data = result.data || {};
+
+        trackResult.className = "status-box show";
+        trackResult.innerHTML = `
+          <strong>Tracking ID:</strong> ${data.trackingId || trackingId}<br>
+          <strong>Candidate:</strong> ${data.candidateName || "-"}<br>
+          <strong>Mobile:</strong> **${data.mobileLast4 || ""}<br>
+          <strong>Designation:</strong> ${formatStatusLabel(data.applyingDesignation)}<br>
+          <span class="status-chip">${formatStatusLabel(data.status)}</span>
+        `;
+      } catch (err) {
+        trackResult.className = "status-box show";
+        trackResult.innerHTML = err.message || "Tracking ID not found.";
+      } finally {
+        trackBtn.disabled = false;
+        trackBtn.textContent = "Track Status";
+      }
+    });
 
     function showMessage(type, text) {
       formMessage.className = `message ${type}`;
