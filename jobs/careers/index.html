@@ -395,6 +395,60 @@
       line-height: 1.6;
     }
 
+    .track-card {
+      border-radius: 28px;
+      background: #ffffff;
+      border: 1px solid rgba(15, 23, 42, 0.08);
+      box-shadow: 0 22px 45px rgba(15, 23, 42, 0.08);
+      padding: 30px;
+      max-width: 860px;
+    }
+
+    .track-row {
+      display: flex;
+      gap: 14px;
+      align-items: center;
+      width: 100%;
+    }
+
+    .track-row input {
+      flex: 1;
+      min-width: 0;
+      height: 52px;
+      text-transform: uppercase;
+    }
+
+    .track-row .btn {
+      height: 52px;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .status-box {
+      display: none;
+      margin-top: 18px;
+      padding: 18px;
+      border-radius: 18px;
+      background: #fff7d6;
+      border: 1px solid rgba(123, 0, 87, 0.18);
+      color: #190022;
+      line-height: 1.7;
+    }
+
+    .status-box.show {
+      display: block;
+    }
+
+    .status-chip {
+      display: inline-flex;
+      margin-top: 8px;
+      padding: 8px 14px;
+      border-radius: 999px;
+      background: linear-gradient(135deg, #4b006e, #9b005d);
+      color: #ffffff;
+      font-weight: 800;
+    }
+
     footer {
       margin-top: 30px;
       background: rgba(15, 23, 42, 0.96);
@@ -431,15 +485,30 @@
 
     @media (max-width: 700px) {
       .nav {
-        padding: 14px 20px;
+        padding: 14px 18px;
+        gap: 10px;
       }
 
       .brand {
-        font-size: 28px;
+        font-size: 27px;
+        flex-shrink: 0;
+      }
+
+      .nav-actions {
+        gap: 8px;
+        flex-wrap: nowrap;
       }
 
       .nav-link {
-        display: none;
+        display: inline-flex;
+        font-size: 12px;
+        font-weight: 700;
+      }
+
+      .nav-actions .btn {
+        min-height: 42px;
+        padding: 10px 14px;
+        font-size: 13px;
       }
 
       .hero,
@@ -464,99 +533,21 @@
       }
 
       .team-banner {
-        display: grid;
-        grid-template-columns: 1fr 0.9fr;
-        gap: 28px;
-        align-items: center;
-        padding: 34px;
-        border-radius: 32px;
-        background: linear-gradient(135deg, #30003f, #9b005d);
-        color: #ffffff;
-        box-shadow: 0 24px 50px rgba(75, 0, 110, 0.28);
-        overflow: hidden;
-      }
-
-      .team-banner h2 {
-        margin: 16px 0 12px;
-        font-size: clamp(30px, 4vw, 54px);
-        line-height: 1.08;
-      }
-
-      .team-banner p {
-        color: #ffe7f6;
-        font-size: 17px;
-        line-height: 1.7;
-        max-width: 620px;
-      }
-
-      .team-banner img {
-        width: 100%;
-        border-radius: 24px;
-        display: block;
-        object-fit: cover;
-        box-shadow: 0 20px 40px rgba(0,0,0,0.22);
-      }
-
-      .dark-pill {
-        background: rgba(255,255,255,0.14);
-        border-color: rgba(255,255,255,0.22);
-        color: #ffcc00;
-      }
-
-      .yellow-btn {
-        background: linear-gradient(135deg, #ffcc00, #ff8a00);
-        color: #230018;
+        grid-template-columns: 1fr;
+        padding: 24px;
       }
 
       .track-card {
-        border-radius: 28px;
-        background: #ffffff;
-        border: 1px solid rgba(15, 23, 42, 0.08);
-        box-shadow: 0 22px 45px rgba(15, 23, 42, 0.08);
-        padding: 30px;
-        max-width: 760px;
+        padding: 20px;
       }
 
       .track-row {
-        display: flex;
-        gap: 12px;
+        flex-direction: column;
         align-items: stretch;
       }
 
-      .track-row input {
-        flex: 1;
-        text-transform: uppercase;
-      }
-
-      .status-box {
-        display: none;
-        margin-top: 18px;
-        padding: 18px;
-        border-radius: 18px;
-        background: #fff7d6;
-        border: 1px solid rgba(123, 0, 87, 0.18);
-        color: #190022;
-        line-height: 1.7;
-      }
-
-      .status-box.show {
-        display: block;
-      }
-
-      .status-chip {
-        display: inline-flex;
-        margin-top: 8px;
-        padding: 8px 14px;
-        border-radius: 999px;
-        background: linear-gradient(135deg, #4b006e, #9b005d);
-        color: #ffffff;
-        font-weight: 800;
-      }
-
-      @media (max-width: 700px) {
-        .track-row {
-          flex-direction: column;
-        }
+      .track-row .btn {
+        width: 100%;
       }
 
       footer {
