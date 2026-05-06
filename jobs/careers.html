@@ -1,0 +1,803 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Careers at RevStore</title>
+
+  <meta name="description" content="Apply for RevStore careers across India. Submit your details and resume online." />
+  <meta name="theme-color" content="#0b4fc4" />
+
+  <link rel="icon" href="/favicon.ico" />
+  <link rel="apple-touch-icon" href="/favicon-192x192.png" />
+
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      font-family: "Poppins", sans-serif;
+      color: #102033;
+      background:
+        radial-gradient(circle at top left, rgba(37, 99, 235, 0.28), transparent 32%),
+        radial-gradient(circle at bottom right, rgba(245, 158, 11, 0.24), transparent 32%),
+        linear-gradient(135deg, #eef6ff 0%, #ffffff 48%, #e0ecff 100%);
+      overflow-x: hidden;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .page {
+      min-height: 100vh;
+    }
+
+    .nav {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 18px 8%;
+      background: rgba(255, 255, 255, 0.88);
+      backdrop-filter: blur(14px);
+      border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+    }
+
+    .brand {
+      font-size: 34px;
+      font-weight: 800;
+      letter-spacing: -1px;
+      color: #111827;
+    }
+
+    .brand span {
+      color: #0b4fc4;
+    }
+
+    .nav-actions {
+      display: flex;
+      gap: 14px;
+      align-items: center;
+    }
+
+    .nav-link {
+      font-size: 14px;
+      font-weight: 600;
+      color: #334155;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 46px;
+      padding: 12px 22px;
+      border: 0;
+      border-radius: 999px;
+      font-family: inherit;
+      font-weight: 700;
+      cursor: pointer;
+      transition: 0.2s ease;
+    }
+
+    .btn-primary {
+      color: #ffffff;
+      background: linear-gradient(135deg, #0b4fc4, #023e9f);
+      box-shadow: 0 14px 28px rgba(11, 79, 196, 0.25);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 18px 36px rgba(11, 79, 196, 0.32);
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: 1fr 0.95fr;
+      align-items: center;
+      gap: 42px;
+      padding: 64px 8% 40px;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 18px;
+      border-radius: 999px;
+      color: #0b4fc4;
+      background: #ffffff;
+      border: 1px solid rgba(11, 79, 196, 0.14);
+      font-weight: 700;
+      box-shadow: 0 14px 30px rgba(15, 23, 42, 0.08);
+    }
+
+    h1 {
+      margin: 22px 0 16px;
+      font-size: clamp(42px, 6vw, 82px);
+      line-height: 0.98;
+      letter-spacing: -2px;
+      color: #07132b;
+    }
+
+    .highlight {
+      color: #0b4fc4;
+    }
+
+    .hero-text {
+      max-width: 720px;
+      font-size: clamp(17px, 2vw, 23px);
+      line-height: 1.55;
+      font-weight: 500;
+      color: #334155;
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      margin-top: 28px;
+    }
+
+    .btn-outline {
+      background: #ffffff;
+      color: #0b4fc4;
+      border: 1px solid rgba(11, 79, 196, 0.24);
+    }
+
+    .hero-card {
+      position: relative;
+      overflow: hidden;
+      border-radius: 34px;
+      background: linear-gradient(145deg, #07132b, #0b4fc4);
+      padding: 24px;
+      box-shadow: 0 28px 54px rgba(11, 79, 196, 0.28);
+    }
+
+    .hero-card img {
+      width: 100%;
+      display: block;
+      border-radius: 24px;
+      object-fit: cover;
+    }
+
+    .hero-card-badge {
+      position: absolute;
+      left: 34px;
+      bottom: 34px;
+      max-width: calc(100% - 68px);
+      padding: 16px 18px;
+      border-radius: 18px;
+      color: #ffffff;
+      background: rgba(2, 6, 23, 0.78);
+      backdrop-filter: blur(10px);
+      font-weight: 700;
+    }
+
+    .section {
+      padding: 56px 8%;
+    }
+
+    .section-title {
+      margin: 0 0 14px;
+      font-size: clamp(30px, 4vw, 52px);
+      line-height: 1.1;
+      color: #07132b;
+      letter-spacing: -1px;
+    }
+
+    .section-subtitle {
+      margin: 0 0 28px;
+      max-width: 780px;
+      color: #475569;
+      font-size: 17px;
+      line-height: 1.7;
+    }
+
+    .jobs-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 18px;
+    }
+
+    .job-card {
+      padding: 24px;
+      border-radius: 24px;
+      background: #ffffff;
+      border: 1px solid rgba(15, 23, 42, 0.08);
+      box-shadow: 0 18px 38px rgba(15, 23, 42, 0.08);
+    }
+
+    .job-icon {
+      width: 54px;
+      height: 54px;
+      display: grid;
+      place-items: center;
+      border-radius: 18px;
+      background: linear-gradient(135deg, #fde047, #f59e0b);
+      font-size: 26px;
+      margin-bottom: 14px;
+    }
+
+    .job-card h3 {
+      margin: 0 0 8px;
+      font-size: 19px;
+      color: #07132b;
+    }
+
+    .job-card p {
+      margin: 0;
+      color: #64748b;
+      line-height: 1.6;
+      font-size: 14px;
+    }
+
+    .salary {
+      margin-top: 14px;
+      display: inline-flex;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: #eff6ff;
+      color: #0b4fc4;
+      font-weight: 800;
+      font-size: 13px;
+    }
+
+    .form-wrap {
+      display: grid;
+      grid-template-columns: 0.82fr 1.18fr;
+      gap: 28px;
+      align-items: start;
+    }
+
+    .info-panel,
+    .form-card {
+      border-radius: 28px;
+      background: #ffffff;
+      border: 1px solid rgba(15, 23, 42, 0.08);
+      box-shadow: 0 22px 45px rgba(15, 23, 42, 0.08);
+    }
+
+    .info-panel {
+      padding: 30px;
+      background:
+        radial-gradient(circle at top right, rgba(245, 158, 11, 0.28), transparent 30%),
+        linear-gradient(145deg, #07132b, #0b4fc4);
+      color: #ffffff;
+    }
+
+    .info-panel h2 {
+      margin: 0 0 14px;
+      font-size: 34px;
+      line-height: 1.12;
+    }
+
+    .info-panel p {
+      color: #dbeafe;
+      line-height: 1.7;
+    }
+
+    .benefit {
+      display: flex;
+      gap: 12px;
+      margin-top: 18px;
+      align-items: flex-start;
+      font-weight: 600;
+    }
+
+    .form-card {
+      padding: 30px;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 18px;
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+    }
+
+    .field.full {
+      grid-column: 1 / -1;
+    }
+
+    label {
+      font-size: 13px;
+      font-weight: 700;
+      color: #334155;
+    }
+
+    input,
+    select,
+    textarea {
+      width: 100%;
+      border: 1px solid #dbe3ef;
+      border-radius: 14px;
+      padding: 13px 14px;
+      font-family: inherit;
+      font-size: 15px;
+      color: #0f172a;
+      background: #f8fafc;
+      outline: none;
+      transition: 0.18s ease;
+    }
+
+    input:focus,
+    select:focus,
+    textarea:focus {
+      border-color: #0b4fc4;
+      background: #ffffff;
+      box-shadow: 0 0 0 4px rgba(11, 79, 196, 0.10);
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 92px;
+    }
+
+    .file-note {
+      margin-top: 6px;
+      font-size: 12px;
+      color: #64748b;
+    }
+
+    .message {
+      display: none;
+      margin-top: 18px;
+      padding: 14px 16px;
+      border-radius: 16px;
+      font-weight: 600;
+      line-height: 1.5;
+    }
+
+    .message.success {
+      display: block;
+      color: #065f46;
+      background: #d1fae5;
+      border: 1px solid #a7f3d0;
+    }
+
+    .message.error {
+      display: block;
+      color: #991b1b;
+      background: #fee2e2;
+      border: 1px solid #fecaca;
+    }
+
+    .form-footer {
+      margin-top: 22px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .small-text {
+      color: #64748b;
+      font-size: 12px;
+      line-height: 1.6;
+    }
+
+    footer {
+      margin-top: 30px;
+      background: rgba(15, 23, 42, 0.96);
+      color: #e5e7eb;
+      padding: 22px 8%;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 16px;
+      font-size: 14px;
+    }
+
+    footer a {
+      margin-right: 14px;
+      color: #ffffff;
+      font-weight: 500;
+    }
+
+    .company {
+      line-height: 1.7;
+      color: #cbd5e1;
+    }
+
+    @media (max-width: 1100px) {
+      .jobs-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .hero,
+      .form-wrap {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 700px) {
+      .nav {
+        padding: 14px 20px;
+      }
+
+      .brand {
+        font-size: 28px;
+      }
+
+      .nav-link {
+        display: none;
+      }
+
+      .hero,
+      .section {
+        padding-left: 20px;
+        padding-right: 20px;
+      }
+
+      .jobs-grid,
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .hero-card-badge {
+        position: static;
+        max-width: 100%;
+        margin-top: 14px;
+      }
+
+      footer {
+        text-align: center;
+        justify-content: center;
+      }
+
+      footer a {
+        display: inline-block;
+        margin: 5px 8px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <main class="page">
+    <nav class="nav">
+      <a class="brand" href="/">Rev<span>Store</span></a>
+
+      <div class="nav-actions">
+        <a class="nav-link" href="#openings">Openings</a>
+        <a class="nav-link" href="#apply">Apply</a>
+        <a class="btn btn-primary" href="#apply">Apply Now</a>
+      </div>
+    </nav>
+
+    <section class="hero">
+      <div>
+        <div class="pill">🚀 We are hiring across Pan-India</div>
+
+        <h1>
+          Build your career with
+          <span class="highlight">RevStore</span>
+        </h1>
+
+        <p class="hero-text">
+          Join a fast-growing commerce and delivery platform. Explore roles in delivery,
+          marketing, HR, customer support, GST filing, operations, and business development.
+        </p>
+
+        <div class="hero-actions">
+          <a class="btn btn-primary" href="#apply">Submit Application</a>
+          <a class="btn btn-outline" href="#openings">View Openings</a>
+        </div>
+      </div>
+
+      <div class="hero-card">
+        <img src="/jobs/marketing-executive.jpg" alt="RevStore careers hiring banner" />
+        <div class="hero-card-badge">
+          Attractive salary packages · Growth opportunities · Pan-India openings
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="openings">
+      <h2 class="section-title">Current Openings</h2>
+      <p class="section-subtitle">
+        Select your preferred designation while applying. Our hiring team will review your application
+        and update your tracking status.
+      </p>
+
+      <div class="jobs-grid">
+        <div class="job-card">
+          <div class="job-icon">🛵</div>
+          <h3>Delivery Partner</h3>
+          <p>Full-time and part-time opportunities with flexible timings.</p>
+          <div class="salary">₹40,000 – ₹70,000</div>
+        </div>
+
+        <div class="job-card">
+          <div class="job-icon">📈</div>
+          <h3>Marketing Executive</h3>
+          <p>Build RevStore presence across locations and business networks.</p>
+          <div class="salary">₹45,000 – ₹70,000</div>
+        </div>
+
+        <div class="job-card">
+          <div class="job-icon">👥</div>
+          <h3>HR Executive</h3>
+          <p>Support recruitment, onboarding, and team operations.</p>
+          <div class="salary">₹20,000 – ₹50,000</div>
+        </div>
+
+        <div class="job-card">
+          <div class="job-icon">🎧</div>
+          <h3>Customer Support Executive</h3>
+          <p>Assist customers and partners with reliable support.</p>
+          <div class="salary">₹20,000 – ₹40,000</div>
+        </div>
+
+        <div class="job-card">
+          <div class="job-icon">🧾</div>
+          <h3>GST & Indirect Tax Consultant</h3>
+          <p>Handle GST compliance, filings, and indirect tax support.</p>
+          <div class="salary">₹45,000 – ₹1,20,000</div>
+        </div>
+
+        <div class="job-card">
+          <div class="job-icon">💼</div>
+          <h3>Accounts Executive</h3>
+          <p>Support accounts, payments, reconciliation, and reporting.</p>
+          <div class="salary">Based on experience</div>
+        </div>
+
+        <div class="job-card">
+          <div class="job-icon">⚙️</div>
+          <h3>Operations Executive</h3>
+          <p>Coordinate daily store, rider, and delivery operations.</p>
+          <div class="salary">Based on experience</div>
+        </div>
+
+        <div class="job-card">
+          <div class="job-icon">🤝</div>
+          <h3>Business Development Executive</h3>
+          <p>Grow retailer partnerships and business opportunities.</p>
+          <div class="salary">Based on experience</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="apply">
+      <div class="form-wrap">
+        <aside class="info-panel">
+          <h2>Apply to RevStore Careers</h2>
+          <p>
+            Fill your details carefully. After submission, you will receive a tracking ID
+            to follow your application status.
+          </p>
+
+          <div class="benefit">✅ Pan-India opportunities</div>
+          <div class="benefit">✅ Resume upload supported</div>
+          <div class="benefit">✅ Track status: processing, shortlisted, hired, or better luck next time</div>
+          <div class="benefit">✅ Suitable roles for freshers and experienced candidates</div>
+        </aside>
+
+        <form class="form-card" id="careerForm" enctype="multipart/form-data">
+          <div class="form-grid">
+            <div class="field">
+              <label for="name">Candidate Name *</label>
+              <input id="name" name="name" type="text" maxlength="80" required />
+            </div>
+
+            <div class="field">
+              <label for="mobile">Mobile Number *</label>
+              <input id="mobile" name="mobile" type="tel" inputmode="numeric" maxlength="10" pattern="[6-9][0-9]{9}" required />
+            </div>
+
+            <div class="field">
+              <label for="email">Email</label>
+              <input id="email" name="email" type="email" maxlength="120" />
+            </div>
+
+            <div class="field">
+              <label for="qualification">Qualification *</label>
+              <input id="qualification" name="qualification" type="text" maxlength="120" required />
+            </div>
+
+            <div class="field">
+              <label for="applyingDesignation">Applying Designation *</label>
+              <select id="applyingDesignation" name="applyingDesignation" required>
+                <option value="">Select designation</option>
+                <option value="delivery_partner">Delivery Partner</option>
+                <option value="marketing_executive">Marketing Executive</option>
+                <option value="hr_executive">HR Executive</option>
+                <option value="customer_support_executive">Customer Support Executive</option>
+                <option value="gst_indirect_tax_consultant">GST & Indirect Tax Consultant</option>
+                <option value="gst_filing_professional">GST Filing Professional</option>
+                <option value="accounts_executive">Accounts Executive</option>
+                <option value="operations_executive">Operations Executive</option>
+                <option value="business_development_executive">Business Development Executive</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+
+            <div class="field" id="customDesignationWrap" style="display:none;">
+              <label for="customDesignation">Custom Designation *</label>
+              <input id="customDesignation" name="customDesignation" type="text" maxlength="120" />
+            </div>
+
+            <div class="field">
+              <label for="state">State *</label>
+              <input id="state" name="state" type="text" maxlength="80" required />
+            </div>
+
+            <div class="field">
+              <label for="city">City *</label>
+              <input id="city" name="city" type="text" maxlength="80" required />
+            </div>
+
+            <div class="field">
+              <label for="area">Area *</label>
+              <input id="area" name="area" type="text" maxlength="120" required />
+            </div>
+
+            <div class="field">
+              <label for="resume">Resume *</label>
+              <input id="resume" name="resume" type="file" accept=".pdf,.doc,.docx,.rtf,.txt" required />
+              <div class="file-note">Allowed: PDF, DOC, DOCX, RTF, TXT. Max size: 5MB.</div>
+            </div>
+
+            <div class="field full">
+              <label for="notes">Additional Notes</label>
+              <textarea id="notes" name="notes" maxlength="1000" placeholder="Optional: experience, preferred shift, availability, etc."></textarea>
+            </div>
+          </div>
+
+          <div class="form-footer">
+            <button class="btn btn-primary" type="submit" id="submitBtn">
+              Submit Application
+            </button>
+
+            <div class="small-text">
+              By submitting, you confirm the details are correct.
+            </div>
+          </div>
+
+          <div id="formMessage" class="message"></div>
+        </form>
+      </div>
+    </section>
+
+    <footer>
+      <div>
+        <a href="/terms/">Terms &amp; Conditions</a>
+        <a href="/privacy/">Privacy Policy</a>
+        <a href="/delete/">Delete Account</a>
+      </div>
+
+      <div class="company">
+        © 2025 Rev Technologies<br />
+        No. 173, Bhavani Nagar, Ayapakkam, Chennai – 600077<br />
+        Email: support@revstore.in · Phone: +91 44 35623776, 9940694829
+      </div>
+    </footer>
+  </main>
+
+  <script>
+    const API_BASE = "https://api.revstore.in";
+    const CAREER_APPLY_URL = `${API_BASE}/api/careers/apply`;
+
+    const form = document.getElementById("careerForm");
+    const submitBtn = document.getElementById("submitBtn");
+    const formMessage = document.getElementById("formMessage");
+    const designation = document.getElementById("applyingDesignation");
+    const customWrap = document.getElementById("customDesignationWrap");
+    const customDesignation = document.getElementById("customDesignation");
+    const resumeInput = document.getElementById("resume");
+
+    function showMessage(type, text) {
+      formMessage.className = `message ${type}`;
+      formMessage.innerHTML = text;
+    }
+
+    designation.addEventListener("change", () => {
+      const isOther = designation.value === "other";
+      customWrap.style.display = isOther ? "flex" : "none";
+      customDesignation.required = isOther;
+      if (!isOther) customDesignation.value = "";
+    });
+
+    resumeInput.addEventListener("change", () => {
+      const file = resumeInput.files && resumeInput.files[0];
+      if (!file) return;
+
+      const maxSize = 5 * 1024 * 1024;
+      const allowed = [".pdf", ".doc", ".docx", ".rtf", ".txt"];
+      const name = file.name.toLowerCase();
+      const okExt = allowed.some(ext => name.endsWith(ext));
+
+      if (!okExt) {
+        resumeInput.value = "";
+        showMessage("error", "Only PDF, DOC, DOCX, RTF, and TXT resume files are allowed.");
+        return;
+      }
+
+      if (file.size > maxSize) {
+        resumeInput.value = "";
+        showMessage("error", "Resume file size must be less than 5MB.");
+      }
+    });
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      formMessage.className = "message";
+      formMessage.textContent = "";
+
+      if (!form.checkValidity()) {
+        form.reportValidity();
+        return;
+      }
+
+      const mobile = document.getElementById("mobile").value.trim();
+      if (!/^[6-9]\d{9}$/.test(mobile)) {
+        showMessage("error", "Please enter a valid 10-digit Indian mobile number.");
+        return;
+      }
+
+      const file = resumeInput.files && resumeInput.files[0];
+      if (!file) {
+        showMessage("error", "Please upload your resume.");
+        return;
+      }
+
+      submitBtn.disabled = true;
+      submitBtn.textContent = "Submitting...";
+
+      try {
+        const formData = new FormData(form);
+
+        const response = await fetch(CAREER_APPLY_URL, {
+          method: "POST",
+          body: formData
+        });
+
+        const result = await response.json().catch(() => ({}));
+
+        if (!response.ok || !result.success) {
+          throw new Error(result.message || "Application submission failed.");
+        }
+
+        const trackingId = result.data && result.data.trackingId
+          ? result.data.trackingId
+          : "";
+
+        showMessage(
+          "success",
+          `Application submitted successfully.<br><strong>Tracking ID:</strong> ${trackingId || "Generated"}`
+        );
+
+        form.reset();
+        customWrap.style.display = "none";
+        customDesignation.required = false;
+      } catch (err) {
+        showMessage("error", err.message || "Unable to submit application. Please try again.");
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = "Submit Application";
+      }
+    });
+  </script>
+</body>
+</html>

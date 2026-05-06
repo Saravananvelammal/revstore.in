@@ -155,6 +155,27 @@
       filter: drop-shadow(0 14px 24px rgba(17, 24, 39, 0.25));
     }
 
+    .career-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 56px;
+      padding: 0 24px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, #0b4fc4, #023e9f);
+      color: #ffffff;
+      font-weight: 800;
+      text-decoration: none;
+      box-shadow: 0 16px 30px rgba(11, 79, 196, 0.25);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .career-btn:hover,
+    .career-btn:focus {
+      transform: translateY(-2px);
+      box-shadow: 0 20px 38px rgba(11, 79, 196, 0.34);
+    }
+
     .play-store-badge {
       display: block;
       width: 210px;
@@ -301,6 +322,13 @@
               alt="RevStore Google Play QR Code"
             />
             <span>Scan to install</span>
+          </a>
+          <a
+            class="career-btn"
+            href="/jobs/careers/"
+            aria-label="Apply for RevStore jobs and careers"
+          >
+            We’re Hiring · Apply Now
           </a>
         </div>
       </div>
