@@ -16,7 +16,7 @@
   <link rel="icon" href="/favicon.ico" />
   <link rel="apple-touch-icon" href="/favicon-192x192.png" />
 
-  <meta name="theme-color" content="#2563eb" />
+  <meta name="theme-color" content="#7b0057" />
   <meta name="description" content="RevStore - Shop, order and track your deliveries easily." />
 
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -28,14 +28,19 @@
 
     body {
       margin: 0;
-      font-family: 'Poppins', sans-serif;
+      font-family: "Poppins", sans-serif;
       min-height: 100vh;
-      color: #102033;
+      color: #190022;
       background:
-        radial-gradient(circle at top left, rgba(37, 99, 235, 0.38), transparent 35%),
-        radial-gradient(circle at bottom right, rgba(14, 165, 233, 0.32), transparent 35%),
-        linear-gradient(135deg, #eaf4ff 0%, #ffffff 48%, #dbeafe 100%);
+        radial-gradient(circle at top left, rgba(126, 0, 120, 0.25), transparent 32%),
+        radial-gradient(circle at bottom right, rgba(255, 204, 0, 0.24), transparent 32%),
+        linear-gradient(135deg, #fff7fb 0%, #ffffff 45%, #f4e8ff 100%);
       overflow-x: hidden;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
     }
 
     .page {
@@ -49,7 +54,7 @@
       display: grid;
       grid-template-columns: 1.05fr 0.95fr;
       align-items: center;
-      gap: 30px;
+      gap: 34px;
       padding: 56px 8%;
       position: relative;
     }
@@ -59,7 +64,7 @@
       content: "";
       position: absolute;
       border-radius: 999px;
-      background: rgba(255, 255, 255, 0.5);
+      background: rgba(255, 255, 255, 0.55);
       filter: blur(2px);
       z-index: 0;
     }
@@ -72,10 +77,10 @@
     }
 
     .hero::after {
-      width: 220px;
-      height: 220px;
-      right: -60px;
-      bottom: 80px;
+      width: 240px;
+      height: 240px;
+      right: -70px;
+      bottom: 70px;
     }
 
     .content,
@@ -88,13 +93,13 @@
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      background: #ffffff;
-      color: #2563eb;
-      border: 1px solid rgba(37, 99, 235, 0.18);
+      background: #fff7d6;
+      color: #7b0057;
+      border: 1px solid rgba(123, 0, 87, 0.14);
       border-radius: 999px;
-      padding: 9px 16px;
-      font-weight: 600;
-      box-shadow: 0 10px 28px rgba(37, 99, 235, 0.12);
+      padding: 10px 18px;
+      font-weight: 700;
+      box-shadow: 0 14px 30px rgba(15, 23, 42, 0.08);
       margin-bottom: 20px;
     }
 
@@ -103,8 +108,12 @@
       font-size: clamp(48px, 7vw, 94px);
       line-height: 1;
       font-weight: 800;
-      color: #1d4ed8;
-      text-shadow: 0 4px 0 rgba(255,255,255,0.85);
+      color: #111827;
+      text-shadow: 0 4px 0 rgba(255, 255, 255, 0.9);
+    }
+
+    h1 span {
+      color: #7b0057;
     }
 
     .tagline {
@@ -112,10 +121,10 @@
       margin: 18px 0 16px;
       padding: 14px 24px;
       border-radius: 24px;
-      background: linear-gradient(135deg, #fde047, #f59e0b);
-      color: #241909;
+      background: linear-gradient(135deg, #ffcc00, #ff8a00);
+      color: #230018;
       font-size: clamp(24px, 3.5vw, 44px);
-      font-weight: 700;
+      font-weight: 800;
       box-shadow: 0 16px 28px rgba(245, 158, 11, 0.25);
     }
 
@@ -125,10 +134,10 @@
       line-height: 1.45;
       font-weight: 600;
       color: #ffffff;
-      background: linear-gradient(135deg, #2563eb, #1d4ed8);
-      padding: 14px 22px;
+      background: linear-gradient(135deg, #30003f, #9b005d);
+      padding: 16px 22px;
       border-radius: 18px;
-      box-shadow: 0 16px 30px rgba(37, 99, 235, 0.22);
+      box-shadow: 0 18px 36px rgba(123, 0, 87, 0.24);
     }
 
     .actions {
@@ -162,18 +171,18 @@
       min-height: 56px;
       padding: 0 24px;
       border-radius: 14px;
-      background: linear-gradient(135deg, #0b4fc4, #023e9f);
+      background: linear-gradient(135deg, #4b006e, #9b005d);
       color: #ffffff;
       font-weight: 800;
       text-decoration: none;
-      box-shadow: 0 16px 30px rgba(11, 79, 196, 0.25);
+      box-shadow: 0 16px 30px rgba(123, 0, 87, 0.25);
       transition: transform 0.2s ease, box-shadow 0.2s ease;
     }
 
     .career-btn:hover,
     .career-btn:focus {
       transform: translateY(-2px);
-      box-shadow: 0 20px 38px rgba(11, 79, 196, 0.34);
+      box-shadow: 0 20px 38px rgba(123, 0, 87, 0.34);
     }
 
     .play-store-badge {
@@ -184,12 +193,12 @@
     }
 
     .qr-card {
-      background: rgba(255,255,255,0.85);
-      border: 1px solid rgba(37, 99, 235, 0.14);
+      background: rgba(255, 255, 255, 0.9);
+      border: 1px solid rgba(123, 0, 87, 0.14);
       border-radius: 18px;
       padding: 12px;
       text-align: center;
-      box-shadow: 0 16px 30px rgba(37, 99, 235, 0.14);
+      box-shadow: 0 16px 30px rgba(123, 0, 87, 0.12);
     }
 
     .qr-card img {
@@ -203,8 +212,8 @@
       display: block;
       margin-top: 6px;
       font-size: 12px;
-      font-weight: 600;
-      color: #334155;
+      font-weight: 700;
+      color: #7b0057;
     }
 
     .visual {
@@ -213,10 +222,18 @@
       align-items: center;
     }
 
+    .hero-frame {
+      padding: 24px;
+      border-radius: 34px;
+      background: linear-gradient(145deg, #290039, #97005f);
+      box-shadow: 0 28px 54px rgba(123, 0, 87, 0.28);
+    }
+
     .hero-image {
       width: min(100%, 560px);
-      border-radius: 36px;
-      filter: drop-shadow(0 30px 35px rgba(30, 64, 175, 0.28));
+      border-radius: 26px;
+      display: block;
+      filter: drop-shadow(0 22px 30px rgba(30, 0, 45, 0.25));
       animation: floatCart 4.5s ease-in-out infinite;
     }
 
@@ -226,7 +243,7 @@
     }
 
     footer {
-      background: rgba(15, 23, 42, 0.95);
+      background: rgba(25, 0, 34, 0.96);
       color: #e5e7eb;
       padding: 20px 8%;
       display: flex;
@@ -249,7 +266,7 @@
 
     .company {
       line-height: 1.7;
-      color: #cbd5e1;
+      color: #f3d7ea;
     }
 
     @media (max-width: 900px) {
@@ -266,6 +283,10 @@
 
       .actions {
         justify-content: center;
+      }
+
+      .hero-frame {
+        padding: 16px;
       }
 
       footer {
@@ -287,7 +308,7 @@
       <div class="content">
         <div class="badge">🛒 RevStore is live on Google Play</div>
 
-        <h1>RevStore</h1>
+        <h1>Rev<span>Store</span></h1>
 
         <div class="tagline">Shop, Order, Track</div>
 
@@ -323,6 +344,7 @@
             />
             <span>Scan to install</span>
           </a>
+
           <a
             class="career-btn"
             href="/jobs/careers"
@@ -334,7 +356,9 @@
       </div>
 
       <div class="visual">
-        <img src="./logo.png" class="hero-image" alt="RevStore shopping cart logo" />
+        <div class="hero-frame">
+          <img src="./logo.png" class="hero-image" alt="RevStore shopping cart logo" />
+        </div>
       </div>
     </section>
 
