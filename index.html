@@ -52,10 +52,10 @@
     .hero {
       flex: 1;
       display: grid;
-      grid-template-columns: 1.05fr 0.95fr;
+      grid-template-columns: 1fr 1fr;
       align-items: center;
-      gap: 34px;
-      padding: 56px 8%;
+      gap: 24px;
+      padding: 56px 6%;
       position: relative;
     }
 
@@ -218,12 +218,14 @@
 
     .visual {
       display: flex;
-      justify-content: center;
+      justify-content: flex-end;
       align-items: center;
     }
 
     .hero-frame {
-      padding: 24px;
+      width: 100%;
+      max-width: 560px;
+      padding: 18px;
       border-radius: 34px;
       background: linear-gradient(145deg, #290039, #97005f);
       box-shadow: 0 28px 54px rgba(123, 0, 87, 0.28);
@@ -275,6 +277,15 @@
         text-align: center;
         padding: 42px 22px;
       }
+
+      .visual {
+        justify-content: center;
+      }
+
+      .hero-frame {
+        max-width: 100%;
+      }
+
 
       .subtitle {
         margin-left: auto;
