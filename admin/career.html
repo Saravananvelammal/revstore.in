@@ -224,6 +224,40 @@
     busy: false
   };
 
+  let currentResumeBlobUrl = "";
+
+  async function loadResumeBlob(id) {
+    if (currentResumeBlobUrl) {
+      URL.revokeObjectURL(currentResumeBlobUrl);
+      currentResumeBlobUrl = "";
+    }
+
+    const headers = new Headers();
+    headers.set("Accept", "application/pdf");
+    headers.set("X-Requested-With", "XMLHttpRequest");
+    if (state.fingerprint) {
+      headers.set("x-device-fingerprint", state.fingerprint);
+    }
+
+    const res = await fetch(
+      CONFIG.API_BASE + "/careers/" + encodeURIComponent(id) + "/resume",
+      {
+        method: "GET",
+        headers,
+        credentials: "include",
+        cache: "no-store"
+      }
+    );
+
+    if (!res.ok) {
+      throw new Error("Failed to load resume");
+    }
+
+    const blob = await res.blob();
+    currentResumeBlobUrl = URL.createObjectURL(blob);
+    return currentResumeBlobUrl;
+  }
+
   function escapeHtml(value) {
     return String(value ?? '')
       .replace(/&/g, '&amp;')
@@ -335,11 +369,41 @@
       .join(' ');
   }
 
-  function safeResumeUrl(fileUrl) {
-    const url = String(fileUrl || '').trim();
-    if (!url) return '';
-    if (/^https?:\/\//i.test(url)) return url;
-    return 'https://api.revstore.in' + (url.startsWith('/') ? url : '/' + url);
+  async function loadResumeBlob(id) {
+    if (currentResumeBlobUrl) {
+      URL.revokeObjectURL(currentResumeBlobUrl);
+      currentResumeBlobUrl = "";
+    }
+
+    const headers = new Headers();
+    headers.set("Accept", "application/pdf");
+    headers.set("X-Requested-With", "XMLHttpRequest");
+
+    if (state.fingerprint) {
+      headers.set("x-device-fingerprint", state.fingerprint);
+    }
+
+    const res = await fetch(
+      CONFIG.API_BASE + "/careers/" + encodeURIComponent(id) + "/resume",
+      {
+        method: "GET",
+        headers,
+        credentials: "include",
+        cache: "no-store"
+      }
+    );
+
+    if (res.status === 401 || res.status === 403) {
+      throw Object.assign(new Error("Session expired."), { status: res.status });
+    }
+
+    if (!res.ok) {
+      throw new Error("Failed to load resume");
+    }
+
+    const blob = await res.blob();
+    currentResumeBlobUrl = URL.createObjectURL(blob);
+    return currentResumeBlobUrl;
   }
 
   function renderTable() {
@@ -431,8 +495,6 @@
 
     state.selected = item;
 
-    const resumeUrl = safeResumeUrl(item.resume?.fileUrl);
-
     els.modalTitle.textContent = item.name || 'Candidate Details';
     els.modalSub.textContent = item.trackingId || '';
     els.newStatus.value = ALLOWED_STATUS.has(item.status) ? item.status : 'processing';
@@ -453,23 +515,44 @@
       detailBlock('Resume Size', item.resume?.sizeBytes ? Math.round(Number(item.resume.sizeBytes) / 1024) + ' KB' : '-')
     ].join('');
 
-    if (resumeUrl) {
-      els.resumeOpenBtn.href = resumeUrl;
-      els.resumeOpenBtn.style.display = 'inline-flex';
-      els.resumeFrame.src = resumeUrl;
-    } else {
-      els.resumeOpenBtn.removeAttribute('href');
-      els.resumeOpenBtn.style.display = 'none';
-      els.resumeFrame.removeAttribute('src');
-    }
+    els.resumeFrame.removeAttribute("src");
+    els.resumeOpenBtn.removeAttribute("href");
+    els.resumeOpenBtn.style.display = "none";
+
+    loadResumeBlob(item._id)
+      .then((blobUrl) => {
+        els.resumeFrame.src = blobUrl;
+        els.resumeOpenBtn.href = blobUrl;
+        els.resumeOpenBtn.style.display = "inline-flex";
+      })
+      .catch((err) => {
+        els.resumeFrame.removeAttribute("src");
+        els.resumeOpenBtn.removeAttribute("href");
+        els.resumeOpenBtn.style.display = "none";
+
+        if (err.status === 401 || err.status === 403) {
+          showBanner("error", "Session expired. Redirecting to login...");
+          setTimeout(redirectToLogin, 600);
+          return;
+        }
+
+        showBanner("error", "Resume could not be loaded.");
+      });
 
     els.modal.classList.add('show');
   }
 
   function closeModal() {
-    els.modal.classList.remove('show');
+    els.modal.classList.remove("show");
     state.selected = null;
-    els.resumeFrame.removeAttribute('src');
+    els.resumeFrame.removeAttribute("src");
+    els.resumeOpenBtn.removeAttribute("href");
+    els.resumeOpenBtn.style.display = "none";
+
+    if (currentResumeBlobUrl) {
+      URL.revokeObjectURL(currentResumeBlobUrl);
+      currentResumeBlobUrl = "";
+    }
   }
 
   async function updateStatus() {
