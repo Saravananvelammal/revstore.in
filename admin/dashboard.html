@@ -41,7 +41,7 @@
     }
     .welcome h2{margin:0;font-size:1.8rem}
     .welcome p{margin:10px 0 0;color:rgba(255,255,255,.88);line-height:1.6}
-    .grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
+    .grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
     .tile{
       min-height:160px;border:1px solid var(--line);border-radius:22px;background:#fff;
       display:grid;place-items:center;text-align:center;padding:20px;cursor:pointer;
@@ -86,7 +86,9 @@
 
       <div class="welcome">
         <h2 id="welcomeTitle">Welcome, Admin</h2>
-        <p id="welcomeSub">Manage retailers, riders, and support operations from one secure web dashboard.</p>
+        <p id="welcomeSub">
+          Manage retailers, riders, HR, marketing executives, careers, and support operations from one secure web dashboard.
+        </p>
       </div>
 
       <div class="grid">
@@ -119,6 +121,22 @@
             <div class="icon">💼</div>
             <h3>Careers</h3>
             <p>View candidates, resumes, and update application status.</p>
+          </div>
+        </a>
+
+        <a class="tile" href="./human-resources">
+          <div>
+            <div class="icon">👥</div>
+            <h3>Human Resource</h3>
+            <p>Add, update, view, delete, and restore HR accounts.</p>
+          </div>
+        </a>
+
+        <a class="tile" href="./marketing-executives">
+          <div>
+            <div class="icon">📣</div>
+            <h3>Marketing Executive</h3>
+            <p>Manage marketing executive accounts and field targets.</p>
           </div>
         </a>
       </div>
@@ -272,8 +290,8 @@
           const name = String(admin.name || admin.email || 'Admin').trim();
 
           els.welcomeTitle.textContent = 'Welcome, ' + name;
-          els.welcomeSub.textContent = 
-          'Manage retailers, riders, and support operations.';
+          els.welcomeSub.textContent =
+            'Manage retailers, riders, HR, marketing executives, careers, and support operations.';
         } catch (err) {
           showBanner('error', 'Session expired. Redirecting to login...');
           setTimeout(redirectToLogin, 500);
