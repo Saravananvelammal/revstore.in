@@ -14,42 +14,26 @@
       --bg1:#4318b8; --bg2:#7e22ce; --bg3:#c026d3;
       --card:rgba(255,255,255,.97); --text:#1e1b4b; --muted:#6b7280;
       --line:rgba(30,27,75,.12); --primary:#5b21b6; --danger:#dc2626;
-      --success:#059669; --warning:#d97706;
-      --shadow:0 18px 60px rgba(49,12,120,.25); --radius:24px;
+      --success:#059669; --shadow:0 18px 60px rgba(49,12,120,.25); --radius:24px;
     }
     *{box-sizing:border-box}
-    body{
-      margin:0; min-height:100vh; padding:22px;
-      font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
-      color:var(--text);
-      background:linear-gradient(135deg,var(--bg1),var(--bg2),var(--bg3));
-    }
+    body{margin:0;min-height:100vh;padding:22px;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;color:var(--text);background:linear-gradient(135deg,var(--bg1),var(--bg2),var(--bg3))}
     .app{max-width:1380px;margin:0 auto;display:grid;gap:18px}
     .topbar{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;color:#fff}
-    h1{margin:0;font-size:2rem;font-weight:900}
-    .sub{margin:8px 0 0;color:rgba(255,255,255,.86)}
+    h1{margin:0;font-size:2rem;font-weight:900}.sub{margin:8px 0 0;color:rgba(255,255,255,.86)}
     .actions{display:flex;gap:10px;flex-wrap:wrap}
-    .btn{
-      min-height:44px;padding:0 16px;border-radius:14px;border:1px solid var(--line);
-      cursor:pointer;font-weight:850;background:#fff;color:var(--text)
-    }
+    .btn{min-height:44px;padding:0 16px;border-radius:14px;border:1px solid var(--line);cursor:pointer;font-weight:850;background:#fff;color:var(--text)}
     .btn-primary{border:0;color:#fff;background:linear-gradient(135deg,#5b21b6,#7c3aed,#a21caf)}
     .btn-danger{border:0;color:#fff;background:linear-gradient(135deg,#dc2626,#b91c1c)}
     .btn-success{border:0;color:#fff;background:linear-gradient(135deg,#059669,#10b981)}
     .btn-small{min-height:36px;padding:0 12px;border-radius:12px;font-size:.86rem}
     .panel{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:22px}
     .toolbar{display:grid;grid-template-columns:1fr 170px 170px 150px auto;gap:12px;margin-bottom:16px}
-    input,select,textarea{
-      width:100%;border:1px solid var(--line);border-radius:14px;padding:0 13px;
-      min-height:44px;font:inherit;background:#fff;color:var(--text)
-    }
+    input,select,textarea{width:100%;border:1px solid var(--line);border-radius:14px;padding:0 13px;min-height:44px;font:inherit;background:#fff;color:var(--text)}
     textarea{padding:12px 13px;min-height:82px;resize:vertical}
-    label{font-weight:850;font-size:.84rem}
-    .field{display:grid;gap:7px}
-    .banner{display:none;padding:14px 16px;border-radius:16px;margin-bottom:14px}
-    .banner.show{display:block}
-    .banner.error{background:rgba(239,68,68,.12);color:#7f1d1d}
-    .banner.success{background:rgba(16,185,129,.12);color:#065f46}
+    label{font-weight:850;font-size:.84rem}.field{display:grid;gap:7px}
+    .banner{display:none;padding:14px 16px;border-radius:16px;margin-bottom:14px}.banner.show{display:block}
+    .banner.error{background:rgba(239,68,68,.12);color:#7f1d1d}.banner.success{background:rgba(16,185,129,.12);color:#065f46}
     .table-wrap{overflow:auto;border:1px solid var(--line);border-radius:18px;background:#fff}
     table{width:100%;border-collapse:collapse;min-width:1180px}
     th,td{padding:13px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top;font-size:.92rem}
@@ -58,23 +42,16 @@
     .pill{display:inline-flex;align-items:center;border-radius:999px;padding:5px 10px;font-weight:850;font-size:.78rem}
     .pill.active{background:rgba(16,185,129,.12);color:#065f46}
     .pill.inactive,.pill.terminated,.pill.suspended{background:rgba(239,68,68,.12);color:#7f1d1d}
-    .muted{color:var(--muted)}
-    .row-actions{display:flex;gap:8px;flex-wrap:wrap}
+    .muted{color:var(--muted)}.row-actions{display:flex;gap:8px;flex-wrap:wrap}
     .modal{position:fixed;inset:0;background:rgba(0,0,0,.52);display:none;place-items:center;padding:18px;z-index:50}
     .modal.show{display:grid}
     .modal-card{width:100%;max-width:1050px;max-height:92vh;overflow:auto;background:#fff;border-radius:22px;padding:22px;box-shadow:var(--shadow)}
-    .modal-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;margin-bottom:16px}
-    .modal-head h2{margin:0}
-    .form-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
-    .full{grid-column:1/-1}
+    .modal-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;margin-bottom:16px}.modal-head h2{margin:0}
+    .form-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}.full{grid-column:1/-1}
     .section-title{grid-column:1/-1;margin:10px 0 0;font-weight:950;color:#4c1d95}
     .modal-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:18px;position:sticky;bottom:0;background:#fff;padding-top:14px}
     .img-preview{width:48px;height:48px;border-radius:12px;object-fit:cover;border:1px solid var(--line);background:#f3f4f6}
-    @media(max-width:980px){
-      .toolbar{grid-template-columns:1fr}
-      .form-grid{grid-template-columns:1fr}
-      .topbar{flex-direction:column}
-    }
+    @media(max-width:980px){.toolbar{grid-template-columns:1fr}.form-grid{grid-template-columns:1fr}.topbar{flex-direction:column}}
   </style>
 </head>
 
@@ -124,20 +101,11 @@
         <table>
           <thead>
             <tr>
-              <th>Profile</th>
-              <th>Name</th>
-              <th>Contact</th>
-              <th>Location</th>
-              <th>Targets</th>
-              <th>Wallet</th>
-              <th>Status</th>
-              <th>Added By</th>
-              <th>Actions</th>
+              <th>Profile</th><th>Name</th><th>Contact</th><th>Location</th>
+              <th>Targets</th><th>Wallet</th><th>Status</th><th>Added By</th><th>Actions</th>
             </tr>
           </thead>
-          <tbody id="hrRows">
-            <tr><td colspan="9" class="muted">Loading...</td></tr>
-          </tbody>
+          <tbody id="hrRows"><tr><td colspan="9" class="muted">Loading...</td></tr></tbody>
         </table>
       </div>
     </section>
@@ -148,7 +116,7 @@
       <div class="modal-head">
         <div>
           <h2 id="modalTitle">Add Human Resource</h2>
-          <p class="muted">Fields match your current HumanResource.js schema and admin web controller.</p>
+          <p class="muted">Fields match your HumanResource schema and admin web controller.</p>
         </div>
         <button id="closeModalBtn" class="btn">Close</button>
       </div>
@@ -158,7 +126,6 @@
 
         <div class="form-grid">
           <div class="section-title">Profile</div>
-
           <div class="field"><label>Name *</label><input name="name" required minlength="2" /></div>
           <div class="field"><label>Email *</label><input name="email" type="email" required /></div>
           <div class="field"><label>Password <span id="passwordHint">*</span></label><input name="password" type="password" minlength="8" /></div>
@@ -166,12 +133,9 @@
           <div class="field">
             <label>Role *</label>
             <select name="role">
-              <option value="hr">HR</option>
-              <option value="hr_manager">HR Manager</option>
-              <option value="admin_staff">Admin Staff</option>
-              <option value="support_staff">Support Staff</option>
-              <option value="operations_staff">Operations Staff</option>
-              <option value="finance_staff">Finance Staff</option>
+              <option value="hr">HR</option><option value="hr_manager">HR Manager</option>
+              <option value="admin_staff">Admin Staff</option><option value="support_staff">Support Staff</option>
+              <option value="operations_staff">Operations Staff</option><option value="finance_staff">Finance Staff</option>
               <option value="other">Other</option>
             </select>
           </div>
@@ -187,14 +151,12 @@
           <div class="field">
             <label>Blood Group</label>
             <select name="bloodGroup">
-              <option value="">Not Set</option>
-              <option>A+</option><option>A-</option><option>B+</option><option>B-</option>
+              <option value="">Not Set</option><option>A+</option><option>A-</option><option>B+</option><option>B-</option>
               <option>AB+</option><option>AB-</option><option>O+</option><option>O-</option>
             </select>
           </div>
 
           <div class="section-title">Address</div>
-
           <div class="field full"><label>Address *</label><textarea name="address" required></textarea></div>
           <div class="field"><label>Address Line 1</label><input name="addressLine1" /></div>
           <div class="field"><label>Address Line 2</label><input name="addressLine2" /></div>
@@ -205,17 +167,14 @@
           <div class="field"><label>Country</label><input name="country" value="India" /></div>
 
           <div class="section-title">Documents</div>
-
-          <div class="field"><label>Aadhaar Number *</label><input name="aadhaarNumber" required maxlength="12" /></div>
+          <div class="field"><label>Aadhaar Number *</label><input name="aadhaarNumber" maxlength="12" /></div>
           <div class="field"><label>Aadhaar Front *</label><input name="aadhaarFrontImage" type="file" accept="image/png,image/jpeg" /></div>
           <div class="field"><label>Aadhaar Back *</label><input name="aadhaarBackImage" type="file" accept="image/png,image/jpeg" /></div>
-
           <div class="field"><label>PAN Number *</label><input name="panNumber" required maxlength="10" /></div>
           <div class="field"><label>PAN Front *</label><input name="panFrontImage" type="file" accept="image/png,image/jpeg" /></div>
           <div class="field"><label>PAN Back</label><input name="panBackImage" type="file" accept="image/png,image/jpeg" /></div>
 
           <div class="section-title">Payment / Bank</div>
-
           <div class="field"><label>UPI ID *</label><input name="upiId" required /></div>
           <div class="field"><label>Bank Name</label><input name="bankName" /></div>
           <div class="field"><label>Bank Account Number</label><input name="bankAccountNumber" maxlength="18" /></div>
@@ -223,14 +182,12 @@
           <div class="field"><label>Bank Proof Image</label><input name="bankProofImage" type="file" accept="image/png,image/jpeg" /></div>
 
           <div class="section-title">Targets</div>
-
           <div class="field"><label>Per Day Marketing Executives</label><input name="perDayMarketingExecutives" type="number" min="0" max="100" value="1" /></div>
           <div class="field"><label>Per Day Riders</label><input name="perDayRiders" type="number" min="0" max="500" value="2" /></div>
           <div class="field"><label>Monthly Marketing Executives</label><input name="monthlyMarketingExecutives" type="number" min="0" max="3000" value="30" /></div>
           <div class="field"><label>Monthly Riders</label><input name="monthlyRiders" type="number" min="0" max="15000" value="60" /></div>
 
           <div class="section-title">Login Policy</div>
-
           <div class="field"><label>Login Hours / Day</label><input name="loginHoursPerDay" type="number" min="1" max="24" value="8" /></div>
           <div class="field"><label>Allowed Start</label><input name="allowedLoginStartTime" value="09:00" /></div>
           <div class="field"><label>Allowed End</label><input name="allowedLoginEndTime" value="18:00" /></div>
@@ -239,10 +196,8 @@
           <div class="field">
             <label>Status</label>
             <select name="status">
-              <option value="active">Active</option>
-              <option value="inactive">Inactive</option>
-              <option value="suspended">Suspended</option>
-              <option value="terminated">Terminated</option>
+              <option value="active">Active</option><option value="inactive">Inactive</option>
+              <option value="suspended">Suspended</option><option value="terminated">Terminated</option>
             </select>
           </div>
         </div>
@@ -357,7 +312,8 @@
           headers.set('Content-Type', 'application/json');
         }
 
-        if (!['GET', 'HEAD', 'OPTIONS'].includes(String(options?.method || 'GET').toUpperCase())) {
+        const method = String(options?.method || 'GET').toUpperCase();
+        if (!['GET', 'HEAD', 'OPTIONS'].includes(method)) {
           headers.set('x-csrf-token', getCookie('csrf_token'));
         }
 
@@ -380,8 +336,7 @@
         }
 
         if (!res.ok) {
-          const msg = data.message || 'Request failed.';
-          const err = new Error(msg);
+          const err = new Error(data.message || 'Request failed.');
           err.data = data;
           err.status = res.status;
           throw err;
@@ -419,12 +374,15 @@
       function appendQuery() {
         const [sort, order] = String(els.sort.value || 'createdAt:desc').split(':');
         const qs = new URLSearchParams();
+
         if (els.search.value.trim()) qs.set('q', els.search.value.trim());
         if (els.status.value) qs.set('status', els.status.value);
         if (els.deleted.value === 'with') qs.set('includeDeleted', 'true');
         if (els.deleted.value === 'only') qs.set('deleted', 'only');
+
         qs.set('sort', sort || 'createdAt');
         qs.set('order', order || 'desc');
+
         return '?' + qs.toString();
       }
 
@@ -457,60 +415,52 @@
           const mo = targets.monthly || {};
           const addedBy = hr.addedBy || {};
 
+          const actionButton = deleted
+            ? <button class="btn btn-success btn-small" data-action="restore" data-id="${esc(hr._id)}">Restore</button>
+            : <button class="btn btn-danger btn-small" data-action="delete" data-id="${esc(hr._id)}">Delete</button>;
+
           return `
             <tr>
               <td>${img ? `<img class="img-preview" src="${esc(img)}" alt="">` : '<span class="muted">No image</span>'}</td>
-              <td>
-                <strong>${esc(hr.name || '-')}</strong><br>
-                <span class="muted">${esc(hr.designation || '')}</span><br>
-                <span class="muted">${esc(hr.role || '')}</span>
-              </td>
-              <td>
-                ${esc(hr.email || '-')}<br>
-                <span class="muted">${esc(hr.personalMobile || '')}</span>
-              </td>
-              <td>
-                ${esc(hr.area || '')}, ${esc(hr.city || '')}<br>
-                <span class="muted">${esc(hr.state || '')}</span>
-              </td>
-              <td>
-                Day: ME ${Number(pd.marketingExecutives || 0)}, Rider ${Number(pd.riders || 0)}<br>
-                <span class="muted">Month: ME ${Number(mo.marketingExecutives || 0)}, Rider ${Number(mo.riders || 0)}</span>
-              </td>
+              <td><strong>${esc(hr.name || '-')}</strong><br><span class="muted">${esc(hr.designation || '')}</span><br><span class="muted">${esc(hr.role || '')}</span></td>
+              <td>${esc(hr.email || '-')}<br><span class="muted">${esc(hr.personalMobile || '')}</span></td>
+              <td>${esc(hr.area || '')}, ${esc(hr.city || '')}<br><span class="muted">${esc(hr.state || '')}</span></td>
+              <td>Day: ME ${Number(pd.marketingExecutives || 0)}, Rider ${Number(pd.riders || 0)}<br><span class="muted">Month: ME ${Number(mo.marketingExecutives || 0)}, Rider ${Number(mo.riders || 0)}</span></td>
               <td>${fmtMoney(hr.wallet)}<br><span class="muted">${hr.wallet?.locked ? 'Locked' : 'Unlocked'}</span></td>
-              <td>
-                <span class="pill ${esc(status)}">${esc(status || '-')}</span>
-                ${deleted ? '<br><span class="muted">Deleted</span>' : ''}
-              </td>
-              <td>
-                ${esc(addedBy.kind || '-')}<br>
-                <span class="muted">${esc(addedBy.id || '')}</span>
-              </td>
-              <td>
-                <div class="row-actions">
-                  <button class="btn btn-small" data-action="edit" data-id="${esc(hr._id)}">Edit</button>
-                  ${deleted
-                    ? <button class="btn btn-success btn-small" data-action="restore" data-id="${esc(hr._id)}">Restore</button>
-                    : <button class="btn btn-danger btn-small" data-action="delete" data-id="${esc(hr._id)}">Delete</button>
-                  }
-                </div>
-              </td>
+              <td><span class="pill ${esc(status)}">${esc(status || '-')}</span>${deleted ? '<br><span class="muted">Deleted</span>' : ''}</td>
+              <td>${esc(addedBy.kind || '-')}<br><span class="muted">${esc(addedBy.id || '')}</span></td>
+              <td><div class="row-actions"><button class="btn btn-small" data-action="edit" data-id="${esc(hr._id)}">Edit</button>${actionButton}</div></td>
             </tr>
           `;
         }).join('');
       }
 
+      function setFormValue(name, value) {
+        const el = els.form.elements[name];
+        if (el) el.value = value ?? '';
+      }
+
+      function setRequired(name, required) {
+        const el = els.form.elements[name];
+        if (el) el.required = Boolean(required);
+      }
+
       function openModal(mode, item) {
         clearBanner();
         els.form.reset();
-        els.hrId.value = item?._id || '';
-        els.modalTitle.textContent = mode === 'edit' ? 'Edit Human Resource' : 'Add Human Resource';
-        els.passwordHint.textContent = mode === 'edit' ? '(optional)' : '*';
 
-        const emailInput = els.form.elements.email;
-        const passwordInput = els.form.elements.password;
-        emailInput.disabled = mode === 'edit';
-        passwordInput.required = mode !== 'edit';
+        const isEdit = mode === 'edit';
+        els.hrId.value = item?._id || '';
+        els.modalTitle.textContent = isEdit ? 'Edit Human Resource' : 'Add Human Resource';
+        els.passwordHint.textContent = isEdit ? '(optional)' : '*';
+
+        els.form.elements.email.disabled = isEdit;
+        els.form.elements.password.required = !isEdit;
+
+        setRequired('aadhaarNumber', !isEdit);
+        setRequired('aadhaarFrontImage', !isEdit);
+        setRequired('aadhaarBackImage', !isEdit);
+        setRequired('panFrontImage', !isEdit);
 
         if (item) {
           setFormValue('name', item.name);
@@ -530,7 +480,6 @@
           setFormValue('state', item.state || 'Tamil Nadu');
           setFormValue('postalCode', item.postalCode);
           setFormValue('country', item.country || 'India');
-          setFormValue('panNumber', item.pan?.number || '');
           setFormValue('upiId', item.upiId);
           setFormValue('bankName', item.bank?.name);
           setFormValue('bankIfsc', item.bank?.ifsc);
@@ -571,21 +520,24 @@
         els.form.elements.email.disabled = false;
       }
 
-      function setFormValue(name, value) {
-        const el = els.form.elements[name];
-        if (!el) return;
-        el.value = value ?? '';
+      function cleanEmptyFiles(formData) {
+        for (const [key, value] of Array.from(formData.entries())) {
+          if (value instanceof File && !value.name) formData.delete(key);
+        }
       }
 
       function validateForm(formData, isEdit) {
-        const required = ['name','personalMobile','emergencyContactNumber','address','dateOfBirth','panNumber','upiId'];
-        if (!isEdit) required.push('email', 'password');
+        const required = ['name', 'personalMobile', 'emergencyContactNumber', 'address', 'dateOfBirth', 'panNumber', 'upiId'];
+        if (!isEdit) required.push('email', 'password', 'aadhaarNumber');
 
         for (const key of required) {
           if (!String(formData.get(key) || '').trim()) return key + ' is required.';
         }
 
-        if (!isEdit && String(formData.get('password') || '').trim().length < 8) return 'Password must be at least 8 characters.';
+        const password = String(formData.get('password') || '').trim();
+        if (!isEdit && password.length < 8) return 'Password must be at least 8 characters.';
+        if (isEdit && password && password.length < 8) return 'Password must be at least 8 characters.';
+
         if (!/^[6-9][0-9]{9}$/.test(String(formData.get('personalMobile') || '').trim())) return 'Invalid personal mobile number.';
         if (!/^[6-9][0-9]{9}$/.test(String(formData.get('emergencyContactNumber') || '').trim())) return 'Invalid emergency contact number.';
 
@@ -594,6 +546,9 @@
 
         const pin = String(formData.get('postalCode') || '').trim();
         if (pin && !/^[1-9][0-9]{5}$/.test(pin)) return 'Invalid postal code.';
+
+        const aadhaar = String(formData.get('aadhaarNumber') || '').trim();
+        if (aadhaar && !/^[0-9]{12}$/.test(aadhaar)) return 'Invalid Aadhaar number.';
 
         const pan = String(formData.get('panNumber') || '').trim().toUpperCase();
         if (!/^[A-Z]{5}[0-9]{4}[A-Z]$/.test(pan)) return 'Invalid PAN number.';
@@ -611,10 +566,12 @@
         const id = els.hrId.value.trim();
         const isEdit = Boolean(id);
         const formData = new FormData(els.form);
+        cleanEmptyFiles(formData);
 
         if (isEdit) {
           formData.delete('email');
           if (!String(formData.get('password') || '').trim()) formData.delete('password');
+          if (!String(formData.get('aadhaarNumber') || '').trim()) formData.delete('aadhaarNumber');
         }
 
         const errMsg = validateForm(formData, isEdit);
@@ -637,11 +594,7 @@
           await loadHumanResources();
         } catch (err) {
           const errors = err.data?.errors;
-          if (errors && typeof errors === 'object') {
-            showBanner('error', Object.values(errors).join(' | '));
-          } else {
-            showBanner('error', err.message || 'Save failed.');
-          }
+          showBanner('error', errors && typeof errors === 'object' ? Object.values(errors).join(' | ') : (err.message || 'Save failed.'));
         } finally {
           state.busy = false;
           els.saveBtn.disabled = false;
@@ -694,9 +647,11 @@
         els.cancelBtn.addEventListener('click', closeModal);
         els.form.addEventListener('submit', submitForm);
         els.rows.addEventListener('click', rowAction);
+
         els.search.addEventListener('keydown', e => {
           if (e.key === 'Enter') loadHumanResources();
         });
+
         els.modal.addEventListener('click', e => {
           if (e.target === els.modal) closeModal();
         });
