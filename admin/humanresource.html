@@ -235,6 +235,12 @@
     els.banner.textContent = '';
   }
 
+  function setValue(name, value) {
+    if (els.form.elements[name]) {
+      els.form.elements[name].value = value || '';
+    }
+  }
+
   function getCookie(name) {
     const target = name + '=';
     const found = String(document.cookie || '')
@@ -398,27 +404,78 @@
     });
 
     if (item) {
-      for (const key of [
-        'name','email','role','designation','personalMobile','officeMobile',
-        'emergencyContactNumber','bloodGroup','address','addressLine1',
-        'addressLine2','area','city','state','postalCode','country',
-        'upiId','loginHoursPerDay','allowedLoginStartTime','allowedLoginEndTime',
-        'timezone','status'
-      ]) {
-        if (els.form.elements[key]) els.form.elements[key].value = item[key] || '';
-      }
+      [
+        'name',
+        'email',
+        'role',
+        'designation',
+        'personalMobile',
+        'officeMobile',
+        'emergencyContactNumber',
+        'bloodGroup',
+        'address',
+        'addressLine1',
+        'addressLine2',
+        'area',
+        'city',
+        'state',
+        'postalCode',
+        'country',
+        'upiId',
+        'loginHoursPerDay',
+        'allowedLoginStartTime',
+        'allowedLoginEndTime',
+        'timezone',
+        'status'
+      ].forEach((key) => {
+        setValue(key, item[key]);
+      });
 
-      if (item.dateOfBirth && els.form.elements.dateOfBirth) {
+      if (item.dateOfBirth) {
         const d = new Date(item.dateOfBirth);
-        els.form.elements.dateOfBirth.value = Number.isNaN(d.getTime()) ? '' : d.toISOString().slice(0, 10);
+        setValue(
+          'dateOfBirth',
+          Number.isNaN(d.getTime()) ? '' : d.toISOString().slice(0, 10)
+        );
       }
 
-      if (els.form.elements.bankName) els.form.elements.bankName.value = item.bank && item.bank.name || '';
-      if (els.form.elements.bankIfsc) els.form.elements.bankIfsc.value = item.bank && item.bank.ifsc || '';
-      if (els.form.elements.perDayMarketingExecutives) els.form.elements.perDayMarketingExecutives.value = item.targets && item.targets.perDay && item.targets.perDay.marketingExecutives || 1;
-      if (els.form.elements.perDayRiders) els.form.elements.perDayRiders.value = item.targets && item.targets.perDay && item.targets.perDay.riders || 2;
-      if (els.form.elements.monthlyMarketingExecutives) els.form.elements.monthlyMarketingExecutives.value = item.targets && item.targets.monthly && item.targets.monthly.marketingExecutives || 30;
-      if (els.form.elements.monthlyRiders) els.form.elements.monthlyRiders.value = item.targets && item.targets.monthly && item.targets.monthly.riders || 60;
+      setValue('aadhaarNumber', item.aadhaar && item.aadhaar.number);
+      setValue('panNumber', item.pan && item.pan.number);
+
+      setValue('bankName', item.bank && item.bank.name);
+      setValue(
+        'bankAccountNumber',
+        item.bank && (item.bank.accountNumber || item.bank.accountNumberMasked)
+      );
+      setValue('bankIfsc', item.bank && item.bank.ifsc);
+
+      setValue(
+        'perDayMarketingExecutives',
+        item.targets &&
+          item.targets.perDay &&
+          item.targets.perDay.marketingExecutives
+      );
+
+      setValue(
+        'perDayRiders',
+        item.targets &&
+          item.targets.perDay &&
+          item.targets.perDay.riders
+      );
+
+      setValue(
+        'monthlyMarketingExecutives',
+        item.targets &&
+          item.targets.monthly &&
+          item.targets.monthly.marketingExecutives
+      );
+
+      setValue(
+        'monthlyRiders',
+        item.targets &&
+          item.targets.monthly &&
+          item.targets.monthly.riders
+      );
     }
 
     els.modal.classList.add('show');
