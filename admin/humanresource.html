@@ -306,8 +306,8 @@
       const mo = (hr.targets && hr.targets.monthly) || {};
 
       const action = deleted
-        ? <button class="btn btn-success btn-small" data-action="restore" data-id="${esc(hr._id)}">Restore</button>
-        : <button class="btn btn-danger btn-small" data-action="delete" data-id="${esc(hr._id)}">Delete</button>;
+        ? `<button class="btn btn-success btn-small" data-action="restore" data-id="${esc(hr._id)}">Restore</button>`
+        : `<button class="btn btn-danger btn-small" data-action="delete" data-id="${esc(hr._id)}">Delete</button>`;
 
       return `
         <tr>
