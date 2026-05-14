@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Revstore HR Login</title>
+  <meta name="robots" content="noindex,nofollow,noarchive,nosnippet" />
+  <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+  <style>
+    :root{--bg:#3b0ca8;--card:rgba(255,255,255,.96);--text:#1e1b4b;--muted:#6b7280;--line:rgba(30,27,75,.10);--primary:#5b21b6;--danger:#dc2626;--success:#059669;--shadow:0 18px 60px rgba(49,12,120,.30);--radius:22px;--input-h:52px;--focus:0 0 0 4px rgba(91,33,182,.18)}
+    *{box-sizing:border-box}
+    html,body{margin:0;min-height:100%;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:linear-gradient(135deg,#4318b8,#5b21b6,#7e22ce,#c026d3);color:var(--text)}
+    body{display:grid;place-items:center;padding:24px}
+    .shell{width:100%;max-width:430px}
+    .brand{text-align:center;color:#fff;margin-bottom:16px}
+    .brand h1{margin:0 0 8px;font-size:1.95rem;font-weight:900}
+    .brand p{margin:0;color:rgba(255,255,255,.86);font-size:.96rem;line-height:1.5}
+    .card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden}
+    .card-inner{padding:26px}
+    .stepper{display:flex;align-items:center;gap:10px;margin-bottom:20px}
+    .step{display:inline-flex;align-items:center;gap:8px;color:var(--muted);font-size:.88rem;font-weight:800}
+    .step-dot{width:26px;height:26px;border-radius:999px;display:grid;place-items:center;border:1px solid var(--line)}
+    .step.active{color:var(--primary)}.step.done{color:var(--success)}
+    .divider{flex:1;height:1px;background:var(--line)}
+    h2{margin:0 0 8px;font-size:1.35rem}.subtitle{margin:0 0 22px;color:var(--muted);font-size:.95rem;line-height:1.55}
+    .hidden{display:none!important}
+    form{display:grid;gap:16px}.field{display:grid;gap:8px}.field label{font-size:.9rem;font-weight:800}
+    .control{position:relative}.input,.otp-input{width:100%;height:var(--input-h);border-radius:14px;border:1px solid var(--line);background:#fff;color:var(--text);padding:0 14px;outline:none;font-size:1rem}
+    .input:focus,.otp-input:focus,button:focus-visible{border-color:rgba(91,33,182,.55);box-shadow:var(--focus)}
+    .otp-input{text-align:center;letter-spacing:.35em;font-weight:900;font-size:1.15rem}
+    .input-with-action{padding-right:116px}
+    .toggle-password{position:absolute;top:50%;right:14px;transform:translateY(-50%);height:36px;border:0;background:transparent;color:var(--muted);cursor:pointer;font-weight:800;border-radius:10px;padding:0 10px}
+    .btn{width:100%;height:52px;border:0;border-radius:16px;cursor:pointer;font-weight:900;font-size:.98rem}
+    .btn-primary{background:linear-gradient(135deg,#5b21b6,#7c3aed,#a21caf);color:#fff}
+    .btn-secondary{background:transparent;color:var(--text);border:1px solid var(--line)}
+    .stack,.actions{display:grid;gap:12px}
+    .banner{display:none;margin-bottom:16px;padding:13px 14px;border-radius:14px;font-size:.92rem;line-height:1.5}
+    .banner.show{display:block}.banner.error{color:#7f1d1d;background:rgba(239,68,68,.10)}.banner.success{color:#065f46;background:rgba(16,185,129,.10)}.banner.info{color:#4c1d95;background:rgba(124,58,237,.10)}
+    .setup-box{display:grid;gap:12px;margin-bottom:6px}.qr-wrap{display:grid;justify-items:center;gap:10px}
+    .qr-image{width:220px;height:220px;border-radius:14px;border:1px solid var(--line);background:#fff;object-fit:contain;padding:8px}
+    .manual-key{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+    .spinner{width:18px;height:18px;border:2px solid rgba(255,255,255,.35);border-top-color:#fff;border-radius:999px;animation:spin .8s linear infinite}
+    .loading{display:inline-flex;align-items:center;justify-content:center;gap:10px}
+    @keyframes spin{to{transform:rotate(360deg)}}
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <section class="brand">
+      <h1>Revstore HR</h1>
+      <p>Secure Human Resource sign-in with password and authenticator code.</p>
+    </section>
+
+    <section class="card">
+      <div class="card-inner">
+        <div class="stepper">
+          <div class="step active" id="stepIndicator1"><span class="step-dot">1</span><span>Credentials</span></div>
+          <div class="divider"></div>
+          <div class="step" id="stepIndicator2"><span class="step-dot">2</span><span>2FA</span></div>
+        </div>
+
+        <div id="banner" class="banner" role="alert"></div>
+
+        <section id="step1Section">
+          <h2>Sign in</h2>
+          <p class="subtitle">Enter your HR email and password to continue.</p>
+
+          <form id="loginForm" novalidate>
+            <div class="field">
+              <label for="email">Email</label>
+              <input id="email" class="input" type="email" autocomplete="username" maxlength="190" required />
+            </div>
+
+            <div class="field">
+              <label for="password">Password</label>
+              <div class="control">
+                <input id="password" class="input input-with-action" type="password" autocomplete="current-password" maxlength="128" required />
+                <button type="button" class="toggle-password" id="togglePasswordBtn">
+                  <span id="togglePasswordText">Show</span>
+                </button>
+              </div>
+            </div>
+
+            <div class="actions">
+              <button type="submit" id="startLoginBtn" class="btn btn-primary">Continue to 2FA</button>
+            </div>
+          </form>
+        </section>
+
+        <section id="step2Section" class="hidden">
+          <h2 id="step2Title">Verify 2FA</h2>
+          <p class="subtitle" id="step2Subtitle">Enter the 6-digit code from your authenticator app.</p>
+
+          <form id="otpForm" novalidate>
+            <div id="setupBlock" class="setup-box hidden">
+              <div class="field">
+                <label>HR Google Authenticator Setup</label>
+                <div class="qr-wrap">
+                  <img id="qrImage" class="qr-image" alt="Google Authenticator QR Code" />
+                  <div class="subtitle" style="text-align:center;margin:0;">Scan this QR code in Google Authenticator.</div>
+                </div>
+              </div>
+
+              <div class="field">
+                <label for="manualKey">Manual setup key</label>
+                <input id="manualKey" class="input manual-key" type="text" readonly />
+              </div>
+            </div>
+
+            <div class="field">
+              <label for="otp">One-time code</label>
+              <input id="otp" class="otp-input" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="6" required />
+            </div>
+
+            <div class="stack">
+              <button type="submit" id="verifyOtpBtn" class="btn btn-primary">Verify and sign in</button>
+              <button type="button" id="backBtn" class="btn btn-secondary">Back</button>
+            </div>
+          </form>
+        </section>
+      </div>
+    </section>
+  </main>
+
+<script>
+(function () {
+  'use strict';
+
+  const CONFIG = {
+    API_BASE: typeof window.HR_WEB_API_BASE === 'string' && window.HR_WEB_API_BASE.trim()
+      ? window.HR_WEB_API_BASE.trim().replace(/\/+$/, '')
+      : 'https://api.revstore.in/api/human-resource-web/v1',
+
+    AFTER_LOGIN_URL: typeof window.HR_WEB_AFTER_LOGIN_URL === 'string' && window.HR_WEB_AFTER_LOGIN_URL.trim()
+      ? window.HR_WEB_AFTER_LOGIN_URL.trim()
+      : '/hr/dashboard',
+
+    CHALLENGE_STORAGE_KEY: 'hr_web_login_challenge_v1',
+    FINGERPRINT_STORAGE_KEY: 'hr_web_fp_v1'
+  };
+
+  const els = {
+    banner: document.getElementById('banner'),
+    step1Section: document.getElementById('step1Section'),
+    step2Section: document.getElementById('step2Section'),
+    stepIndicator1: document.getElementById('stepIndicator1'),
+    stepIndicator2: document.getElementById('stepIndicator2'),
+    loginForm: document.getElementById('loginForm'),
+    otpForm: document.getElementById('otpForm'),
+    email: document.getElementById('email'),
+    password: document.getElementById('password'),
+    otp: document.getElementById('otp'),
+    startLoginBtn: document.getElementById('startLoginBtn'),
+    verifyOtpBtn: document.getElementById('verifyOtpBtn'),
+    backBtn: document.getElementById('backBtn'),
+    togglePasswordBtn: document.getElementById('togglePasswordBtn'),
+    setupBlock: document.getElementById('setupBlock'),
+    qrImage: document.getElementById('qrImage'),
+    manualKey: document.getElementById('manualKey'),
+    step2Title: document.getElementById('step2Title'),
+    step2Subtitle: document.getElementById('step2Subtitle')
+  };
+
+  let state = { challengeToken: '', fingerprint: '', busy: false, mode: 'verify' };
+
+  function showBanner(type, message) {
+    els.banner.className = 'banner show ' + type;
+    els.banner.textContent = message || '';
+  }
+
+  function clearBanner() {
+    els.banner.className = 'banner';
+    els.banner.textContent = '';
+  }
+
+  function normalizeEmail(v) {
+    return String(v || '').trim().toLowerCase();
+  }
+
+  function normalizeOtp(v) {
+    return String(v || '').replace(/\D+/g, '').slice(0, 6);
+  }
+
+  function getCookie(name) {
+    const target = name + '=';
+    const found = String(document.cookie || '')
+      .split(';')
+      .map(v => v.trim())
+      .find(v => v.indexOf(target) === 0);
+
+    return found ? decodeURIComponent(found.slice(target.length)) : '';
+  }
+
+  async function sha256Hex(input) {
+    const data = new TextEncoder().encode(String(input));
+    const digest = await crypto.subtle.digest('SHA-256', data);
+
+    return Array.from(new Uint8Array(digest))
+      .map(b => b.toString(16).padStart(2, '0'))
+      .join('');
+  }
+
+  async function getStableFingerprint() {
+    try {
+      const existing = localStorage.getItem(CONFIG.FINGERPRINT_STORAGE_KEY);
+      if (existing && existing.trim()) return existing.trim().slice(0, 200);
+    } catch (_) {}
+
+    const raw = [
+      navigator.userAgent || '',
+      navigator.language || '',
+      screen.width || '',
+      screen.height || '',
+      screen.colorDepth || '',
+      Intl.DateTimeFormat().resolvedOptions().timeZone || '',
+      navigator.platform || '',
+      crypto.getRandomValues(new Uint32Array(4)).join('-')
+    ].join('|');
+
+    const fp = (await sha256Hex(raw)).slice(0, 64);
+
+    try {
+      localStorage.setItem(CONFIG.FINGERPRINT_STORAGE_KEY, fp);
+    } catch (_) {}
+
+    return fp;
+  }
+
+  function setBusy(nextBusy) {
+    state.busy = !!nextBusy;
+
+    const loginBusy = state.busy && !els.step1Section.classList.contains('hidden');
+    const otpBusy = state.busy && !els.step2Section.classList.contains('hidden');
+
+    els.startLoginBtn.disabled = state.busy;
+    els.verifyOtpBtn.disabled = state.busy;
+    els.backBtn.disabled = state.busy;
+    els.email.disabled = state.busy;
+    els.password.disabled = state.busy;
+    els.otp.disabled = state.busy;
+
+    els.startLoginBtn.innerHTML = loginBusy
+      ? '<span class="loading"><span class="spinner"></span><span>Please wait...</span></span>'
+      : 'Continue to 2FA';
+
+    els.verifyOtpBtn.innerHTML = otpBusy
+      ? '<span class="loading"><span class="spinner"></span><span>Verifying...</span></span>'
+      : (state.mode === 'setup' ? 'Activate 2FA and sign in' : 'Verify and sign in');
+  }
+
+  function setStep(step) {
+    const step1 = step === 1;
+
+    els.step1Section.classList.toggle('hidden', !step1);
+    els.step2Section.classList.toggle('hidden', step1);
+
+    els.stepIndicator1.className = step1 ? 'step active' : 'step done';
+    els.stepIndicator2.className = step1 ? 'step' : 'step active';
+
+    requestAnimationFrame(() => step1 ? els.email.focus() : els.otp.focus());
+  }
+
+  function setMode(mode) {
+    state.mode = mode === 'setup' ? 'setup' : 'verify';
+
+    if (state.mode === 'setup') {
+      els.setupBlock.classList.remove('hidden');
+      els.step2Title.textContent = 'Set up Google Authenticator';
+      els.step2Subtitle.textContent = 'Scan the QR code or use the manual key, then enter the 6-digit code.';
+    } else {
+      els.setupBlock.classList.add('hidden');
+      els.qrImage.removeAttribute('src');
+      els.manualKey.value = '';
+      els.step2Title.textContent = 'Verify 2FA';
+      els.step2Subtitle.textContent = 'Enter the 6-digit code from your authenticator app.';
+    }
+
+    if (!state.busy) {
+      els.verifyOtpBtn.innerHTML = state.mode === 'setup'
+        ? 'Activate 2FA and sign in'
+        : 'Verify and sign in';
+    }
+  }
+
+  function persistChallenge(data) {
+    try {
+      sessionStorage.setItem(CONFIG.CHALLENGE_STORAGE_KEY, JSON.stringify({
+        challengeToken: data.challengeToken || '',
+        email: data.email || '',
+        mode: data.mode || 'verify',
+        manualKey: data.manualKey || '',
+        qrDataUrl: data.qrDataUrl || '',
+        createdAt: Date.now()
+      }));
+    } catch (_) {}
+  }
+
+  function readPersistedChallenge() {
+    try {
+      const raw = sessionStorage.getItem(CONFIG.CHALLENGE_STORAGE_KEY);
+      return raw ? JSON.parse(raw) : null;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  function clearPersistedChallenge() {
+    try {
+      sessionStorage.removeItem(CONFIG.CHALLENGE_STORAGE_KEY);
+    } catch (_) {}
+  }
+
+  async function apiFetch(path, options) {
+    const headers = new Headers((options && options.headers) || {});
+    headers.set('Accept', 'application/json');
+    headers.set('X-Requested-With', 'XMLHttpRequest');
+
+    if (state.fingerprint) {
+      headers.set('x-device-fingerprint', state.fingerprint);
+    }
+
+    const res = await fetch(CONFIG.API_BASE + path, {
+      ...(options || {}),
+      headers,
+      credentials: 'include',
+      cache: 'no-store',
+      redirect: 'follow',
+      referrerPolicy: 'strict-origin-when-cross-origin'
+    });
+
+    let data = {};
+    try {
+      data = await res.json();
+    } catch (_) {}
+
+    if (!res.ok) {
+      const err = new Error(data.message || 'Request failed.');
+      err.status = res.status;
+      err.data = data;
+      throw err;
+    }
+
+    return data;
+  }
+
+  function validateStep1(email, password) {
+    if (!email) throw new Error('Please enter your email.');
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) throw new Error('Please enter a valid email address.');
+    if (!password) throw new Error('Please enter your password.');
+  }
+
+  function validateStep2(otp) {
+    if (!/^\d{6}$/.test(otp)) throw new Error('OTP must be exactly 6 digits.');
+    if (!state.challengeToken) throw new Error('Login challenge is missing. Please login again.');
+  }
+
+  async function handleStartLogin(e) {
+    e.preventDefault();
+    if (state.busy) return;
+
+    clearBanner();
+
+    const email = normalizeEmail(els.email.value);
+    const password = String(els.password.value || '');
+
+    try {
+      validateStep1(email, password);
+      setBusy(true);
+
+      const data = await apiFetch('/auth/login/start', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      });
+
+      if (data.success !== true || data.requires2fa !== true || !data.challengeToken) {
+        throw new Error('Unexpected login response.');
+      }
+
+      state.challengeToken = String(data.challengeToken).trim();
+
+      persistChallenge({
+        challengeToken: state.challengeToken,
+        email,
+        mode: data.mode || 'verify',
+        manualKey: data.manualKey || '',
+        qrDataUrl: data.qrDataUrl || ''
+      });
+
+      els.password.value = '';
+      els.otp.value = '';
+
+      if (data.mode === 'setup') {
+        setMode('setup');
+        els.manualKey.value = String(data.manualKey || '').trim();
+
+        if (data.qrDataUrl) {
+          els.qrImage.src = data.qrDataUrl;
+        }
+
+        showBanner('info', 'Scan the QR code in Google Authenticator, then enter the code.');
+      } else {
+        setMode('verify');
+        showBanner('info', 'Password verified. Enter your authenticator code.');
+      }
+
+      setStep(2);
+    } catch (err) {
+      showBanner('error', err.message || 'Failed to start login.');
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function handleVerifyOtp(e) {
+    e.preventDefault();
+    if (state.busy) return;
+
+    clearBanner();
+
+    const otp = normalizeOtp(els.otp.value);
+    els.otp.value = otp;
+
+    try {
+      validateStep2(otp);
+      setBusy(true);
+
+      const endpoint = state.mode === 'setup'
+        ? '/auth/login/setup-2fa'
+        : '/auth/login/verify-otp';
+
+      const data = await apiFetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          challengeToken: state.challengeToken,
+          otp
+        })
+      });
+
+      if (data.success !== true) {
+        throw new Error('OTP verification failed.');
+      }
+
+      clearPersistedChallenge();
+
+      if (!getCookie('csrf_token')) {
+        showBanner('error', 'Login succeeded, but CSRF token was not created.');
+        return;
+      }
+
+      showBanner('success', data.message || 'Login successful. Redirecting...');
+
+      setTimeout(() => {
+        window.location.replace(CONFIG.AFTER_LOGIN_URL);
+      }, 350);
+    } catch (err) {
+      showBanner('error', err.message || 'Failed to verify OTP.');
+
+      if (err.status === 401) {
+        clearPersistedChallenge();
+      }
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  function handleBack() {
+    if (state.busy) return;
+
+    clearBanner();
+    clearPersistedChallenge();
+
+    state.challengeToken = '';
+    els.otp.value = '';
+    els.manualKey.value = '';
+    els.qrImage.removeAttribute('src');
+
+    setMode('verify');
+    setStep(1);
+  }
+
+  function restoreChallengeIfPresent() {
+    const saved = readPersistedChallenge();
+    if (!saved || !saved.challengeToken) return;
+
+    const age = Date.now() - Number(saved.createdAt || 0);
+    if (age <= 0 || age > 5 * 60 * 1000) {
+      clearPersistedChallenge();
+      return;
+    }
+
+    state.challengeToken = String(saved.challengeToken).trim();
+
+    if (saved.email) els.email.value = saved.email;
+
+    if (saved.mode === 'setup') {
+      setMode('setup');
+      els.manualKey.value = String(saved.manualKey || '');
+      if (saved.qrDataUrl) els.qrImage.src = saved.qrDataUrl;
+      showBanner('info', 'Restored pending 2FA setup.');
+    } else {
+      setMode('verify');
+      showBanner('info', 'Restored pending 2FA verification.');
+    }
+
+    setStep(2);
+  }
+
+  function togglePassword() {
+    const show = els.password.type === 'password';
+    els.password.type = show ? 'text' : 'password';
+    document.getElementById('togglePasswordText').textContent = show ? 'Hide' : 'Show';
+  }
+
+  document.addEventListener('DOMContentLoaded', async function () {
+    state.fingerprint = await getStableFingerprint();
+
+    els.loginForm.addEventListener('submit', handleStartLogin);
+    els.otpForm.addEventListener('submit', handleVerifyOtp);
+    els.backBtn.addEventListener('click', handleBack);
+    els.togglePasswordBtn.addEventListener('click', togglePassword);
+    els.otp.addEventListener('input', () => {
+      els.otp.value = normalizeOtp(els.otp.value);
+    });
+
+    setMode('verify');
+    setStep(1);
+    restoreChallengeIfPresent();
+  });
+})();
+</script>
+</body>
+</html>

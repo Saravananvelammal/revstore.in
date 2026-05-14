@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Revstore HR Dashboard</title>
+  <meta name="robots" content="noindex,nofollow,noarchive,nosnippet" />
+  <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+
+  <style>
+    :root{--bg1:#4318b8;--bg2:#7e22ce;--bg3:#c026d3;--card:rgba(255,255,255,.96);--text:#1e1b4b;--muted:#6b7280;--line:rgba(30,27,75,.12);--primary:#5b21b6;--danger:#dc2626;--success:#059669;--shadow:0 18px 60px rgba(49,12,120,.25);--radius:24px}
+    *{box-sizing:border-box}
+    body{margin:0;min-height:100vh;padding:22px;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;color:var(--text);background:linear-gradient(135deg,var(--bg1),var(--bg2),var(--bg3))}
+    .app{max-width:1150px;margin:0 auto;display:grid;gap:18px}
+    .topbar{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;color:#fff}
+    h1{margin:0;font-size:2rem;font-weight:900}.sub{margin:8px 0 0;color:rgba(255,255,255,.86)}
+    .actions{display:flex;gap:10px;flex-wrap:wrap}
+    .btn{height:48px;padding:0 18px;border-radius:16px;border:1px solid var(--line);cursor:pointer;font-weight:850;background:#fff;color:var(--text)}
+    .btn-primary{border:0;color:#fff;background:linear-gradient(135deg,#5b21b6,#7c3aed,#a21caf)}
+    .btn-danger{border:0;color:#fff;background:linear-gradient(135deg,#dc2626,#b91c1c)}
+    .panel{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:24px}
+    .welcome{background:linear-gradient(135deg,#5b21b6,#a21caf);color:#fff;border-radius:22px;padding:26px;margin-bottom:20px}
+    .welcome h2{margin:0;font-size:1.8rem}.welcome p{margin:10px 0 0;color:rgba(255,255,255,.88);line-height:1.6}
+    .stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-bottom:20px}
+    .stat{background:#fff;border:1px solid var(--line);border-radius:20px;padding:18px}
+    .stat-title{font-size:.8rem;font-weight:900;text-transform:uppercase;letter-spacing:.06em;color:#4c1d95}
+    .stat-number{margin-top:10px;font-size:1.8rem;font-weight:950;color:var(--text)}
+    .stat-note{margin-top:4px;color:var(--muted);font-size:.86rem}
+    .quick-actions{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px}
+    .grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+    .tile{min-height:160px;border:1px solid var(--line);border-radius:22px;background:#fff;display:grid;place-items:center;text-align:center;padding:20px;cursor:pointer;transition:.16s ease;text-decoration:none;color:var(--text)}
+    .tile:hover{transform:translateY(-2px);box-shadow:0 16px 34px rgba(91,33,182,.16)}
+    .icon{font-size:2.4rem;margin-bottom:12px}.tile h3{margin:0;font-size:1.15rem;letter-spacing:.04em;text-transform:uppercase}.tile p{margin:8px 0 0;color:var(--muted);font-size:.92rem}
+    .banner{display:none;padding:14px 16px;border-radius:16px;margin-bottom:14px}.banner.show{display:block}.banner.error{background:rgba(239,68,68,.12);color:#7f1d1d}.banner.success{background:rgba(16,185,129,.12);color:#065f46}
+    @media(max-width:900px){.topbar{flex-direction:column}.stats,.grid{grid-template-columns:1fr}}
+  </style>
+</head>
+
+<body>
+<main class="app">
+  <header class="topbar">
+    <div>
+      <h1>Revstore HR Dashboard</h1>
+      <p class="sub">Secure human resource web dashboard with session-based access.</p>
+    </div>
+    <div class="actions">
+      <button id="refreshBtn" class="btn btn-primary">Refresh</button>
+      <button id="logoutBtn" class="btn">Logout</button>
+    </div>
+  </header>
+
+  <section class="panel">
+    <div id="banner" class="banner"></div>
+
+    <div class="welcome">
+      <h2 id="welcomeTitle">Welcome, HR</h2>
+      <p id="welcomeSub">Manage marketing executives, recruitment targets, profile, and wallet overview.</p>
+    </div>
+
+    <div class="stats">
+      <div class="stat">
+        <div class="stat-title">Retailers</div>
+        <div id="retailerCount" class="stat-number">0</div>
+        <div class="stat-note">Recruitment / assigned count</div>
+      </div>
+
+      <div class="stat">
+        <div class="stat-title">Marketing Executives</div>
+        <div id="marketingCount" class="stat-number">0</div>
+        <div class="stat-note">Members added by HR</div>
+      </div>
+
+      <div class="stat">
+        <div class="stat-title">Riders</div>
+        <div id="riderCount" class="stat-number">0</div>
+        <div class="stat-note">Recruitment / assigned count</div>
+      </div>
+
+      <div class="stat">
+        <div class="stat-title">Wallet Balance</div>
+        <div id="walletBalance" class="stat-number">₹0.00</div>
+        <div id="walletNote" class="stat-note">Unlocked</div>
+      </div>
+    </div>
+
+    <div class="quick-actions">
+      <button id="profileBtn" class="btn btn-primary">Profile</button>
+      <button id="removeHrBtn" class="btn btn-danger">Remove HR</button>
+    </div>
+
+    <div class="grid">
+      <a class="tile" href="./marketingexecutive">
+        <div>
+          <div class="icon">📣</div>
+          <h3>Marketing Executive</h3>
+          <p>Add, update, view, delete, and restore marketing executives.</p>
+        </div>
+      </a>
+
+      <a class="tile" href="./profile">
+        <div>
+          <div class="icon">👤</div>
+          <h3>Profile</h3>
+          <p>View and update HR profile, bank, and document details.</p>
+        </div>
+      </a>
+
+      <a class="tile" href="./wallet">
+        <div>
+          <div class="icon">💰</div>
+          <h3>Wallet</h3>
+          <p>View wallet balance and payout-related information.</p>
+        </div>
+      </a>
+    </div>
+  </section>
+</main>
+
+<script>
+(function () {
+  'use strict';
+
+  const CONFIG = {
+    API_BASE: typeof window.HR_WEB_API_BASE === 'string' && window.HR_WEB_API_BASE.trim()
+      ? window.HR_WEB_API_BASE.trim().replace(/\/+$/, '')
+      : 'https://api.revstore.in/api/human-resource-web/v1',
+    LOGIN_URL: typeof window.HR_WEB_LOGIN_URL === 'string' && window.HR_WEB_LOGIN_URL.trim()
+      ? window.HR_WEB_LOGIN_URL.trim()
+      : '/hr/login',
+    PROFILE_URL: '/hr/profile',
+    FINGERPRINT_STORAGE_KEY: 'hr_web_fp_v1'
+  };
+
+  const els = {
+    banner: document.getElementById('banner'),
+    welcomeTitle: document.getElementById('welcomeTitle'),
+    welcomeSub: document.getElementById('welcomeSub'),
+    retailerCount: document.getElementById('retailerCount'),
+    marketingCount: document.getElementById('marketingCount'),
+    riderCount: document.getElementById('riderCount'),
+    walletBalance: document.getElementById('walletBalance'),
+    walletNote: document.getElementById('walletNote'),
+    refreshBtn: document.getElementById('refreshBtn'),
+    logoutBtn: document.getElementById('logoutBtn'),
+    profileBtn: document.getElementById('profileBtn'),
+    removeHrBtn: document.getElementById('removeHrBtn')
+  };
+
+  const state = { fingerprint: '' };
+
+  function showBanner(type, msg) {
+    els.banner.className = 'banner show ' + type;
+    els.banner.textContent = msg || '';
+  }
+
+  function clearBanner() {
+    els.banner.className = 'banner';
+    els.banner.textContent = '';
+  }
+
+  function getCookie(name) {
+    const target = name + '=';
+    const found = String(document.cookie || '')
+      .split(';')
+      .map(v => v.trim())
+      .find(v => v.indexOf(target) === 0);
+    return found ? decodeURIComponent(found.slice(target.length)) : '';
+  }
+
+  async function sha256Hex(input) {
+    const data = new TextEncoder().encode(String(input));
+    const digest = await crypto.subtle.digest('SHA-256', data);
+    return Array.from(new Uint8Array(digest)).map(b => b.toString(16).padStart(2, '0')).join('');
+  }
+
+  async function getStableFingerprint() {
+    try {
+      const existing = localStorage.getItem(CONFIG.FINGERPRINT_STORAGE_KEY);
+      if (existing && existing.trim()) return existing.trim().slice(0, 200);
+    } catch (_) {}
+
+    const raw = [
+      navigator.userAgent || '',
+      navigator.language || '',
+      screen.width || '',
+      screen.height || '',
+      screen.colorDepth || '',
+      Intl.DateTimeFormat().resolvedOptions().timeZone || '',
+      navigator.platform || '',
+      crypto.getRandomValues(new Uint32Array(4)).join('-')
+    ].join('|');
+
+    const fp = (await sha256Hex(raw)).slice(0, 64);
+    try { localStorage.setItem(CONFIG.FINGERPRINT_STORAGE_KEY, fp); } catch (_) {}
+    return fp;
+  }
+
+  function redirectToLogin() {
+    window.location.replace(CONFIG.LOGIN_URL);
+  }
+
+  async function apiFetch(path, options) {
+    const headers = new Headers((options && options.headers) || {});
+    headers.set('Accept', 'application/json');
+    headers.set('X-Requested-With', 'XMLHttpRequest');
+
+    if (state.fingerprint) {
+      headers.set('x-device-fingerprint', state.fingerprint);
+    }
+
+    const method = String((options && options.method) || 'GET').toUpperCase();
+    if (!['GET', 'HEAD', 'OPTIONS'].includes(method)) {
+      headers.set('x-csrf-token', getCookie('csrf_token'));
+    }
+
+    const res = await fetch(CONFIG.API_BASE + path, {
+      ...(options || {}),
+      headers,
+      credentials: 'include',
+      cache: 'no-store',
+      redirect: 'follow',
+      referrerPolicy: 'strict-origin-when-cross-origin'
+    });
+
+    let data = {};
+    try { data = await res.json(); } catch (_) {}
+
+    if (res.status === 401 || res.status === 403) {
+      throw Object.assign(new Error(data.message || 'Session expired.'), { status: res.status });
+    }
+
+    if (!res.ok) {
+      throw Object.assign(new Error(data.message || 'Request failed.'), { status: res.status, data });
+    }
+
+    return data;
+  }
+
+  function money(value) {
+    const n = Number(value || 0);
+    return '₹' + n.toFixed(2);
+  }
+
+  function getWallet(profile) {
+    const wallet = profile.wallet || {};
+    const balanceInr =
+      wallet.balanceInr != null
+        ? Number(wallet.balanceInr)
+        : wallet.balance != null
+          ? Number(wallet.balance) / 100
+          : 0;
+
+    return {
+      balanceInr,
+      locked: Boolean(wallet.locked)
+    };
+  }
+
+  async function loadDashboard() {
+    clearBanner();
+
+    try {
+      const meData = await apiFetch('/auth/me', { method: 'GET' });
+      const profileData = await apiFetch('/profile', { method: 'GET' });
+      const marketingData = await apiFetch('/marketing-executives', { method: 'GET' });
+
+      const me = meData.humanResource || {};
+      const profile = profileData.humanResource || {};
+      const marketingExecutives = Array.isArray(marketingData.marketingExecutives)
+        ? marketingData.marketingExecutives
+        : [];
+
+      const name = String(me.name || profile.name || 'HR').trim();
+      els.welcomeTitle.textContent = 'Welcome, ' + name;
+
+      const targets = profile.targets || {};
+      const perDay = targets.perDay || {};
+      const monthly = targets.monthly || {};
+
+      els.retailerCount.textContent = Number(profile.retailerCount || profile.recruitedRetailers || 0);
+      els.marketingCount.textContent = marketingExecutives.length;
+      els.riderCount.textContent = Number(profile.riderCount || profile.recruitedRiders || perDay.riders || 0);
+
+      const wallet = getWallet(profile);
+      els.walletBalance.textContent = money(wallet.balanceInr);
+      els.walletNote.textContent = wallet.locked ? 'Locked' : 'Unlocked';
+
+      els.welcomeSub.textContent =
+        'Monthly target: ME ' + Number(monthly.marketingExecutives || 0) +
+        ', Riders ' + Number(monthly.riders || 0) + '.';
+    } catch (err) {
+      if (err.status === 401 || err.status === 403) {
+        showBanner('error', 'Session expired. Redirecting to login...');
+        setTimeout(redirectToLogin, 600);
+        return;
+      }
+
+      showBanner('error', err.message || 'Failed to load dashboard.');
+    }
+  }
+
+  async function logout() {
+    try {
+      await apiFetch('/auth/logout', { method: 'POST' });
+    } catch (_) {}
+    redirectToLogin();
+  }
+
+  function removeHr() {
+    showBanner('error', 'Remove HR must be done by Admin from Admin Dashboard.');
+  }
+
+  document.addEventListener('DOMContentLoaded', async function () {
+    state.fingerprint = await getStableFingerprint();
+
+    els.refreshBtn.addEventListener('click', loadDashboard);
+    els.logoutBtn.addEventListener('click', logout);
+    els.profileBtn.addEventListener('click', () => window.location.href = CONFIG.PROFILE_URL);
+    els.removeHrBtn.addEventListener('click', removeHr);
+
+    await loadDashboard();
+  });
+})();
+</script>
+</body>
+</html>
