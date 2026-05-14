@@ -381,6 +381,22 @@
     els.form.elements.email.disabled = Boolean(item);
     els.form.elements.password.required = !item;
 
+    const addMode = !item;
+
+    [
+      'dateOfBirth',
+      'personalMobile',
+      'emergencyContactNumber',
+      'address',
+      'aadhaarNumber',
+      'panNumber',
+      'upiId'
+    ].forEach((name) => {
+      if (els.form.elements[name]) {
+        els.form.elements[name].required = !addMode;
+      }
+    });
+
     if (item) {
       for (const key of [
         'name','email','role','designation','personalMobile','officeMobile',
@@ -429,6 +445,14 @@
     const edit = Boolean(id);
     const fd = new FormData(els.form);
     cleanFiles(fd);
+
+    if (!edit) {
+      for (const [key] of Array.from(fd.entries())) {
+        if (!['name', 'email', 'password'].includes(key)) {
+          fd.delete(key);
+        }
+      }
+    }
 
     if (edit) {
       fd.delete('email');
