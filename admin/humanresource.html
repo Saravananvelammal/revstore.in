@@ -152,11 +152,26 @@
 (function () {
   'use strict';
 
+  window.addEventListener('error', function (e) {
+    const banner = document.getElementById('banner');
+    const rows = document.getElementById('hrRows');
+    if (banner) {
+      banner.className = 'banner show error';
+      banner.textContent = 'Page JS error: ' + (e.message || 'Unknown error');
+    }
+    if (rows) rows.innerHTML = '<tr><td colspan="9" class="muted">Page script error. Check console.</td></tr>';
+  });
+
   const CONFIG = {
-    API_BASE: window.ADMIN_WEB_API_BASE?.trim() ? window.ADMIN_WEB_API_BASE.trim().replace(/\/+$/, '') : 'https://api.revstore.in/api/admin-web/v1',
-    LOGIN_URL: window.ADMIN_WEB_LOGIN_URL?.trim() || '/admin/login',
-    DASHBOARD_URL: window.ADMIN_DASHBOARD_URL?.trim() || '/admin',
-    FINGERPRINT_STORAGE_KEY: 'admin_web_fp_v1'
+    API_BASE: (window.ADMIN_WEB_API_BASE && window.ADMIN_WEB_API_BASE.trim())
+      ? window.ADMIN_WEB_API_BASE.trim().replace(/\/+$/, '')
+      : 'https://api.revstore.in/api/admin-web/v1',
+    LOGIN_URL: (window.ADMIN_WEB_LOGIN_URL && window.ADMIN_WEB_LOGIN_URL.trim())
+      ? window.ADMIN_WEB_LOGIN_URL.trim()
+      : '/admin/login',
+    DASHBOARD_URL: (window.ADMIN_DASHBOARD_URL && window.ADMIN_DASHBOARD_URL.trim())
+      ? window.ADMIN_DASHBOARD_URL.trim()
+      : '/admin'
   };
 
   const els = {
@@ -171,20 +186,20 @@
     backBtn: document.getElementById('backBtn'),
     addBtn: document.getElementById('addBtn'),
     modal: document.getElementById('hrModal'),
-    modalTitle: document.getElementById('modalTitle'),
-    closeModalBtn: document.getElementById('closeModalBtn'),
-    cancelBtn: document.getElementById('cancelBtn'),
     form: document.getElementById('hrForm'),
     hrId: document.getElementById('hrId'),
-    passwordHint: document.getElementById('passwordHint'),
-    saveBtn: document.getElementById('saveBtn')
+    saveBtn: document.getElementById('saveBtn'),
+    closeModalBtn: document.getElementById('closeModalBtn'),
+    cancelBtn: document.getElementById('cancelBtn'),
+    modalTitle: document.getElementById('modalTitle'),
+    passwordHint: document.getElementById('passwordHint')
   };
 
-  const state = { fingerprint: '', items: [], busy: false };
+  const state = { items: [], busy: false };
 
-  function showBanner(type, message) {
+  function banner(type, msg) {
     els.banner.className = 'banner show ' + type;
-    els.banner.textContent = message || '';
+    els.banner.textContent = msg || '';
   }
 
   function clearBanner() {
@@ -193,57 +208,37 @@
   }
 
   function getCookie(name) {
-    const target = String(name || '') + '=';
-    return String(document.cookie || '').split(';').map(v => v.trim()).find(v => v.indexOf(target) === 0)?.slice(target.length) || '';
+    const target = name + '=';
+    const found = String(document.cookie || '')
+      .split(';')
+      .map(v => v.trim())
+      .find(v => v.indexOf(target) === 0);
+    return found ? decodeURIComponent(found.slice(target.length)) : '';
   }
 
-  function fallbackFingerprint() {
-    return ('fp_' + navigator.userAgent + '' + screen.width + '' + screen.height).slice(0, 200);
-  }
+  async function apiFetch(path, options) {
+    const headers = new Headers((options && options.headers) || {});
+    headers.set('Accept', 'application/json');
+    headers.set('X-Requested-With', 'XMLHttpRequest');
 
-  async function getStableFingerprint() {
-    try {
-      const existing = localStorage.getItem(CONFIG.FINGERPRINT_STORAGE_KEY);
-      if (existing) return existing.slice(0, 200);
+    const method = String((options && options.method) || 'GET').toUpperCase();
+    const body = options && options.body;
+    const isFormData = body instanceof FormData;
 
-      if (!window.crypto?.subtle || !window.TextEncoder) {
-        const fp = fallbackFingerprint();
-        localStorage.setItem(CONFIG.FINGERPRINT_STORAGE_KEY, fp);
-        return fp;
-      }
-
-      const raw = [navigator.userAgent, navigator.language, screen.width, screen.height, screen.colorDepth, Intl.DateTimeFormat().resolvedOptions().timeZone, navigator.platform].join('|');
-      const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(raw));
-      const fp = Array.from(new Uint8Array(digest)).map(b => b.toString(16).padStart(2, '0')).join('').slice(0, 64);
-      localStorage.setItem(CONFIG.FINGERPRINT_STORAGE_KEY, fp);
-      return fp;
-    } catch (_) {
-      return fallbackFingerprint();
+    if (!isFormData && body && !headers.has('Content-Type')) {
+      headers.set('Content-Type', 'application/json');
     }
-  }
 
-  function redirectToLogin() {
-    window.location.replace(CONFIG.LOGIN_URL);
-  }
+    if (!['GET', 'HEAD', 'OPTIONS'].includes(method)) {
+      headers.set('x-csrf-token', getCookie('csrf_token'));
+    }
 
-  async function apiFetch(path, options = {}) {
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), 20000);
 
     try {
-      const headers = new Headers(options.headers || {});
-      headers.set('Accept', 'application/json');
-      headers.set('X-Requested-With', 'XMLHttpRequest');
-      if (state.fingerprint) headers.set('x-device-fingerprint', state.fingerprint);
-
-      const isFormData = options.body instanceof FormData;
-      if (!isFormData && options.body && !headers.has('Content-Type')) headers.set('Content-Type', 'application/json');
-
-      const method = String(options.method || 'GET').toUpperCase();
-      if (!['GET', 'HEAD', 'OPTIONS'].includes(method)) headers.set('x-csrf-token', getCookie('csrf_token'));
-
       const res = await fetch(CONFIG.API_BASE + path, {
-        ...options,
+        ...(options || {}),
         headers,
         credentials: 'include',
         cache: 'no-store',
@@ -254,13 +249,13 @@
       try { data = await res.json(); } catch (_) {}
 
       if (res.status === 401 || res.status === 403) {
-        showBanner('error', data.message || 'Session expired. Redirecting to login...');
-        setTimeout(redirectToLogin, 700);
+        banner('error', data.message || 'Session expired. Redirecting...');
+        setTimeout(() => window.location.replace(CONFIG.LOGIN_URL), 700);
         throw new Error(data.message || 'Unauthorized');
       }
 
       if (!res.ok) {
-        const err = new Error(data.message || 'Request failed.');
+        const err = new Error(data.message || ('HTTP ' + res.status));
         err.data = data;
         err.status = res.status;
         throw err;
@@ -273,39 +268,61 @@
   }
 
   function esc(v) {
-    return String(v ?? '').replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
+    return String(v == null ? '' : v).replace(/[&<>"']/g, c => ({
+      '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;'
+    }[c]));
   }
 
-  function imageUrl(path) {
-    const p = String(path || '').trim();
-    if (!p) return '';
-    if (/^https?:\/\//i.test(p) || p.startsWith('data:')) return p;
-    if (p.startsWith('/')) return p;
-    return '/' + p.replace(/^\/+/, '');
+  function qs() {
+    const parts = String(els.sort.value || 'createdAt:desc').split(':');
+    const p = new URLSearchParams();
+
+    if (els.search.value.trim()) p.set('q', els.search.value.trim());
+    if (els.status.value) p.set('status', els.status.value);
+    if (els.deleted.value === 'with') p.set('includeDeleted', 'true');
+    if (els.deleted.value === 'only') p.set('deleted', 'only');
+
+    p.set('sort', parts[0] || 'createdAt');
+    p.set('order', parts[1] || 'desc');
+
+    return '?' + p.toString();
   }
 
-  function fmtMoney(wallet) {
-    const inr = Number(wallet?.balanceInr ?? (Number(wallet?.balance || 0) / 100));
-    return '₹' + inr.toFixed(2);
+  function money(wallet) {
+    const value = Number(wallet && wallet.balanceInr != null ? wallet.balanceInr : 0);
+    return '₹' + value.toFixed(2);
   }
 
-  function dobToInput(v) {
-    if (!v) return '';
-    const d = new Date(v);
-    if (Number.isNaN(d.getTime())) return '';
-    return d.toISOString().slice(0, 10);
-  }
+  function render() {
+    if (!state.items.length) {
+      els.rows.innerHTML = '<tr><td colspan="9" class="muted">No human resources found.</td></tr>';
+      return;
+    }
 
-  function appendQuery() {
-    const [sort, order] = String(els.sort.value || 'createdAt:desc').split(':');
-    const qs = new URLSearchParams();
-    if (els.search.value.trim()) qs.set('q', els.search.value.trim());
-    if (els.status.value) qs.set('status', els.status.value);
-    if (els.deleted.value === 'with') qs.set('includeDeleted', 'true');
-    if (els.deleted.value === 'only') qs.set('deleted', 'only');
-    qs.set('sort', sort || 'createdAt');
-    qs.set('order', order || 'desc');
-    return '?' + qs.toString();
+    els.rows.innerHTML = state.items.map(hr => {
+      const deleted = hr.isDeleted === true;
+      const status = String(hr.status || '').toLowerCase();
+      const pd = (hr.targets && hr.targets.perDay) || {};
+      const mo = (hr.targets && hr.targets.monthly) || {};
+
+      const action = deleted
+        ? <button class="btn btn-success btn-small" data-action="restore" data-id="${esc(hr._id)}">Restore</button>
+        : <button class="btn btn-danger btn-small" data-action="delete" data-id="${esc(hr._id)}">Delete</button>;
+
+      return `
+        <tr>
+          <td>${hr.profileImage ? `<img class="img-preview" src="${esc(hr.profileImage)}" alt="">` : '<span class="muted">No image</span>'}</td>
+          <td><strong>${esc(hr.name || '-')}</strong><br><span class="muted">${esc(hr.designation || '')}</span><br><span class="muted">${esc(hr.role || '')}</span></td>
+          <td>${esc(hr.email || '-')}<br><span class="muted">${esc(hr.personalMobile || '')}</span></td>
+          <td>${esc(hr.area || '')}, ${esc(hr.city || '')}<br><span class="muted">${esc(hr.state || '')}</span></td>
+          <td>Day: ME ${Number(pd.marketingExecutives || 0)}, Rider ${Number(pd.riders || 0)}<br><span class="muted">Month: ME ${Number(mo.marketingExecutives || 0)}, Rider ${Number(mo.riders || 0)}</span></td>
+          <td>${money(hr.wallet)}<br><span class="muted">${hr.wallet && hr.wallet.locked ? 'Locked' : 'Unlocked'}</span></td>
+          <td><span class="pill ${esc(status)}">${esc(status || '-')}</span>${deleted ? '<br><span class="muted">Deleted</span>' : ''}</td>
+          <td>${esc(hr.addedBy && hr.addedBy.kind || '-')}</td>
+          <td><div class="row-actions"><button class="btn btn-small" data-action="edit" data-id="${esc(hr._id)}">Edit</button>${action}</div></td>
+        </tr>
+      `;
+    }).join('');
   }
 
   async function loadHumanResources() {
@@ -313,119 +330,47 @@
     els.rows.innerHTML = '<tr><td colspan="9" class="muted">Loading...</td></tr>';
 
     try {
-      const data = await apiFetch('/human-resources' + appendQuery(), { method: 'GET' });
+      const data = await apiFetch('/human-resources' + qs(), { method: 'GET' });
       state.items = Array.isArray(data.humanResources) ? data.humanResources : [];
-      renderRows();
+      render();
     } catch (err) {
       els.rows.innerHTML = '<tr><td colspan="9" class="muted">Failed to load human resources.</td></tr>';
-      showBanner('error', err.name === 'AbortError' ? 'Request timeout. Check API, route, CORS, or session.' : err.message);
+      banner('error', err.name === 'AbortError'
+        ? 'Request timeout: /human-resources not responding.'
+        : 'Fetch failed: ' + (err.message || 'Unknown error'));
     }
   }
 
-  function renderRows() {
-    if (!state.items.length) {
-      els.rows.innerHTML = '<tr><td colspan="9" class="muted">No human resources found.</td></tr>';
-      return;
-    }
-
-    els.rows.innerHTML = state.items.map(hr => {
-      const img = imageUrl(hr.profileImage || hr.documentImages?.profile);
-      const status = String(hr.status || '').toLowerCase();
-      const deleted = hr.isDeleted === true;
-      const pd = hr.targets?.perDay || {};
-      const mo = hr.targets?.monthly || {};
-      const actionButton = deleted
-        ? <button class="btn btn-success btn-small" data-action="restore" data-id="${esc(hr._id)}">Restore</button>
-        : <button class="btn btn-danger btn-small" data-action="delete" data-id="${esc(hr._id)}">Delete</button>;
-
-      return `
-        <tr>
-          <td>${img ? `<img class="img-preview" src="${esc(img)}" alt="">` : '<span class="muted">No image</span>'}</td>
-          <td><strong>${esc(hr.name || '-')}</strong><br><span class="muted">${esc(hr.designation || '')}</span><br><span class="muted">${esc(hr.role || '')}</span></td>
-          <td>${esc(hr.email || '-')}<br><span class="muted">${esc(hr.personalMobile || '')}</span></td>
-          <td>${esc(hr.area || '')}, ${esc(hr.city || '')}<br><span class="muted">${esc(hr.state || '')}</span></td>
-          <td>Day: ME ${Number(pd.marketingExecutives || 0)}, Rider ${Number(pd.riders || 0)}<br><span class="muted">Month: ME ${Number(mo.marketingExecutives || 0)}, Rider ${Number(mo.riders || 0)}</span></td>
-          <td>${fmtMoney(hr.wallet)}<br><span class="muted">${hr.wallet?.locked ? 'Locked' : 'Unlocked'}</span></td>
-          <td><span class="pill ${esc(status)}">${esc(status || '-')}</span>${deleted ? '<br><span class="muted">Deleted</span>' : ''}</td>
-          <td>${esc(hr.addedBy?.kind || '-')}<br><span class="muted">${esc(hr.addedBy?.id || '')}</span></td>
-          <td><div class="row-actions"><button class="btn btn-small" data-action="edit" data-id="${esc(hr._id)}">Edit</button>${actionButton}</div></td>
-        </tr>`;
-    }).join('');
-  }
-
-  function setFormValue(name, value) {
-    const el = els.form.elements[name];
-    if (el) el.value = value ?? '';
-  }
-
-  function setRequired(name, required) {
-    const el = els.form.elements[name];
-    if (el) el.required = Boolean(required);
-  }
-
-  function openModal(mode, item) {
-    clearBanner();
+  function openModal(item) {
     els.form.reset();
-
-    const isEdit = mode === 'edit';
-    els.hrId.value = item?._id || '';
-    els.modalTitle.textContent = isEdit ? 'Edit Human Resource' : 'Add Human Resource';
-    els.passwordHint.textContent = isEdit ? '(optional)' : '*';
-
-    els.form.elements.email.disabled = isEdit;
-    els.form.elements.password.required = !isEdit;
-
-    setRequired('aadhaarNumber', !isEdit);
-    setRequired('aadhaarFrontImage', !isEdit);
-    setRequired('aadhaarBackImage', !isEdit);
-    setRequired('panFrontImage', !isEdit);
+    els.hrId.value = item ? item._id : '';
+    els.modalTitle.textContent = item ? 'Edit Human Resource' : 'Add Human Resource';
+    els.passwordHint.textContent = item ? '(optional)' : '*';
+    els.form.elements.email.disabled = Boolean(item);
+    els.form.elements.password.required = !item;
 
     if (item) {
-      setFormValue('name', item.name);
-      setFormValue('email', item.email);
-      setFormValue('role', item.role || 'hr');
-      setFormValue('designation', item.designation || 'Human Resource Executive');
-      setFormValue('dateOfBirth', dobToInput(item.dateOfBirth));
-      setFormValue('personalMobile', item.personalMobile);
-      setFormValue('officeMobile', item.officeMobile);
-      setFormValue('emergencyContactNumber', item.emergencyContactNumber);
-      setFormValue('bloodGroup', item.bloodGroup);
-      setFormValue('address', item.address);
-      setFormValue('addressLine1', item.addressLine1);
-      setFormValue('addressLine2', item.addressLine2);
-      setFormValue('area', item.area || 'Ambattur');
-      setFormValue('city', item.city || 'Chennai');
-      setFormValue('state', item.state || 'Tamil Nadu');
-      setFormValue('postalCode', item.postalCode);
-      setFormValue('country', item.country || 'India');
-      setFormValue('upiId', item.upiId);
-      setFormValue('bankName', item.bank?.name);
-      setFormValue('bankIfsc', item.bank?.ifsc);
-      setFormValue('perDayMarketingExecutives', item.targets?.perDay?.marketingExecutives ?? 1);
-      setFormValue('perDayRiders', item.targets?.perDay?.riders ?? 2);
-      setFormValue('monthlyMarketingExecutives', item.targets?.monthly?.marketingExecutives ?? 30);
-      setFormValue('monthlyRiders', item.targets?.monthly?.riders ?? 60);
-      setFormValue('loginHoursPerDay', item.loginHoursPerDay ?? 8);
-      setFormValue('allowedLoginStartTime', item.allowedLoginStartTime || '09:00');
-      setFormValue('allowedLoginEndTime', item.allowedLoginEndTime || '18:00');
-      setFormValue('timezone', item.timezone || 'Asia/Kolkata');
-      setFormValue('status', item.status || 'active');
-    } else {
-      setFormValue('role', 'hr');
-      setFormValue('designation', 'Human Resource Executive');
-      setFormValue('area', 'Ambattur');
-      setFormValue('city', 'Chennai');
-      setFormValue('state', 'Tamil Nadu');
-      setFormValue('country', 'India');
-      setFormValue('perDayMarketingExecutives', 1);
-      setFormValue('perDayRiders', 2);
-      setFormValue('monthlyMarketingExecutives', 30);
-      setFormValue('monthlyRiders', 60);
-      setFormValue('loginHoursPerDay', 8);
-      setFormValue('allowedLoginStartTime', '09:00');
-      setFormValue('allowedLoginEndTime', '18:00');
-      setFormValue('timezone', 'Asia/Kolkata');
-      setFormValue('status', 'active');
+      for (const key of [
+        'name','email','role','designation','personalMobile','officeMobile',
+        'emergencyContactNumber','bloodGroup','address','addressLine1',
+        'addressLine2','area','city','state','postalCode','country',
+        'upiId','loginHoursPerDay','allowedLoginStartTime','allowedLoginEndTime',
+        'timezone','status'
+      ]) {
+        if (els.form.elements[key]) els.form.elements[key].value = item[key] || '';
+      }
+
+      if (item.dateOfBirth && els.form.elements.dateOfBirth) {
+        const d = new Date(item.dateOfBirth);
+        els.form.elements.dateOfBirth.value = Number.isNaN(d.getTime()) ? '' : d.toISOString().slice(0, 10);
+      }
+
+      if (els.form.elements.bankName) els.form.elements.bankName.value = item.bank && item.bank.name || '';
+      if (els.form.elements.bankIfsc) els.form.elements.bankIfsc.value = item.bank && item.bank.ifsc || '';
+      if (els.form.elements.perDayMarketingExecutives) els.form.elements.perDayMarketingExecutives.value = item.targets && item.targets.perDay && item.targets.perDay.marketingExecutives || 1;
+      if (els.form.elements.perDayRiders) els.form.elements.perDayRiders.value = item.targets && item.targets.perDay && item.targets.perDay.riders || 2;
+      if (els.form.elements.monthlyMarketingExecutives) els.form.elements.monthlyMarketingExecutives.value = item.targets && item.targets.monthly && item.targets.monthly.marketingExecutives || 30;
+      if (els.form.elements.monthlyRiders) els.form.elements.monthlyRiders.value = item.targets && item.targets.monthly && item.targets.monthly.riders || 60;
     }
 
     els.modal.classList.add('show');
@@ -438,78 +383,42 @@
     els.form.elements.email.disabled = false;
   }
 
-  function cleanEmptyFiles(formData) {
-    for (const [key, value] of Array.from(formData.entries())) {
-      if (value instanceof File && !value.name) formData.delete(key);
+  function cleanFiles(fd) {
+    for (const [k, v] of Array.from(fd.entries())) {
+      if (v instanceof File && !v.name) fd.delete(k);
     }
   }
 
-  function validateForm(fd, isEdit) {
-    const required = ['name', 'personalMobile', 'emergencyContactNumber', 'address', 'dateOfBirth', 'panNumber', 'upiId'];
-    if (!isEdit) required.push('email', 'password', 'aadhaarNumber');
-
-    for (const key of required) {
-      if (!String(fd.get(key) || '').trim()) return key + ' is required.';
-    }
-
-    const password = String(fd.get('password') || '').trim();
-    if (!isEdit && password.length < 8) return 'Password must be at least 8 characters.';
-    if (isEdit && password && password.length < 8) return 'Password must be at least 8 characters.';
-
-    if (!/^[6-9][0-9]{9}$/.test(String(fd.get('personalMobile') || '').trim())) return 'Invalid personal mobile number.';
-    if (!/^[6-9][0-9]{9}$/.test(String(fd.get('emergencyContactNumber') || '').trim())) return 'Invalid emergency contact number.';
-
-    const officeMobile = String(fd.get('officeMobile') || '').trim();
-    if (officeMobile && !/^[6-9][0-9]{9}$/.test(officeMobile)) return 'Invalid office mobile number.';
-
-    const pin = String(fd.get('postalCode') || '').trim();
-    if (pin && !/^[1-9][0-9]{5}$/.test(pin)) return 'Invalid postal code.';
-
-    const aadhaar = String(fd.get('aadhaarNumber') || '').trim();
-    if (aadhaar && !/^[0-9]{12}$/.test(aadhaar)) return 'Invalid Aadhaar number.';
-
-    const pan = String(fd.get('panNumber') || '').trim().toUpperCase();
-    if (!/^[A-Z]{5}[0-9]{4}[A-Z]$/.test(pan)) return 'Invalid PAN number.';
-
-    const ifsc = String(fd.get('bankIfsc') || '').trim().toUpperCase();
-    if (ifsc && !/^[A-Z]{4}0[A-Z0-9]{6}$/.test(ifsc)) return 'Invalid IFSC code.';
-
-    return '';
-  }
-
-  async function submitForm(e) {
+  async function save(e) {
     e.preventDefault();
     if (state.busy) return;
 
     const id = els.hrId.value.trim();
-    const isEdit = Boolean(id);
+    const edit = Boolean(id);
     const fd = new FormData(els.form);
-    cleanEmptyFiles(fd);
+    cleanFiles(fd);
 
-    if (isEdit) {
+    if (edit) {
       fd.delete('email');
       if (!String(fd.get('password') || '').trim()) fd.delete('password');
       if (!String(fd.get('aadhaarNumber') || '').trim()) fd.delete('aadhaarNumber');
     }
 
-    const errMsg = validateForm(fd, isEdit);
-    if (errMsg) return showBanner('error', errMsg);
-
     state.busy = true;
     els.saveBtn.disabled = true;
 
     try {
-      await apiFetch(isEdit ? '/human-resources/' + encodeURIComponent(id) : '/human-resources', {
-        method: isEdit ? 'PUT' : 'POST',
+      await apiFetch(edit ? '/human-resources/' + encodeURIComponent(id) : '/human-resources', {
+        method: edit ? 'PUT' : 'POST',
         body: fd
       });
 
       closeModal();
-      showBanner('success', isEdit ? 'Human resource updated successfully.' : 'Human resource added successfully.');
+      banner('success', edit ? 'Human resource updated.' : 'Human resource added.');
       await loadHumanResources();
     } catch (err) {
-      const errors = err.data?.errors;
-      showBanner('error', errors && typeof errors === 'object' ? Object.values(errors).join(' | ') : (err.message || 'Save failed.'));
+      const errors = err.data && err.data.errors;
+      banner('error', errors ? Object.values(errors).join(' | ') : err.message);
     } finally {
       state.busy = false;
       els.saveBtn.disabled = false;
@@ -521,52 +430,41 @@
     if (!btn) return;
 
     const id = btn.dataset.id;
-    const action = btn.dataset.action;
     const item = state.items.find(x => String(x._id) === String(id));
 
-    try {
-      if (action === 'edit') return openModal('edit', item);
+    if (btn.dataset.action === 'edit') return openModal(item);
 
-      if (action === 'delete') {
+    try {
+      if (btn.dataset.action === 'delete') {
         if (!confirm('Delete this human resource?')) return;
         await apiFetch('/human-resources/' + encodeURIComponent(id), { method: 'DELETE' });
-        showBanner('success', 'Human resource deleted successfully.');
-        return loadHumanResources();
+        banner('success', 'Deleted successfully.');
       }
 
-      if (action === 'restore') {
+      if (btn.dataset.action === 'restore') {
         await apiFetch('/human-resources/' + encodeURIComponent(id) + '/restore', { method: 'PUT' });
-        showBanner('success', 'Human resource restored successfully.');
-        return loadHumanResources();
+        banner('success', 'Restored successfully.');
       }
-    } catch (err) {
-      showBanner('error', err.message || 'Action failed.');
-    }
-  }
-
-  async function bootstrap() {
-    try {
-      state.fingerprint = await getStableFingerprint();
-
-      els.backBtn.addEventListener('click', () => window.location.href = CONFIG.DASHBOARD_URL);
-      els.refreshBtn.addEventListener('click', loadHumanResources);
-      els.applyBtn.addEventListener('click', loadHumanResources);
-      els.addBtn.addEventListener('click', () => openModal('add'));
-      els.closeModalBtn.addEventListener('click', closeModal);
-      els.cancelBtn.addEventListener('click', closeModal);
-      els.form.addEventListener('submit', submitForm);
-      els.rows.addEventListener('click', rowAction);
-      els.search.addEventListener('keydown', e => { if (e.key === 'Enter') loadHumanResources(); });
-      els.modal.addEventListener('click', e => { if (e.target === els.modal) closeModal(); });
 
       await loadHumanResources();
     } catch (err) {
-      els.rows.innerHTML = '<tr><td colspan="9" class="muted">Page script failed.</td></tr>';
-      showBanner('error', err.message || 'Page script failed.');
+      banner('error', err.message || 'Action failed.');
     }
   }
 
-  bootstrap();
+  document.addEventListener('DOMContentLoaded', function () {
+    els.backBtn.addEventListener('click', () => window.location.href = CONFIG.DASHBOARD_URL);
+    els.refreshBtn.addEventListener('click', loadHumanResources);
+    els.applyBtn.addEventListener('click', loadHumanResources);
+    els.addBtn.addEventListener('click', () => openModal(null));
+    els.closeModalBtn.addEventListener('click', closeModal);
+    els.cancelBtn.addEventListener('click', closeModal);
+    els.form.addEventListener('submit', save);
+    els.rows.addEventListener('click', rowAction);
+    els.search.addEventListener('keydown', e => { if (e.key === 'Enter') loadHumanResources(); });
+
+    loadHumanResources();
+  });
 })();
 </script>
 </body>
