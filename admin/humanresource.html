@@ -166,13 +166,43 @@
     API_BASE: (window.ADMIN_WEB_API_BASE && window.ADMIN_WEB_API_BASE.trim())
       ? window.ADMIN_WEB_API_BASE.trim().replace(/\/+$/, '')
       : 'https://api.revstore.in/api/admin-web/v1',
-    LOGIN_URL: (window.ADMIN_WEB_LOGIN_URL && window.ADMIN_WEB_LOGIN_URL.trim())
-      ? window.ADMIN_WEB_LOGIN_URL.trim()
-      : '/admin/login',
-    DASHBOARD_URL: (window.ADMIN_DASHBOARD_URL && window.ADMIN_DASHBOARD_URL.trim())
-      ? window.ADMIN_DASHBOARD_URL.trim()
-      : '/admin'
+    LOGIN_URL: '/admin/login',
+    DASHBOARD_URL: '/admin',
+    FINGERPRINT_STORAGE_KEY: 'admin_web_fp_v1'
   };
+
+  const state = { items: [], busy: false, fingerprint: '' };
+
+  async function sha256Hex(input) {
+    const data = new TextEncoder().encode(String(input));
+    const digest = await crypto.subtle.digest('SHA-256', data);
+    return Array.from(new Uint8Array(digest))
+      .map(b => b.toString(16).padStart(2, '0'))
+      .join('');
+  }
+
+  async function getStableFingerprint() {
+    try {
+      const existing = localStorage.getItem(CONFIG.FINGERPRINT_STORAGE_KEY);
+      if (existing && existing.trim()) return existing.trim().slice(0, 200);
+    } catch (_) {}
+
+    const raw = [
+      navigator.userAgent || '',
+      navigator.language || '',
+      screen.width || '',
+      screen.height || '',
+      screen.colorDepth || '',
+      Intl.DateTimeFormat().resolvedOptions().timeZone || '',
+      navigator.platform || '',
+      crypto.getRandomValues(new Uint32Array(4)).join('-')
+    ].join('|');
+
+    const fp = (await sha256Hex(raw)).slice(0, 64);
+    try { localStorage.setItem(CONFIG.FINGERPRINT_STORAGE_KEY, fp); } catch (_) {}
+    return fp;
+  }
+
 
   const els = {
     banner: document.getElementById('banner'),
@@ -193,9 +223,7 @@
     cancelBtn: document.getElementById('cancelBtn'),
     modalTitle: document.getElementById('modalTitle'),
     passwordHint: document.getElementById('passwordHint')
-  };
-
-  const state = { items: [], busy: false };
+  };  
 
   function banner(type, msg) {
     els.banner.className = 'banner show ' + type;
@@ -220,6 +248,10 @@
     const headers = new Headers((options && options.headers) || {});
     headers.set('Accept', 'application/json');
     headers.set('X-Requested-With', 'XMLHttpRequest');
+
+    if (state.fingerprint) {
+      headers.set('x-device-fingerprint', state.fingerprint);
+    }
 
     const method = String((options && options.method) || 'GET').toUpperCase();
     const body = options && options.body;
@@ -452,7 +484,9 @@
     }
   }
 
-  document.addEventListener('DOMContentLoaded', function () {
+  document.addEventListener('DOMContentLoaded', async function () {
+    state.fingerprint = await getStableFingerprint();
+
     els.backBtn.addEventListener('click', () => window.location.href = CONFIG.DASHBOARD_URL);
     els.refreshBtn.addEventListener('click', loadHumanResources);
     els.applyBtn.addEventListener('click', loadHumanResources);
@@ -461,9 +495,11 @@
     els.cancelBtn.addEventListener('click', closeModal);
     els.form.addEventListener('submit', save);
     els.rows.addEventListener('click', rowAction);
-    els.search.addEventListener('keydown', e => { if (e.key === 'Enter') loadHumanResources(); });
+    els.search.addEventListener('keydown', e => {
+      if (e.key === 'Enter') loadHumanResources();
+    });
 
-    loadHumanResources();
+    await loadHumanResources();
   });
 })();
 </script>
