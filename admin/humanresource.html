@@ -273,16 +273,21 @@
     }
   }
 
-  function buildFileUrl(path) {
-    const p = String(path || '').trim();
-    if (!p) return '';
-    if (/^https?:\/\//i.test(p)) return p;
-    return CONFIG.IMAGE_BASE + (p.startsWith('/') ? p : '/' + p);
+  const objectUrls = new Set();
+
+  function cleanupObjectUrls() {
+    for (const url of objectUrls) URL.revokeObjectURL(url);
+    objectUrls.clear();
   }
 
-  async function openProtectedFile(path) {
-    const url = buildFileUrl(path);
-    if (!url) return;
+  function docEndpoint(id, docType) {
+    if (!id || !docType) return '';
+    return '/human-resources/' + encodeURIComponent(id) + '/documents/' + encodeURIComponent(docType);
+  }
+
+  async function fetchProtectedBlobUrl(id, docType) {
+    const endpoint = docEndpoint(id, docType);
+    if (!endpoint) throw new Error('Invalid document request');
 
     const headers = new Headers();
     headers.set('Accept', 'image/*');
@@ -292,31 +297,36 @@
       headers.set('x-device-fingerprint', state.fingerprint);
     }
 
-    const res = await fetch(url, {
+    const res = await fetch(CONFIG.API_BASE + endpoint, {
       method: 'GET',
       headers,
       credentials: 'include',
       cache: 'no-store'
     });
 
-    if (!res.ok) {
-      window.open(url, '_blank', 'noopener,noreferrer');
-      return;
+    if (res.status === 401 || res.status === 403) {
+      banner('error', 'Session expired. Redirecting...');
+      setTimeout(() => window.location.replace(CONFIG.LOGIN_URL), 700);
+      throw new Error('Unauthorized');
     }
+
+    if (!res.ok) throw new Error('Document not available');
 
     const blob = await res.blob();
     const blobUrl = URL.createObjectURL(blob);
-    window.open(blobUrl, '_blank', 'noopener,noreferrer');
-
-    setTimeout(() => URL.revokeObjectURL(blobUrl), 60000);
+    objectUrls.add(blobUrl);
+    return blobUrl;
   }
 
-  function setDocPreview(el, path) {
+  async function openProtectedDoc(id, docType) {
+    const blobUrl = await fetchProtectedBlobUrl(id, docType);
+    window.open(blobUrl, '_blank', 'noopener,noreferrer');
+  }
+
+  function setDocPreview(el, id, docType, hasPath) {
     if (!el) return;
 
-    const p = String(path || '').trim();
-
-    if (!p) {
+    if (!id || !docType || !hasPath) {
       el.style.display = 'none';
       el.onclick = null;
       return;
@@ -324,10 +334,24 @@
 
     el.style.display = 'inline-flex';
     el.onclick = function () {
-      openProtectedFile(p).catch(() => {
-        window.open(buildFileUrl(p), '_blank', 'noopener,noreferrer');
+      openProtectedDoc(id, docType).catch(err => {
+        banner('error', err.message || 'Failed to open document.');
       });
     };
+  }
+
+  async function hydrateProtectedImages() {
+    const imgs = Array.from(document.querySelectorAll('img[data-doc-id][data-doc-type]'));
+
+    for (const img of imgs) {
+      try {
+        const blobUrl = await fetchProtectedBlobUrl(img.dataset.docId, img.dataset.docType);
+        img.src = blobUrl;
+      } catch (_) {
+        img.removeAttribute('src');
+        img.alt = 'Image unavailable';
+      }
+    }
   }
 
   function getCookie(name) {
@@ -415,9 +439,6 @@
     return '?' + p.toString();
   }
 
-  function imageUrl(path) {
-    return buildFileUrl(path);
-  }
 
   function money(wallet) {
     const value = Number(wallet && wallet.balanceInr != null ? wallet.balanceInr : 0);
@@ -445,7 +466,7 @@
           <td>
             ${
               hr.profileImage
-                ? `<img class="img-preview" src="${esc(imageUrl(hr.profileImage))}" alt="" data-doc-path="${esc(hr.profileImage)}">`
+                ? `<img class="img-preview" alt="Profile" data-doc-id="${esc(hr._id)}" data-doc-type="profile">`
                 : '<span class="muted">No image</span>'
             }
           </td>
@@ -460,6 +481,8 @@
         </tr>
       `;
     }).join('');
+
+    setTimeout(hydrateProtectedImages, 0);
   }
 
   async function loadHumanResources() {
@@ -579,25 +602,27 @@
           item.targets.monthly.riders
       );
 
-      setDocPreview(els.aadhaarFrontPreview, item.aadhaar && item.aadhaar.frontImage);
-      setDocPreview(els.aadhaarBackPreview, item.aadhaar && item.aadhaar.backImage);
-      setDocPreview(els.panFrontPreview, item.pan && item.pan.frontImage);
-      setDocPreview(els.panBackPreview, item.pan && item.pan.backImage);
-      setDocPreview(els.bankProofPreview, item.bank && item.bank.proofImage);
+      setDocPreview(els.aadhaarFrontPreview, item._id, 'aadhaar_front', item.aadhaar && item.aadhaar.frontImage);
+      setDocPreview(els.aadhaarBackPreview, item._id, 'aadhaar_back', item.aadhaar && item.aadhaar.backImage);
+      setDocPreview(els.panFrontPreview, item._id, 'pan_front', item.pan && item.pan.frontImage);
+      setDocPreview(els.panBackPreview, item._id, 'pan_back', item.pan && item.pan.backImage);
+      setDocPreview(els.bankProofPreview, item._id, 'bank_proof', item.bank && item.bank.proofImage);
     }
 
     if (!item) {
-      setDocPreview(els.aadhaarFrontPreview, '');
-      setDocPreview(els.aadhaarBackPreview, '');
-      setDocPreview(els.panFrontPreview, '');
-      setDocPreview(els.panBackPreview, '');
-      setDocPreview(els.bankProofPreview, '');
+      setDocPreview(els.aadhaarFrontPreview, '', '', '');
+      setDocPreview(els.aadhaarBackPreview, '', '', '');
+      setDocPreview(els.panFrontPreview, '', '', '');
+      setDocPreview(els.panBackPreview, '', '', '');
+      setDocPreview(els.bankProofPreview, '', '', '');
     }
 
     els.modal.classList.add('show');
   }
 
   function closeModal() {
+    cleanupObjectUrls();
+
     els.modal.classList.remove('show');
     els.form.reset();
     els.hrId.value = '';
@@ -695,6 +720,8 @@
     els.search.addEventListener('keydown', e => {
       if (e.key === 'Enter') loadHumanResources();
     });
+
+    window.addEventListener('beforeunload', cleanupObjectUrls);
 
     await loadHumanResources();
   });
