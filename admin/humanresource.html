@@ -193,6 +193,7 @@
       ? window.ADMIN_WEB_API_BASE.trim().replace(/\/+$/, '')
       : 'https://api.revstore.in/api/admin-web/v1',
     LOGIN_URL: '/admin/login',
+    IMAGE_BASE: 'https://api.revstore.in',
     DASHBOARD_URL: '/admin/dashboard',
     FINGERPRINT_STORAGE_KEY: 'admin_web_fp_v1'
   };
@@ -272,10 +273,49 @@
     }
   }
 
+  function buildFileUrl(path) {
+    const p = String(path || '').trim();
+    if (!p) return '';
+    if (/^https?:\/\//i.test(p)) return p;
+    return CONFIG.IMAGE_BASE + (p.startsWith('/') ? p : '/' + p);
+  }
+
+  async function openProtectedFile(path) {
+    const url = buildFileUrl(path);
+    if (!url) return;
+
+    const headers = new Headers();
+    headers.set('Accept', 'image/*');
+    headers.set('X-Requested-With', 'XMLHttpRequest');
+
+    if (state.fingerprint) {
+      headers.set('x-device-fingerprint', state.fingerprint);
+    }
+
+    const res = await fetch(url, {
+      method: 'GET',
+      headers,
+      credentials: 'include',
+      cache: 'no-store'
+    });
+
+    if (!res.ok) {
+      window.open(url, '_blank', 'noopener,noreferrer');
+      return;
+    }
+
+    const blob = await res.blob();
+    const blobUrl = URL.createObjectURL(blob);
+    window.open(blobUrl, '_blank', 'noopener,noreferrer');
+
+    setTimeout(() => URL.revokeObjectURL(blobUrl), 60000);
+  }
+
   function setDocPreview(el, path) {
     if (!el) return;
 
     const p = String(path || '').trim();
+
     if (!p) {
       el.style.display = 'none';
       el.onclick = null;
@@ -284,11 +324,9 @@
 
     el.style.display = 'inline-flex';
     el.onclick = function () {
-      const url = p.startsWith('http')
-        ? p
-        : 'https://api.revstore.in' + (p.startsWith('/') ? p : '/' + p);
-
-      window.open(url, '_blank', 'noopener,noreferrer');
+      openProtectedFile(p).catch(() => {
+        window.open(buildFileUrl(p), '_blank', 'noopener,noreferrer');
+      });
     };
   }
 
@@ -377,6 +415,10 @@
     return '?' + p.toString();
   }
 
+  function imageUrl(path) {
+    return buildFileUrl(path);
+  }
+
   function money(wallet) {
     const value = Number(wallet && wallet.balanceInr != null ? wallet.balanceInr : 0);
     return '₹' + value.toFixed(2);
@@ -400,7 +442,13 @@
 
       return `
         <tr>
-          <td>${hr.profileImage ? `<img class="img-preview" src="${esc(hr.profileImage)}" alt="">` : '<span class="muted">No image</span>'}</td>
+          <td>
+            ${
+              hr.profileImage
+                ? `<img class="img-preview" src="${esc(imageUrl(hr.profileImage))}" alt="" data-doc-path="${esc(hr.profileImage)}">`
+                : '<span class="muted">No image</span>'
+            }
+          </td>
           <td><strong>${esc(hr.name || '-')}</strong><br><span class="muted">${esc(hr.designation || '')}</span><br><span class="muted">${esc(hr.role || '')}</span></td>
           <td>${esc(hr.email || '-')}<br><span class="muted">${esc(hr.personalMobile || '')}</span></td>
           <td>${esc(hr.area || '')}, ${esc(hr.city || '')}<br><span class="muted">${esc(hr.state || '')}</span></td>
