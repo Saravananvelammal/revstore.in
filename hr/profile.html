@@ -35,7 +35,28 @@
     .img-preview{width:86px;height:86px;border-radius:18px;object-fit:cover;border:1px solid var(--line);background:#f3f4f6}
     .doc-link{display:none;font-size:.84rem;font-weight:850;color:#5b21b6;cursor:pointer;text-decoration:underline}
     .hint{font-size:.78rem;color:var(--muted);line-height:1.4}
-    .footer-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:18px;position:sticky;bottom:0;background:rgba(255,255,255,.96);padding-top:14px}
+    .footer-actions{
+      display:flex;
+      justify-content:flex-end;
+      align-items:center;
+      gap:10px;
+      margin-top:22px;
+      padding:16px 0 0;
+      background:#fff;
+      position:sticky;
+      bottom:0;
+      z-index:5;
+    }
+
+    .footer-actions .btn{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      min-width:132px;
+      height:48px;
+      line-height:1;
+      white-space:nowrap;
+    }
     @media(max-width:900px){.topbar{flex-direction:column}.form-grid{grid-template-columns:1fr}.footer-actions{position:static}}
   </style>
 </head>
@@ -211,7 +232,6 @@
       </div>
 
       <div class="footer-actions">
-        <button type="button" id="resetBtn" class="btn">Reset</button>
         <button type="submit" id="saveBtn" class="btn btn-primary">Save Profile</button>
       </div>
     </form>
@@ -245,7 +265,6 @@
     banner: document.getElementById('banner'),
     form: document.getElementById('profileForm'),
     saveBtn: document.getElementById('saveBtn'),
-    resetBtn: document.getElementById('resetBtn'),
     refreshBtn: document.getElementById('refreshBtn'),
     dashboardBtn: document.getElementById('dashboardBtn'),
     logoutBtn: document.getElementById('logoutBtn'),
@@ -469,7 +488,7 @@
     setValue('postalCode', hr.postalCode);
     setValue('country', hr.country);
 
-    setValue('aadhaarNumber', hr.aadhaar && (hr.aadhaar.number || hr.aadhaar.numberMasked || ''));
+    setValue('aadhaarNumber', hr.aadhaar?.number || '');
     setValue('panNumber', hr.pan && (hr.pan.number || hr.pan.numberMasked || ''));
 
     setValue('upiId', hr.upiId);
@@ -630,7 +649,6 @@
     els.dashboardBtn.addEventListener('click', () => window.location.href = CONFIG.DASHBOARD_URL);
     els.refreshBtn.addEventListener('click', loadProfile);
     els.logoutBtn.addEventListener('click', logout);
-    els.resetBtn.addEventListener('click', loadProfile);
     els.form.addEventListener('submit', saveProfile);
     els.form.addEventListener('input', markDirty);
     els.form.addEventListener('change', markDirty);
