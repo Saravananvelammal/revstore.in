@@ -514,15 +514,37 @@
     els.saveBtn.style.display = 'none';
   }
 
+  function isPlaceholder(v) {
+    const s = String(v || '').trim().toLowerCase();
+    return !s || s === 'to be updated by hr' || s === 'to be updated';
+  }
+
+  function isMasked(v) {
+    return /\*/.test(String(v || ''));
+  }
+
   function requireFirstTimeDocs(profile) {
     const missing = [];
 
-    if (!hasText(profile.aadhaar && (profile.aadhaar.number || profile.aadhaar.numberMasked))) missing.push('Aadhaar number');
-    if (!(profile.aadhaar && profile.aadhaar.frontImage)) missing.push('Aadhaar front image');
-    if (!(profile.aadhaar && profile.aadhaar.backImage)) missing.push('Aadhaar back image');
-    if (!hasText(profile.pan && (profile.pan.number || profile.pan.numberMasked))) missing.push('PAN number');
-    if (!(profile.pan && profile.pan.frontImage)) missing.push('PAN front image');
+    if (isPlaceholder(profile.name)) missing.push('Name');
+    if (!hasText(profile.dateOfBirth)) missing.push('Date of birth');
+    if (!/^[6-9][0-9]{9}$/.test(String(profile.personalMobile || ''))) missing.push('Personal mobile');
+    if (!/^[6-9][0-9]{9}$/.test(String(profile.emergencyContactNumber || ''))) missing.push('Emergency contact');
+
+    if (isPlaceholder(profile.address)) missing.push('Address');
+
+    if (!hasText(profile.aadhaar?.number)) missing.push('Aadhaar number');
+    if (!profile.aadhaar?.frontImage) missing.push('Aadhaar front image');
+    if (!profile.aadhaar?.backImage) missing.push('Aadhaar back image');
+
+    if (!hasText(profile.pan?.number || profile.pan?.numberMasked)) missing.push('PAN number');
+    if (!profile.pan?.frontImage) missing.push('PAN front image');
+
     if (!hasText(profile.upiId)) missing.push('UPI ID');
+
+    if (!hasText(profile.bank?.name)) missing.push('Bank name');
+    if (!hasText(profile.bank?.accountNumber || profile.bank?.accountNumberMasked)) missing.push('Bank account number');
+    if (!hasText(profile.bank?.ifsc)) missing.push('IFSC');
 
     return missing;
   }
@@ -537,9 +559,12 @@
       fillForm(hr);
 
       const missing = requireFirstTimeDocs(hr);
+
       if (missing.length) {
         els.saveBtn.style.display = 'inline-flex';
-        showBanner('info', 'Please complete first-time profile setup: ' + missing.join(', '));
+        showBanner('info', 'Please complete/update profile: ' + missing.join(', '));
+      } else {
+        els.saveBtn.style.display = 'none';
       }
     } catch (err) {
       if (err.status === 401 || err.status === 403) {
@@ -578,7 +603,11 @@
     if (!/^[0-9]{12}$/.test(aadhaar)) throw new Error('Aadhaar number must be exactly 12 digits.');
     if (!/^[A-Z]{5}[0-9]{4}[A-Z]$/.test(pan)) throw new Error('Invalid PAN number.');
     if (upi && !/^[a-z0-9._-]{2,256}@[a-z0-9.-]{2,64}$/i.test(upi)) throw new Error('Invalid UPI ID.');
-    if (bankAcc && !/^[0-9]{9,18}$/.test(bankAcc)) throw new Error('Bank account number must be 9–18 digits.');
+    if (bankAcc && isMasked(bankAcc)) {
+      fd.delete('bankAccountNumber');
+    } else if (bankAcc && !/^[0-9]{9,18}$/.test(bankAcc)) {
+      throw new Error('Bank account number must be 9–18 digits.');
+    }
     if (ifsc && !/^[A-Z]{4}0[A-Z0-9]{6}$/.test(ifsc)) throw new Error('Invalid IFSC code.');
 
     fd.set('panNumber', pan);
