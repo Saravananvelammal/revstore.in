@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Revstore HR Retailers</title>
+  <meta name="robots" content="noindex,nofollow,noarchive,nosnippet" />
+  <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+
+  <style>
+    :root{
+      --bg1:#4318b8;--bg2:#7e22ce;--bg3:#c026d3;
+      --card:rgba(255,255,255,.96);--text:#1e1b4b;--muted:#6b7280;
+      --line:rgba(30,27,75,.12);--primary:#5b21b6;--success:#059669;
+      --warning:#d97706;--danger:#dc2626;--dark:#374151;
+      --shadow:0 18px 60px rgba(49,12,120,.24);--radius:22px;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;min-height:100vh;padding:18px;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;color:var(--text);background:linear-gradient(135deg,var(--bg1),var(--bg2),var(--bg3))}
+    .app{max-width:1180px;margin:0 auto;display:grid;gap:16px}
+    .topbar{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;color:#fff}
+    h1{margin:0;font-size:1.8rem;font-weight:900}
+    .sub{margin:7px 0 0;color:rgba(255,255,255,.86)}
+    .actions{display:flex;gap:10px;flex-wrap:wrap}
+    .btn{height:46px;padding:0 16px;border-radius:15px;border:1px solid var(--line);background:#fff;color:var(--text);font-weight:850;cursor:pointer}
+    .btn-primary{border:0;color:#fff;background:linear-gradient(135deg,#5b21b6,#7c3aed,#a21caf)}
+    .btn:disabled{opacity:.65;cursor:not-allowed}
+    .panel{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px}
+    .toolbar{display:grid;grid-template-columns:minmax(320px,1fr) 220px;gap:10px;align-items:center;margin-bottom:14px}
+    input,select,textarea{width:100%;height:48px;border:1px solid var(--line);border-radius:15px;padding:0 14px;font:inherit;outline:none;background:#fff;color:var(--text)}
+    textarea{height:80px;padding-top:12px;resize:vertical}
+    input:focus,select:focus,textarea:focus{box-shadow:0 0 0 4px rgba(91,33,182,.14);border-color:#7c3aed}
+    .banner{display:none;padding:13px 14px;border-radius:15px;margin-bottom:14px;line-height:1.5}
+    .banner.show{display:block}
+    .banner.error{background:rgba(239,68,68,.12);color:#7f1d1d}
+    .banner.success{background:rgba(16,185,129,.12);color:#065f46}
+    .banner.info{background:rgba(59,130,246,.12);color:#1e3a8a}
+    .list{display:grid;gap:14px}
+    .card{border:1px solid var(--line);border-radius:22px;background:#fff;padding:16px;display:grid;gap:13px}
+    .card-top{display:grid;grid-template-columns:84px 1fr 1.2fr;gap:16px;align-items:start}
+    .avatar{width:84px;height:84px;border-radius:14px;background:#111827;object-fit:cover;border:1px solid var(--line)}
+    .name{font-size:1.35rem;font-weight:900;margin:0;line-height:1.15}
+    .shop{margin:6px 0 0;color:var(--muted);font-size:1rem}
+    .wallet{margin:8px 0 0;color:#6d28d9;font-weight:900}
+    .info-title{font-weight:900;margin:0 0 5px}
+    .info-text{color:#4b5563;line-height:1.45;word-break:break-word}
+    .chips{display:flex;gap:10px;flex-wrap:wrap}
+    .chip{display:inline-flex;align-items:center;min-height:34px;padding:6px 12px;border-radius:999px;font-weight:850;font-size:.86rem}
+    .chip-bank-pending{background:rgba(245,158,11,.18);color:#92400e;border:1px solid rgba(245,158,11,.28)}
+    .chip-bank-verified{background:rgba(16,185,129,.14);color:#065f46;border:1px solid rgba(16,185,129,.25)}
+    .chip-bank-failed{background:rgba(239,68,68,.14);color:#991b1b;border:1px solid rgba(239,68,68,.25)}
+    .chip-online{background:rgba(16,185,129,.14);color:#065f46;border:1px solid rgba(16,185,129,.25)}
+    .chip-offline{background:rgba(55,65,81,.14);color:#374151;border:1px solid rgba(55,65,81,.25)}
+    .card-actions{display:flex;gap:10px;flex-wrap:wrap;border-top:1px solid var(--line);padding-top:12px}
+    .icon-btn{min-width:44px;height:42px;border-radius:13px;border:1px solid var(--line);background:#fff;cursor:pointer;font-size:1.1rem;font-weight:900}
+    .empty,.loading{text-align:center;padding:32px;color:var(--muted);border:1px dashed var(--line);border-radius:20px;background:#fff}
+    .modal{position:fixed;inset:0;background:rgba(0,0,0,.48);display:none;place-items:center;padding:16px;z-index:20}
+    .modal.show{display:grid}
+    .modal-card{width:100%;max-width:780px;max-height:92vh;overflow:auto;background:#fff;border-radius:24px;padding:20px;box-shadow:var(--shadow)}
+    .modal-head{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:14px}
+    .modal-head h2{margin:0}
+    .form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px}
+    .field{display:grid;gap:7px}
+    label{font-weight:850;font-size:.9rem}
+    .full{grid-column:1/-1}
+    .modal-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:16px}
+    @media(max-width:760px){
+      .topbar{flex-direction:column}
+      .toolbar{grid-template-columns:1fr}
+      .card-top{grid-template-columns:72px 1fr}
+      .avatar{width:72px;height:72px}
+      .card-top .right{grid-column:1/-1}
+      .form-grid{grid-template-columns:1fr}
+    }
+  </style>
+</head>
+
+<body>
+<main class="app">
+  <header class="topbar">
+    <div>
+      <h1>Retailers</h1>
+      <p class="sub">HR retailer accounts added under your HR profile.</p>
+    </div>
+    <div class="actions">
+      <button id="backBtn" class="btn">Dashboard</button>
+      <button id="refreshBtn" class="btn btn-primary">Refresh</button>
+      <button id="addBtn" class="btn btn-primary">+ Add Retailer</button>
+    </div>
+  </header>
+
+  <section class="panel">
+    <div id="banner" class="banner"></div>
+
+    <div class="toolbar">
+      <input id="searchInput" type="search" placeholder="Search retailers..." autocomplete="off" />
+      <select id="statusFilter">
+        <option value="all">All</option>
+        <option value="online">Online</option>
+        <option value="offline">Offline</option>
+        <option value="bank_pending">Bank Pending</option>
+        <option value="bank_verified">Bank Verified</option>
+      </select>
+    </div>
+
+    <div id="loading" class="loading">Loading retailers...</div>
+    <div id="empty" class="empty" style="display:none;">No retailers found.</div>
+    <div id="list" class="list"></div>
+  </section>
+</main>
+
+<section id="retailerModal" class="modal" aria-hidden="true">
+  <div class="modal-card">
+    <div class="modal-head">
+      <h2 id="modalTitle">Add Retailer</h2>
+      <button id="closeModalBtn" class="btn">Close</button>
+    </div>
+
+    <form id="retailerForm">
+      <input type="hidden" id="retailerId" />
+
+      <div class="form-grid">
+        <div class="field"><label>Name</label><input id="name" maxlength="120" required /></div>
+        <div class="field"><label>Shop Name</label><input id="shopName" maxlength="140" required /></div>
+        <div class="field"><label>Email</label><input id="email" type="email" maxlength="190" required /></div>
+        <div class="field"><label>Mobile</label><input id="mobile" inputmode="numeric" maxlength="15" required /></div>
+
+        <div class="field">
+          <label>Category</label>
+          <select id="category">
+            <option value="">Unset</option>
+            <option value="grocery">Grocery</option>
+            <option value="restaurant">Restaurant</option>
+            <option value="pharmacy">Pharmacy</option>
+            <option value="electronics">Electronics</option>
+            <option value="fashion">Fashion</option>
+            <option value="salon">Salon</option>
+            <option value="bakery">Bakery</option>
+            <option value="cafe">Cafe</option>
+            <option value="hardware">Hardware</option>
+            <option value="services">Services</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label>Password <span id="passwordHint">(required for add)</span></label>
+          <input id="password" type="password" minlength="8" maxlength="128" />
+        </div>
+
+        <div class="field full"><label>Address</label><textarea id="address"></textarea></div>
+        <div class="field"><label>Address Line 1</label><input id="addressLine1" /></div>
+        <div class="field"><label>Address Line 2</label><input id="addressLine2" /></div>
+        <div class="field"><label>City</label><input id="city" /></div>
+        <div class="field"><label>State</label><input id="state" /></div>
+        <div class="field"><label>Postal Code</label><input id="postalCode" /></div>
+        <div class="field"><label>Country</label><input id="country" value="India" /></div>
+
+        <div class="field"><label>GST Number</label><input id="gstNumber" /></div>
+        <div class="field"><label>FSSAI Number</label><input id="fssaiNumber" /></div>
+        <div class="field"><label>PAN Number</label><input id="panNumber" /></div>
+        <div class="field"><label>Shop License Number</label><input id="shopLicenseNumber" /></div>
+
+        <div class="field full"><label>About</label><textarea id="about"></textarea></div>
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" id="cancelBtn" class="btn">Cancel</button>
+        <button type="submit" id="saveBtn" class="btn btn-primary">Save</button>
+      </div>
+    </form>
+  </div>
+</section>
+
+<script>
+(function () {
+  'use strict';
+
+  const CONFIG = {
+    API_BASE: typeof window.HR_WEB_API_BASE === 'string' && window.HR_WEB_API_BASE.trim()
+      ? window.HR_WEB_API_BASE.trim().replace(/\/+$/, '')
+      : 'https://api.revstore.in/api/human-resource-web/v1',
+    LOGIN_URL: '/hr/login',
+    DASHBOARD_URL: '/hr/dashboard',
+    ALLOWED_CATEGORY_URL: '/hr/retailerallowedcategory',
+    IMAGE_BASE: 'https://api.revstore.in',
+    FINGERPRINT_STORAGE_KEY: 'hr_web_fp_v1'
+  };
+
+  const els = {
+    banner: document.getElementById('banner'),
+    loading: document.getElementById('loading'),
+    empty: document.getElementById('empty'),
+    list: document.getElementById('list'),
+    searchInput: document.getElementById('searchInput'),
+    statusFilter: document.getElementById('statusFilter'),
+    refreshBtn: document.getElementById('refreshBtn'),
+    addBtn: document.getElementById('addBtn'),
+    backBtn: document.getElementById('backBtn'),
+    modal: document.getElementById('retailerModal'),
+    modalTitle: document.getElementById('modalTitle'),
+    closeModalBtn: document.getElementById('closeModalBtn'),
+    cancelBtn: document.getElementById('cancelBtn'),
+    form: document.getElementById('retailerForm'),
+    saveBtn: document.getElementById('saveBtn'),
+    retailerId: document.getElementById('retailerId'),
+    passwordHint: document.getElementById('passwordHint'),
+    name: document.getElementById('name'),
+    shopName: document.getElementById('shopName'),
+    email: document.getElementById('email'),
+    mobile: document.getElementById('mobile'),
+    category: document.getElementById('category'),
+    password: document.getElementById('password'),
+    address: document.getElementById('address'),
+    addressLine1: document.getElementById('addressLine1'),
+    addressLine2: document.getElementById('addressLine2'),
+    city: document.getElementById('city'),
+    state: document.getElementById('state'),
+    postalCode: document.getElementById('postalCode'),
+    country: document.getElementById('country'),
+    gstNumber: document.getElementById('gstNumber'),
+    fssaiNumber: document.getElementById('fssaiNumber'),
+    panNumber: document.getElementById('panNumber'),
+    shopLicenseNumber: document.getElementById('shopLicenseNumber'),
+    about: document.getElementById('about')
+  };
+
+  const state = {
+    fingerprint: '',
+    retailers: [],
+    busy: false
+  };
+
+  function showBanner(type, message) {
+    els.banner.className = 'banner show ' + type;
+    els.banner.textContent = message || '';
+  }
+
+  function clearBanner() {
+    els.banner.className = 'banner';
+    els.banner.textContent = '';
+  }
+
+  function getCookie(name) {
+    const target = String(name || '') + '=';
+    const found = String(document.cookie || '')
+      .split(';')
+      .map(v => v.trim())
+      .find(v => v.indexOf(target) === 0);
+
+    return found ? decodeURIComponent(found.slice(target.length)) : '';
+  }
+
+  async function sha256Hex(input) {
+    const data = new TextEncoder().encode(String(input));
+    const digest = await crypto.subtle.digest('SHA-256', data);
+    return Array.from(new Uint8Array(digest))
+      .map(b => b.toString(16).padStart(2, '0'))
+      .join('');
+  }
+
+  async function getStableFingerprint() {
+    try {
+      const existing = localStorage.getItem(CONFIG.FINGERPRINT_STORAGE_KEY);
+      if (existing && existing.trim()) return existing.trim().slice(0, 200);
+    } catch (_) {}
+
+    const raw = [
+      navigator.userAgent || '',
+      navigator.language || '',
+      screen.width || '',
+      screen.height || '',
+      screen.colorDepth || '',
+      Intl.DateTimeFormat().resolvedOptions().timeZone || '',
+      navigator.platform || '',
+      crypto.getRandomValues(new Uint32Array(4)).join('-')
+    ].join('|');
+
+    const fp = (await sha256Hex(raw)).slice(0, 64);
+
+    try {
+      localStorage.setItem(CONFIG.FINGERPRINT_STORAGE_KEY, fp);
+    } catch (_) {}
+
+    return fp;
+  }
+
+  function redirectToLogin() {
+    window.location.replace(CONFIG.LOGIN_URL);
+  }
+
+  async function apiFetch(path, options) {
+    const headers = new Headers(options && options.headers ? options.headers : {});
+    headers.set('Accept', 'application/json');
+    headers.set('X-Requested-With', 'XMLHttpRequest');
+
+    if (state.fingerprint) {
+      headers.set('x-device-fingerprint', state.fingerprint);
+    }
+
+    const method = String((options && options.method) || 'GET').toUpperCase();
+    const body = options && options.body;
+
+    if (body && !(body instanceof FormData) && !headers.has('Content-Type')) {
+      headers.set('Content-Type', 'application/json');
+    }
+
+    if (!['GET', 'HEAD', 'OPTIONS'].includes(method)) {
+      headers.set('x-csrf-token', getCookie('csrf_token') || '');
+    }
+
+    const res = await fetch(CONFIG.API_BASE + path, {
+      ...(options || {}),
+      headers,
+      credentials: 'include',
+      cache: 'no-store',
+      redirect: 'follow',
+      referrerPolicy: 'strict-origin-when-cross-origin'
+    });
+
+    let data = {};
+    try { data = await res.json(); } catch (_) {}
+
+    if (res.status === 401 || res.status === 403) {
+      throw Object.assign(new Error(data.message || 'Session expired.'), {
+        status: res.status,
+        data
+      });
+    }
+
+    if (!res.ok) {
+      throw Object.assign(new Error(data.message || 'Request failed.'), {
+        status: res.status,
+        data
+      });
+    }
+
+    return data;
+  }
+
+  function escapeHtml(v) {
+    return String(v == null ? '' : v)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  function moneyPaise(v) {
+    const n = Number(v || 0);
+    return '₹' + (Number.isFinite(n) ? (n / 100).toFixed(2) : '0.00');
+  }
+
+  function imageUrl(r) {
+    const raw = String(r.shopImage || r.image || '').trim();
+    if (!raw) return '';
+    if (/^https?:\/\//i.test(raw)) return raw;
+    return CONFIG.IMAGE_BASE + (raw.startsWith('/') ? raw : '/' + raw);
+  }
+
+  function addressText(r) {
+    const parts = [
+      r.address,
+      r.addressLine1,
+      r.addressLine2,
+      r.city,
+      r.state,
+      r.postalCode,
+      r.country
+    ].filter(Boolean);
+
+    return parts.length ? parts.join(', ') : 'Address not added';
+  }
+
+  function bankStatus(r) {
+    const s = String(
+      r?.bankVerificationSummary?.status ||
+      r?.bankVerification?.status ||
+      r?.razorpayRouteSummary?.status ||
+      r?.razorpayRoute?.status ||
+      ''
+    ).toLowerCase();
+
+    if (['verified', 'completed', 'active', 'activated'].includes(s)) return 'verified';
+    if (['failed', 'rejected'].includes(s)) return 'failed';
+    return 'pending';
+  }
+
+  function onlineStatus(r) {
+    const s = String(r.status || '').toLowerCase();
+    if (s === 'online' || s === 'open' || s === 'active') return 'online';
+    return 'offline';
+  }
+
+  function normalizedSearchBlob(r) {
+    return [
+      r.name,
+      r.shopName,
+      r.email,
+      r.mobile,
+      r.category,
+      r.address,
+      r.addressLine1,
+      r.addressLine2,
+      r.city,
+      r.state,
+      r.postalCode
+    ].join(' ').toLowerCase();
+  }
+
+  function render() {
+    const q = String(els.searchInput.value || '').trim().toLowerCase();
+    const filter = String(els.statusFilter.value || 'all');
+
+    let rows = state.retailers.slice();
+
+    if (q) {
+      rows = rows.filter(r => normalizedSearchBlob(r).includes(q));
+    }
+
+    if (filter === 'online') rows = rows.filter(r => onlineStatus(r) === 'online');
+    if (filter === 'offline') rows = rows.filter(r => onlineStatus(r) === 'offline');
+    if (filter === 'bank_pending') rows = rows.filter(r => bankStatus(r) === 'pending');
+    if (filter === 'bank_verified') rows = rows.filter(r => bankStatus(r) === 'verified');
+
+    els.empty.style.display = rows.length ? 'none' : 'block';
+
+    els.list.innerHTML = rows.map(r => {
+      const bank = bankStatus(r);
+      const online = onlineStatus(r);
+      const img = imageUrl(r);
+      const wallet = r.wallet || {};
+      const bankLabel =
+        bank === 'verified'
+          ? 'Bank Verified'
+          : bank === 'failed'
+            ? 'Bank Failed'
+            : 'Bank Pending';
+
+      return `
+        <article class="card">
+          <div class="card-top">
+            ${
+              img
+                ? `<img class="avatar" src="${escapeHtml(img)}" alt="">`
+                : `<div class="avatar"></div>`
+            }
+
+            <div>
+              <p class="name">${escapeHtml(r.name || 'Unnamed Retailer')}</p>
+              <p class="shop">${escapeHtml(r.shopName || 'Shop name not added')}</p>
+              <p class="wallet">Wallet: ${escapeHtml(moneyPaise(wallet.balance || r.balance || 0))}</p>
+            </div>
+
+            <div class="right">
+              <p class="info-title">Address</p>
+              <div class="info-text">
+                ${escapeHtml(addressText(r))}<br>
+                ${escapeHtml(r.email || '')}<br>
+                ${escapeHtml(r.mobile || '')}
+              </div>
+            </div>
+          </div>
+
+          <div class="chips">
+            <span class="chip chip-bank-${bank}">${escapeHtml(bankLabel)}</span>
+            <span class="chip chip-${online}">${escapeHtml(online === 'online' ? 'Online' : 'Offline')}</span>
+          </div>
+
+          <div class="card-actions">
+            <button class="icon-btn" data-action="view" data-id="${escapeHtml(r._id)}" title="View">👁️</button>
+            <button class="icon-btn" data-action="category" data-id="${escapeHtml(r._id)}" title="Allowed Categories">🏷️</button>
+            <button class="icon-btn" data-action="wallet" data-id="${escapeHtml(r._id)}" title="Wallet">₹</button>
+          </div>
+        </article>
+      `;
+    }).join('');
+  }
+
+  async function loadRetailers() {
+    clearBanner();
+    els.loading.style.display = 'block';
+    els.empty.style.display = 'none';
+    els.list.innerHTML = '';
+
+    try {
+      await apiFetch('/auth/me', { method: 'GET' });
+
+      const data = await apiFetch(
+        '/retailers?includeDeleted=false&sort=name&order=asc',
+        { method: 'GET' }
+      );
+
+      state.retailers = Array.isArray(data.retailers) ? data.retailers : [];
+      render();
+    } catch (err) {
+      if (err.status === 401 || err.status === 403) {
+        showBanner('error', 'Session expired. Redirecting to login...');
+        setTimeout(redirectToLogin, 500);
+        return;
+      }
+
+      showBanner('error', err.message || 'Failed to load retailers.');
+    } finally {
+      els.loading.style.display = 'none';
+    }
+  }
+
+  function findRetailer(id) {
+    return state.retailers.find(r => String(r._id) === String(id)) || null;
+  }
+
+  function setFormDisabled(disabled) {
+    [
+      els.name,
+      els.shopName,
+      els.email,
+      els.mobile,
+      els.category,
+      els.password,
+      els.address,
+      els.addressLine1,
+      els.addressLine2,
+      els.city,
+      els.state,
+      els.postalCode,
+      els.country,
+      els.gstNumber,
+      els.fssaiNumber,
+      els.panNumber,
+      els.shopLicenseNumber,
+      els.about
+    ].forEach(el => {
+      el.disabled = Boolean(disabled);
+    });
+  }
+
+  function openAddModal() {
+    els.form.reset();
+    els.retailerId.value = '';
+    els.modalTitle.textContent = 'Add Retailer';
+    els.email.disabled = false;
+    els.password.required = true;
+    els.passwordHint.textContent = '(required for add)';
+    els.country.value = 'India';
+    setFormDisabled(false);
+    els.saveBtn.style.display = 'inline-flex';
+    els.modal.classList.add('show');
+  }
+
+  function openViewModal(retailer) {
+    if (!retailer) return;
+
+    els.form.reset();
+    els.retailerId.value = retailer._id || '';
+    els.modalTitle.textContent = 'View Retailer';
+    els.passwordHint.textContent = '(hidden)';
+    els.password.required = false;
+    els.password.value = '';
+
+    els.name.value = retailer.name || '';
+    els.shopName.value = retailer.shopName || '';
+    els.email.value = retailer.email || '';
+    els.mobile.value = retailer.mobile || '';
+    els.category.value = retailer.category || '';
+
+    els.address.value = retailer.address || '';
+    els.addressLine1.value = retailer.addressLine1 || '';
+    els.addressLine2.value = retailer.addressLine2 || '';
+    els.city.value = retailer.city || '';
+    els.state.value = retailer.state || '';
+    els.postalCode.value = retailer.postalCode || '';
+    els.country.value = retailer.country || 'India';
+
+    const docs = retailer.documents || {};
+    els.gstNumber.value = docs.gstNumber || retailer.gstNumber || '';
+    els.fssaiNumber.value = docs.fssaiNumber || retailer.fssaiNumber || '';
+    els.panNumber.value = docs.panNumber || retailer.panNumber || '';
+    els.shopLicenseNumber.value = docs.shopLicenseNumber || retailer.shopLicenseNumber || '';
+    els.about.value = retailer.about || '';
+
+    setFormDisabled(true);
+    els.saveBtn.style.display = 'none';
+    els.modal.classList.add('show');
+  }
+
+  function closeModal() {
+    els.modal.classList.remove('show');
+    els.form.reset();
+    els.retailerId.value = '';
+    setFormDisabled(false);
+    els.saveBtn.style.display = 'inline-flex';
+  }
+
+  function payloadFromForm() {
+    return {
+      name: els.name.value.trim(),
+      shopName: els.shopName.value.trim(),
+      email: els.email.value.trim().toLowerCase(),
+      mobile: els.mobile.value.trim(),
+      category: els.category.value.trim(),
+      password: els.password.value.trim(),
+      address: els.address.value.trim(),
+      addressLine1: els.addressLine1.value.trim(),
+      addressLine2: els.addressLine2.value.trim(),
+      city: els.city.value.trim(),
+      state: els.state.value.trim(),
+      postalCode: els.postalCode.value.trim(),
+      country: els.country.value.trim(),
+      gstNumber: els.gstNumber.value.trim(),
+      fssaiNumber: els.fssaiNumber.value.trim(),
+      panNumber: els.panNumber.value.trim(),
+      shopLicenseNumber: els.shopLicenseNumber.value.trim(),
+      about: els.about.value.trim()
+    };
+  }
+
+  function validatePayload(payload) {
+    if (!payload.name) throw new Error('Name is required.');
+    if (!payload.shopName) throw new Error('Shop name is required.');
+
+    if (!payload.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(payload.email)) {
+      throw new Error('Valid email is required.');
+    }
+
+    if (!payload.mobile || !/^[0-9]{7,15}$/.test(payload.mobile)) {
+      throw new Error('Mobile must be 7 to 15 digits.');
+    }
+
+    if (!payload.password || payload.password.length < 8) {
+      throw new Error('Password must be at least 8 characters.');
+    }
+  }
+
+  async function saveRetailer(event) {
+    event.preventDefault();
+
+    if (state.busy) return;
+
+    const id = els.retailerId.value.trim();
+
+    if (id) {
+      showBanner('error', 'HR retailer view mode does not update records from this page.');
+      return;
+    }
+
+    const payload = payloadFromForm();
+
+    try {
+      validatePayload(payload);
+
+      state.busy = true;
+      els.saveBtn.disabled = true;
+      els.saveBtn.textContent = 'Saving...';
+
+      await apiFetch('/retailers', {
+        method: 'POST',
+        body: JSON.stringify(payload)
+      });
+
+      closeModal();
+      showBanner('success', 'Retailer added successfully.');
+      await loadRetailers();
+    } catch (err) {
+      const errors = err.data && err.data.errors;
+      showBanner(
+        'error',
+        errors ? Object.values(errors).join(' | ') : (err.message || 'Failed to save retailer.')
+      );
+    } finally {
+      state.busy = false;
+      els.saveBtn.disabled = false;
+      els.saveBtn.textContent = 'Save';
+    }
+  }
+
+  function bindEvents() {
+    els.backBtn.addEventListener('click', () => {
+      window.location.href = CONFIG.DASHBOARD_URL;
+    });
+
+    els.refreshBtn.addEventListener('click', loadRetailers);
+    els.addBtn.addEventListener('click', openAddModal);
+    els.closeModalBtn.addEventListener('click', closeModal);
+    els.cancelBtn.addEventListener('click', closeModal);
+    els.form.addEventListener('submit', saveRetailer);
+    els.searchInput.addEventListener('input', render);
+    els.statusFilter.addEventListener('change', render);
+
+    els.modal.addEventListener('click', (e) => {
+      if (e.target === els.modal) closeModal();
+    });
+
+    els.list.addEventListener('click', (e) => {
+      const btn = e.target.closest('[data-action]');
+      if (!btn) return;
+
+      const action = btn.getAttribute('data-action');
+      const id = btn.getAttribute('data-id');
+      const retailer = findRetailer(id);
+
+      if (action === 'view') {
+        openViewModal(retailer);
+      }
+
+      if (action === 'category') {
+        if (!retailer || !retailer._id) {
+          showBanner('error', 'Retailer id missing.');
+          return;
+        }
+
+        window.location.href =
+          CONFIG.ALLOWED_CATEGORY_URL + '?retailerId=' + encodeURIComponent(retailer._id);
+      }
+
+      if (action === 'wallet') {
+        showBanner('info', 'Wallet information is shown in the retailer card.');
+      }
+    });
+  }
+
+  async function bootstrap() {
+    state.fingerprint = await getStableFingerprint();
+    bindEvents();
+    await loadRetailers();
+  }
+
+  bootstrap().catch(() => {
+    showBanner('error', 'Failed to initialize HR retailer page.');
+  });
+})();
+</script>
+</body>
+</html>
