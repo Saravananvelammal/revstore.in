@@ -89,6 +89,16 @@
 (function () {
   'use strict';
 
+  window.addEventListener('error', function (e) {
+    const b = document.getElementById('banner');
+    const l = document.getElementById('loading');
+    if (l) l.style.display = 'none';
+    if (b) {
+      b.className = 'banner show error';
+      b.textContent = 'Page error: ' + (e.message || 'Unknown JavaScript error');
+    }
+  });
+
   const CONFIG = {
     API_BASE: typeof window.HR_WEB_API_BASE === 'string' && window.HR_WEB_API_BASE.trim()
       ? window.HR_WEB_API_BASE.trim().replace(/\/+$/, '')
@@ -134,32 +144,20 @@
     return String(new URLSearchParams(window.location.search || '').get(name) || '').trim();
   }
 
-  async function sha256Hex(input) {
-    const data = new TextEncoder().encode(String(input));
-    const digest = await crypto.subtle.digest('SHA-256', data);
-    return Array.from(new Uint8Array(digest)).map(b => b.toString(16).padStart(2, '0')).join('');
-  }
-
-  async function getStableFingerprint() {
+  function getStableFingerprint() {
     try {
       const existing = localStorage.getItem(CONFIG.FINGERPRINT_STORAGE_KEY);
       if (existing && existing.trim()) return existing.trim().slice(0, 200);
-    } catch (_) {}
 
-    const raw = [
-      navigator.userAgent || '',
-      navigator.language || '',
-      screen.width || '',
-      screen.height || '',
-      screen.colorDepth || '',
-      Intl.DateTimeFormat().resolvedOptions().timeZone || '',
-      navigator.platform || '',
-      crypto.getRandomValues(new Uint32Array(4)).join('-')
-    ].join('|');
+      const arr = new Uint32Array(4);
+      window.crypto.getRandomValues(arr);
+      const fp = Array.from(arr).join('-') + '-' + Date.now();
 
-    const fp = (await sha256Hex(raw)).slice(0, 64);
-    try { localStorage.setItem(CONFIG.FINGERPRINT_STORAGE_KEY, fp); } catch (_) {}
-    return fp;
+      localStorage.setItem(CONFIG.FINGERPRINT_STORAGE_KEY, fp);
+      return fp.slice(0, 200);
+    } catch (_) {
+      return 'hr-web-' + Date.now();
+    }
   }
 
   function redirectToLogin() {
@@ -175,27 +173,35 @@
       headers.set('x-device-fingerprint', state.fingerprint);
     }
 
-    const res = await fetch(CONFIG.API_BASE + path, {
-      ...(options || {}),
-      headers,
-      credentials: 'include',
-      cache: 'no-store',
-      redirect: 'follow',
-      referrerPolicy: 'strict-origin-when-cross-origin'
-    });
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 20000);
 
-    let data = {};
-    try { data = await res.json(); } catch (_) {}
+    try {
+      const res = await fetch(CONFIG.API_BASE + path, {
+        ...(options || {}),
+        headers,
+        credentials: 'include',
+        cache: 'no-store',
+        redirect: 'follow',
+        referrerPolicy: 'strict-origin-when-cross-origin',
+        signal: controller.signal
+      });
 
-    if (res.status === 401 || res.status === 403) {
-      throw Object.assign(new Error(data.message || 'Session expired.'), { status: res.status, data });
+      let data = {};
+      try { data = await res.json(); } catch (_) {}
+
+      if (res.status === 401 || res.status === 403) {
+        throw Object.assign(new Error(data.message || 'Session expired.'), { status: res.status, data });
+      }
+
+      if (!res.ok) {
+        throw Object.assign(new Error(data.message || 'Request failed.'), { status: res.status, data });
+      }
+
+      return data;
+    } finally {
+      clearTimeout(timer);
     }
-
-    if (!res.ok) {
-      throw Object.assign(new Error(data.message || 'Request failed.'), { status: res.status, data });
-    }
-
-    return data;
   }
 
   function escapeHtml(v) {
@@ -278,29 +284,19 @@
     renderRetailers();
     renderCategoryEditor();
 
-    try {
-      const data = await apiFetch('/retailers/' + encodeURIComponent(id) + '/allowed-categories?includeNames=true', {
-        method: 'GET'
-      });
+    const data = await apiFetch('/retailers/' + encodeURIComponent(id) + '/allowed-categories?includeNames=true', {
+      method: 'GET'
+    });
 
-      const allowed = data && data.retailer && Array.isArray(data.retailer.allowedCategories)
-        ? data.retailer.allowedCategories
-        : [];
+    const allowed = data && data.retailer && Array.isArray(data.retailer.allowedCategories)
+      ? data.retailer.allowedCategories
+      : [];
 
-      const r = selectedRetailer();
-      if (r) r.allowedCategories = allowed.map(k => String(k || '').trim().toLowerCase()).filter(Boolean);
+    const r = selectedRetailer();
+    if (r) r.allowedCategories = allowed.map(k => String(k || '').trim().toLowerCase()).filter(Boolean);
 
-      renderRetailers();
-      renderCategoryEditor();
-    } catch (err) {
-      if (err.status === 401 || err.status === 403) {
-        showBanner('error', 'Session expired. Redirecting to login...');
-        setTimeout(redirectToLogin, 500);
-        return;
-      }
-
-      showBanner('error', err.message || 'Failed to load allowed categories.');
-    }
+    renderRetailers();
+    renderCategoryEditor();
   }
 
   async function loadRetailers() {
@@ -330,17 +326,16 @@
       }
 
       const data = await apiFetch('/retailers?includeDeleted=false&sort=name&order=asc', { method: 'GET' });
-
       state.retailers = Array.isArray(data.retailers) ? data.retailers : [];
-
-      if (state.selectedRetailerId) {
-        const exists = state.retailers.some(r => String(r._id) === String(state.selectedRetailerId));
-        if (!exists) state.selectedRetailerId = '';
-      }
 
       renderRetailers();
       renderCategoryEditor();
     } catch (err) {
+      if (err.name === 'AbortError') {
+        showBanner('error', 'Request timeout. API did not respond within 20 seconds.');
+        return;
+      }
+
       if (err.status === 401 || err.status === 403) {
         showBanner('error', 'Session expired. Redirecting to login...');
         setTimeout(redirectToLogin, 500);
@@ -360,28 +355,29 @@
     els.searchInput.addEventListener('input', renderRetailers);
     els.quickFilter.addEventListener('change', renderRetailers);
 
-    els.retailerList.addEventListener('click', e => {
+    els.retailerList.addEventListener('click', async e => {
       const card = e.target.closest('[data-id]');
       if (!card) return;
-      selectRetailer(card.getAttribute('data-id'));
+
+      try {
+        await selectRetailer(card.getAttribute('data-id'));
+      } catch (err) {
+        showBanner('error', err.message || 'Failed to load allowed categories.');
+      }
     });
   }
 
-  async function bootstrap() {
-    state.fingerprint = await getStableFingerprint();
+  function bootstrap() {
+    state.fingerprint = getStableFingerprint();
     bindEvents();
-    await loadRetailers();
+    loadRetailers();
   }
 
-  bootstrap().catch(err => {
-    if (err && (err.status === 401 || err.status === 403)) {
-      showBanner('error', 'Session expired. Redirecting to login...');
-      setTimeout(redirectToLogin, 500);
-      return;
-    }
-
-    showBanner('error', err && err.message ? err.message : 'Failed to initialize HR category page.');
-  });
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', bootstrap);
+  } else {
+    bootstrap();
+  }
 })();
 </script>
 </body>
