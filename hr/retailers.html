@@ -24,7 +24,24 @@
     h1{margin:0;font-size:1.8rem;font-weight:900}
     .sub{margin:7px 0 0;color:rgba(255,255,255,.86)}
     .actions{display:flex;gap:10px;flex-wrap:wrap}
-    .btn{height:46px;padding:0 16px;border-radius:15px;border:1px solid var(--line);background:#fff;color:var(--text);font-weight:850;cursor:pointer}
+    .btn{
+      height:46px;
+      min-height:46px;
+      padding:0 16px;
+      border-radius:15px;
+      border:1px solid var(--line);
+      background:#fff;
+      color:var(--text);
+      font-weight:850;
+      cursor:pointer;
+
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      line-height:1;
+      white-space:nowrap;
+      vertical-align:middle;
+    }
     .btn-primary{border:0;color:#fff;background:linear-gradient(135deg,#5b21b6,#7c3aed,#a21caf)}
     .btn:disabled{opacity:.65;cursor:not-allowed}
     .panel{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px}
@@ -66,6 +83,9 @@
     label{font-weight:850;font-size:.9rem}
     .full{grid-column:1/-1}
     .modal-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:16px}
+    .modal-actions .btn{
+      min-width:96px;
+    }
     @media(max-width:760px){
       .topbar{flex-direction:column}
       .toolbar{grid-template-columns:1fr}
