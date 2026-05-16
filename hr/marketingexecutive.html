@@ -687,7 +687,7 @@
       els.form.elements.email.disabled = false;
       }
 
-      els.saveBtn.style.display = 'inline-flex';
+      els.saveBtn.style.visibility = 'visible';
       els.saveBtn.disabled = false;
 
       els.modal.classList.add('show');
@@ -702,7 +702,8 @@
       el.disabled = true;
     });
 
-    els.saveBtn.style.display = 'none';
+    els.saveBtn.style.visibility = 'hidden';
+    els.saveBtn.disabled = true;
 
     [
       'name',
@@ -805,7 +806,7 @@
       el.disabled = false;
     });
 
-    els.saveBtn.style.display = 'inline-flex';
+    els.saveBtn.style.visibility = 'visible';
     els.saveBtn.disabled = false;
 
     clearDocPreviews();
