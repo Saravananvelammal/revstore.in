@@ -60,17 +60,30 @@
 
     <div class="welcome">
       <h2 id="welcomeTitle">Welcome, Marketing Executive</h2>
-      <p id="welcomeSub">Manage assigned field work, retailers, notes, support, and profile.</p>
+      <p id="welcomeSub">Manage retailer recruitment, rider recruitment, wallet, support, and profile.</p>
     </div>
 
     <div class="stats">
-      <div class="stat"><div class="stat-title">Retailers</div><div id="retailerCount" class="stat-number">0</div><div class="stat-note">Assigned / recruited retailers</div></div>
-      <div class="stat"><div class="stat-title">Notes</div><div id="noteCount" class="stat-number">0</div><div class="stat-note">Saved follow-up notes</div></div>
-      <div class="stat"><div class="stat-title">Status</div><div id="statusText" class="stat-number">Active</div><div id="roleText" class="stat-note">Marketing Executive</div></div>
+      <div class="stat">
+        <div class="stat-title">Retailers</div>
+        <div id="retailerCount" class="stat-number">0</div>
+        <div class="stat-note">Recruited retailers</div>
+      </div>
+      <div class="stat">
+        <div class="stat-title">Riders</div>
+        <div id="riderCount" class="stat-number">0</div>
+        <div class="stat-note">Recruited riders</div>
+      </div>
+      <div class="stat">
+        <div class="stat-title">Wallet Balance</div>
+        <div id="walletBalance" class="stat-number">₹0.00</div>
+        <div id="walletNote" class="stat-note">Unlocked</div>
+      </div>
     </div>
 
     <div class="grid">
-      <a class="tile" href="./retailers"><div><div class="icon">🏪</div><h3>Retailers</h3><p>View and manage retailer leads.</p></div></a>
+      <a class="tile" href="./retailers"><div><div class="icon">🏪</div><h3>Retailers</h3><p>View and manage recruited retailers.</p></div></a>
+      <a class="tile" href="./riders"><div><div class="icon">🛵</div><h3>Riders</h3><p>Add and manage recruited riders.</p></div></a>
       <a class="tile" href="./notepad"><div><div class="icon">📝</div><h3>Note Pad</h3><p>Write and save follow-up notes.</p></div></a>
       <a class="tile" href="./support"><div><div class="icon">🎧</div><h3>Support</h3><p>View and handle support requests.</p></div></a>
       <a class="tile" href="./profile"><div><div class="icon">👤</div><h3>Profile</h3><p>View profile and account details.</p></div></a>
@@ -110,9 +123,9 @@
     welcomeTitle: document.getElementById('welcomeTitle'),
     welcomeSub: document.getElementById('welcomeSub'),
     retailerCount: document.getElementById('retailerCount'),
-    noteCount: document.getElementById('noteCount'),
-    statusText: document.getElementById('statusText'),
-    roleText: document.getElementById('roleText'),
+    riderCount: document.getElementById('riderCount'),
+    walletBalance: document.getElementById('walletBalance'),
+    walletNote: document.getElementById('walletNote'),
     refreshBtn: document.getElementById('refreshBtn'),
     logoutBtn: document.getElementById('logoutBtn'),
     changePasswordBtn: document.getElementById('changePasswordBtn'),
@@ -175,7 +188,7 @@
   }
 
   function redirectToLogin() {
-    window.location.replace(CONFIG.LOGIN_URL);
+    window.location.replace('/me/login');
   }
 
   async function apiFetch(path, options) {
@@ -226,6 +239,22 @@
     return 0;
   }
 
+  function money(value) {
+    const n = Number(value || 0);
+    return '₹' + (Number.isFinite(n) ? n.toFixed(2) : '0.00');
+  }
+
+  function extractWallet(profileData) {
+    const profile = profileData.marketingExecutive || profileData.profile || profileData.data || {};
+    const wallet = profile.wallet || profileData.wallet || {};
+    const balanceInr = wallet.balanceInr != null ? Number(wallet.balanceInr) : Number(wallet.balance || 0) / 100;
+
+    return {
+      balanceInr,
+      locked: Boolean(wallet.locked)
+    };
+  }
+
   async function loadDashboard(showSuccess = true) {
     if (state.busy) return;
 
@@ -235,10 +264,11 @@
     els.refreshBtn.textContent = 'Refreshing...';
 
     try {
-      const [meData, retailersData, notesData] = await Promise.all([
+      const [meData, profileData, retailersData, ridersData] = await Promise.all([
         apiFetch('/auth/me', { method: 'GET' }),
+        apiFetch('/profile', { method: 'GET' }).catch(() => ({})),
         apiFetch('/retailers', { method: 'GET' }).catch(() => ({})),
-        apiFetch('/notes', { method: 'GET' }).catch(() => ({}))
+        apiFetch('/riders', { method: 'GET' }).catch(() => ({}))
       ]);
 
       const me = meData.marketingExecutive || {};
@@ -246,12 +276,14 @@
       const role = String(me.designation || me.role || 'Marketing Executive').trim();
 
       els.welcomeTitle.textContent = 'Welcome, ' + name;
-      els.welcomeSub.textContent = role + ' • Manage your assigned work securely.';
+      els.welcomeSub.textContent = role + ' • Manage retailer and rider recruitment securely.';
 
       els.retailerCount.textContent = countFromResponse(retailersData, ['retailers', 'items', 'data']);
-      els.noteCount.textContent = countFromResponse(notesData, ['notes', 'items', 'data']);
-      els.statusText.textContent = 'Active';
-      els.roleText.textContent = role;
+      els.riderCount.textContent = countFromResponse(ridersData, ['riders', 'items', 'data']);
+
+      const wallet = extractWallet(profileData);
+      els.walletBalance.textContent = money(wallet.balanceInr);
+      els.walletNote.textContent = wallet.locked ? 'Locked' : 'Unlocked';
 
       if (showSuccess) showBanner('success', 'Dashboard refreshed successfully.');
     } catch (err) {
