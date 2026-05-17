@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Revstore HR Note Pad</title>
+  <meta name="robots" content="noindex,nofollow,noarchive,nosnippet" />
+  <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+
+  <style>
+    :root{
+      --bg1:#4318b8;--bg2:#7e22ce;--bg3:#c026d3;
+      --card:rgba(255,255,255,.96);--text:#1e1b4b;--muted:#6b7280;
+      --line:rgba(30,27,75,.12);--primary:#5b21b6;--success:#059669;
+      --danger:#dc2626;--shadow:0 18px 60px rgba(49,12,120,.25);--radius:24px;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;min-height:100vh;padding:22px;
+      font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+      color:var(--text);
+      background:linear-gradient(135deg,var(--bg1),var(--bg2),var(--bg3));
+    }
+    .app{max-width:1180px;margin:0 auto;display:grid;gap:18px}
+    .topbar{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;color:#fff}
+    h1{margin:0;font-size:2rem;font-weight:900}
+    .sub{margin:8px 0 0;color:rgba(255,255,255,.86)}
+    .actions{display:flex;gap:10px;flex-wrap:wrap}
+    .btn{
+      min-height:46px;padding:0 16px;border-radius:15px;border:1px solid var(--line);
+      background:#fff;color:var(--text);font-weight:850;cursor:pointer;
+      display:inline-flex;align-items:center;justify-content:center;line-height:1;white-space:nowrap;
+    }
+    .btn-primary{border:0;color:#fff;background:linear-gradient(135deg,#5b21b6,#7c3aed,#a21caf)}
+    .btn:disabled{opacity:.65;cursor:not-allowed}
+    .panel{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:22px}
+    .banner{display:none;padding:14px 16px;border-radius:16px;margin-bottom:14px;line-height:1.5}
+    .banner.show{display:block}
+    .banner.error{background:rgba(239,68,68,.12);color:#7f1d1d}
+    .banner.success{background:rgba(16,185,129,.12);color:#065f46}
+    .banner.info{background:rgba(59,130,246,.12);color:#1e3a8a}
+
+    .layout{display:grid;grid-template-columns:420px 1fr;gap:18px;align-items:start}
+    .box{background:#fff;border:1px solid var(--line);border-radius:22px;padding:18px}
+    .box h2{margin:0 0 12px;font-size:1.25rem}
+    .form-grid{display:grid;gap:12px}
+    .field{display:grid;gap:7px}
+    label{font-weight:850;font-size:.9rem}
+    input,select,textarea{
+      width:100%;min-height:48px;border:1px solid var(--line);border-radius:15px;
+      padding:0 14px;font:inherit;outline:none;background:#fff;color:var(--text)
+    }
+    textarea{min-height:110px;padding-top:12px;resize:vertical}
+    input:focus,select:focus,textarea:focus{box-shadow:0 0 0 4px rgba(91,33,182,.14);border-color:#7c3aed}
+
+    .toolbar{display:grid;grid-template-columns:1fr 150px 120px;gap:10px;margin-bottom:14px}
+    .list{display:grid;gap:12px}
+    .note-card{border:1px solid var(--line);border-radius:18px;background:#fff;padding:14px;display:grid;gap:8px}
+    .note-head{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+    .note-title{font-weight:950;font-size:1.05rem}
+    .note-time{color:var(--muted);font-size:.82rem;text-align:right;white-space:nowrap}
+    .note-msg{color:#374151;line-height:1.5;white-space:pre-wrap;word-break:break-word}
+    .note-meta{display:flex;gap:8px;flex-wrap:wrap;color:var(--muted);font-size:.88rem}
+    .pill{display:inline-flex;border-radius:999px;padding:6px 10px;font-weight:850;font-size:.78rem}
+    .pill-yes{background:rgba(16,185,129,.13);color:#065f46}
+    .pill-no{background:rgba(239,68,68,.12);color:#991b1b}
+    .empty,.loading{text-align:center;padding:28px;color:var(--muted);border:1px dashed var(--line);border-radius:18px;background:#fff}
+    .pagination{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:14px;flex-wrap:wrap}
+
+    @media(max-width:900px){
+      body{padding:16px}
+      .topbar{flex-direction:column}
+      .layout{grid-template-columns:1fr}
+      .toolbar{grid-template-columns:1fr}
+      h1{font-size:1.75rem}
+    }
+  </style>
+</head>
+
+<body>
+<main class="app">
+  <header class="topbar">
+    <div>
+      <h1>HR Note Pad</h1>
+      <p class="sub">Save and fetch notes registered under your HR profile.</p>
+    </div>
+    <div class="actions">
+      <button id="dashboardBtn" class="btn">Dashboard</button>
+      <button id="refreshBtn" class="btn btn-primary">Refresh</button>
+    </div>
+  </header>
+
+  <section class="panel">
+    <div id="banner" class="banner"></div>
+
+    <section class="layout">
+      <aside class="box">
+        <h2>Add Note</h2>
+
+        <form id="noteForm" class="form-grid">
+          <div class="field">
+            <label>Person / Organisation Name *</label>
+            <input id="personOrOrganisationName" maxlength="180" required />
+          </div>
+
+          <div class="field">
+            <label>Contact Number *</label>
+            <input id="contactNumber" inputmode="numeric" maxlength="15" required />
+          </div>
+
+          <div class="field">
+            <label>Organisation Mail ID</label>
+            <input id="organisationMailId" type="email" maxlength="190" />
+          </div>
+
+          <div class="field">
+            <label>Message *</label>
+            <textarea id="message" maxlength="3000" required></textarea>
+          </div>
+
+          <div class="field">
+            <label>Mail Sent?</label>
+            <select id="mailSent">
+              <option value="false">No</option>
+              <option value="true">Yes</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label>Remark</label>
+            <textarea id="remark" maxlength="1500"></textarea>
+          </div>
+
+          <button id="saveBtn" type="submit" class="btn btn-primary">Save Note</button>
+        </form>
+      </aside>
+
+      <section class="box">
+        <h2>Saved Notes</h2>
+
+        <div class="toolbar">
+          <input id="searchInput" type="search" placeholder="Search notes..." autocomplete="off" />
+          <select id="mailFilter">
+            <option value="">All</option>
+            <option value="true">Mail Sent</option>
+            <option value="false">Mail Not Sent</option>
+          </select>
+          <button id="applyBtn" class="btn btn-primary">Apply</button>
+        </div>
+
+        <div id="loading" class="loading">Loading notes...</div>
+        <div id="empty" class="empty" style="display:none;">No notes found.</div>
+        <div id="noteList" class="list"></div>
+
+        <div class="pagination">
+          <button id="prevBtn" class="btn">Previous</button>
+          <div id="pageInfo" class="muted">Page 1</div>
+          <button id="nextBtn" class="btn">Next</button>
+        </div>
+      </section>
+    </section>
+  </section>
+</main>
+
+<script>
+(function () {
+  'use strict';
+
+  const CONFIG = {
+    API_BASE: typeof window.HR_WEB_API_BASE === 'string' && window.HR_WEB_API_BASE.trim()
+      ? window.HR_WEB_API_BASE.trim().replace(/\/+$/, '')
+      : 'https://api.revstore.in/api/human-resource-web/v1',
+    LOGIN_URL: '/hr/login',
+    DASHBOARD_URL: '/hr/dashboard',
+    FINGERPRINT_STORAGE_KEY: 'hr_web_fp_v1'
+  };
+
+  const els = {
+    banner: document.getElementById('banner'),
+    dashboardBtn: document.getElementById('dashboardBtn'),
+    refreshBtn: document.getElementById('refreshBtn'),
+
+    form: document.getElementById('noteForm'),
+    saveBtn: document.getElementById('saveBtn'),
+    personOrOrganisationName: document.getElementById('personOrOrganisationName'),
+    contactNumber: document.getElementById('contactNumber'),
+    organisationMailId: document.getElementById('organisationMailId'),
+    message: document.getElementById('message'),
+    mailSent: document.getElementById('mailSent'),
+    remark: document.getElementById('remark'),
+
+    searchInput: document.getElementById('searchInput'),
+    mailFilter: document.getElementById('mailFilter'),
+    applyBtn: document.getElementById('applyBtn'),
+    loading: document.getElementById('loading'),
+    empty: document.getElementById('empty'),
+    noteList: document.getElementById('noteList'),
+    prevBtn: document.getElementById('prevBtn'),
+    nextBtn: document.getElementById('nextBtn'),
+    pageInfo: document.getElementById('pageInfo')
+  };
+
+  const state = {
+    fingerprint: '',
+    page: 1,
+    limit: 20,
+    totalPages: 1,
+    total: 0,
+    busy: false,
+    notes: []
+  };
+
+  let bannerTimer = null;
+
+  function showBanner(type, message, autoHide) {
+    clearTimeout(bannerTimer);
+    els.banner.className = 'banner show ' + type;
+    els.banner.textContent = message || '';
+
+    if (autoHide !== false) {
+      bannerTimer = setTimeout(clearBanner, 3500);
+    }
+  }
+
+  function clearBanner() {
+    clearTimeout(bannerTimer);
+    els.banner.className = 'banner';
+    els.banner.textContent = '';
+  }
+
+  function getCookie(name) {
+    const target = String(name || '') + '=';
+    const found = String(document.cookie || '')
+      .split(';')
+      .map(v => v.trim())
+      .find(v => v.indexOf(target) === 0);
+
+    return found ? decodeURIComponent(found.slice(target.length)) : '';
+  }
+
+  async function sha256Hex(input) {
+    const data = new TextEncoder().encode(String(input));
+    const digest = await crypto.subtle.digest('SHA-256', data);
+
+    return Array.from(new Uint8Array(digest))
+      .map(b => b.toString(16).padStart(2, '0'))
+      .join('');
+  }
+
+  async function getStableFingerprint() {
+    try {
+      const existing = localStorage.getItem(CONFIG.FINGERPRINT_STORAGE_KEY);
+      if (existing && existing.trim()) return existing.trim().slice(0, 200);
+    } catch (_) {}
+
+    const raw = [
+      navigator.userAgent || '',
+      navigator.language || '',
+      screen.width || '',
+      screen.height || '',
+      screen.colorDepth || '',
+      Intl.DateTimeFormat().resolvedOptions().timeZone || '',
+      navigator.platform || '',
+      crypto.getRandomValues(new Uint32Array(4)).join('-')
+    ].join('|');
+
+    const fp = (await sha256Hex(raw)).slice(0, 64);
+
+    try {
+      localStorage.setItem(CONFIG.FINGERPRINT_STORAGE_KEY, fp);
+    } catch (_) {}
+
+    return fp;
+  }
+
+  function redirectToLogin() {
+    window.location.replace(CONFIG.LOGIN_URL);
+  }
+
+  async function apiFetch(path, options) {
+    const headers = new Headers((options && options.headers) || {});
+    headers.set('Accept', 'application/json');
+    headers.set('X-Requested-With', 'XMLHttpRequest');
+
+    if (state.fingerprint) {
+      headers.set('x-device-fingerprint', state.fingerprint);
+    }
+
+    const method = String((options && options.method) || 'GET').toUpperCase();
+    const body = options && options.body;
+
+    if (body && !(body instanceof FormData) && !headers.has('Content-Type')) {
+      headers.set('Content-Type', 'application/json');
+    }
+
+    if (!['GET', 'HEAD', 'OPTIONS'].includes(method)) {
+      headers.set('x-csrf-token', getCookie('csrf_token') || '');
+    }
+
+    const finalPath = method === 'GET'
+      ? path + (path.includes('?') ? '&' : '?') + '_ts=' + Date.now()
+      : path;
+
+    const res = await fetch(CONFIG.API_BASE + finalPath, {
+      ...(options || {}),
+      headers,
+      credentials: 'include',
+      cache: 'no-store',
+      redirect: 'follow',
+      referrerPolicy: 'strict-origin-when-cross-origin'
+    });
+
+    let data = {};
+    try { data = await res.json(); } catch (_) {}
+
+    if (res.status === 401 || res.status === 403) {
+      throw Object.assign(new Error(data.message || 'Session expired.'), {
+        status: res.status,
+        data
+      });
+    }
+
+    if (!res.ok) {
+      throw Object.assign(new Error(data.message || 'Request failed.'), {
+        status: res.status,
+        data
+      });
+    }
+
+    return data;
+  }
+
+  function escapeHtml(v) {
+    return String(v == null ? '' : v)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  function formatDate(value) {
+    const d = new Date(value || Date.now());
+    if (Number.isNaN(d.getTime())) return '-';
+
+    return d.toLocaleString('en-IN', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  }
+
+  function renderNotes() {
+    els.empty.style.display = state.notes.length ? 'none' : 'block';
+
+    els.noteList.innerHTML = state.notes.map(note => {
+      const mailSent = note.mailSent === true;
+
+      return `
+        <article class="note-card">
+          <div class="note-head">
+            <div>
+              <div class="note-title">${escapeHtml(note.personOrOrganisationName || '-')}</div>
+              <div class="note-meta">
+                <span>${escapeHtml(note.contactNumber || '-')}</span>
+                ${note.organisationMailId ? `<span>${escapeHtml(note.organisationMailId)}</span>` : ''}
+              </div>
+            </div>
+            <div class="note-time">${escapeHtml(formatDate(note.currentTime || note.createdAt))}</div>
+          </div>
+
+          <div class="note-msg">${escapeHtml(note.message || '')}</div>
+
+          <div class="note-meta">
+            <span class="pill ${mailSent ? 'pill-yes' : 'pill-no'}">${mailSent ? 'Mail Sent' : 'Mail Not Sent'}</span>
+            ${note.remark ? `<span>Remark: ${escapeHtml(note.remark)}</span>` : ''}
+          </div>
+        </article>
+      `;
+    }).join('');
+
+    updatePagination();
+  }
+
+  function updatePagination() {
+    els.pageInfo.textContent = 'Page ' + state.page + ' of ' + Math.max(1, state.totalPages) + ' • Total ' + state.total;
+    els.prevBtn.disabled = state.busy || state.page <= 1;
+    els.nextBtn.disabled = state.busy || state.page >= state.totalPages;
+  }
+
+  function buildQuery() {
+    const params = new URLSearchParams();
+    params.set('page', String(state.page));
+    params.set('limit', String(state.limit));
+
+    const q = els.searchInput.value.trim();
+    const mailSent = els.mailFilter.value.trim();
+
+    if (q) params.set('q', q);
+    if (mailSent) params.set('mailSent', mailSent);
+
+    return '?' + params.toString();
+  }
+
+  async function loadNotes() {
+    if (state.busy) return;
+
+    state.busy = true;
+    els.loading.style.display = 'block';
+    els.empty.style.display = 'none';
+    els.noteList.innerHTML = '';
+    updatePagination();
+
+    try {
+      await apiFetch('/auth/me', { method: 'GET' });
+
+      const data = await apiFetch('/notes' + buildQuery(), {
+        method: 'GET'
+      });
+
+      state.notes = Array.isArray(data.notes) ? data.notes : [];
+      state.total = Number(data.total || 0);
+      state.totalPages = Math.max(1, Number(data.totalPages || 1));
+
+      renderNotes();
+    } catch (err) {
+      if (err.status === 401 || err.status === 403) {
+        showBanner('error', 'Session expired. Redirecting to login...', false);
+        setTimeout(redirectToLogin, 600);
+        return;
+      }
+
+      showBanner('error', err.message || 'Failed to load notes.', false);
+    } finally {
+      state.busy = false;
+      els.loading.style.display = 'none';
+      updatePagination();
+    }
+  }
+
+  function payloadFromForm() {
+    return {
+      personOrOrganisationName: els.personOrOrganisationName.value.trim(),
+      contactNumber: els.contactNumber.value.trim(),
+      organisationMailId: els.organisationMailId.value.trim().toLowerCase(),
+      message: els.message.value.trim(),
+      mailSent: els.mailSent.value === 'true',
+      remark: els.remark.value.trim(),
+      currentTime: new Date().toISOString()
+    };
+  }
+
+  function validatePayload(payload) {
+    if (!payload.personOrOrganisationName || payload.personOrOrganisationName.length < 2) {
+      throw new Error('Person / organisation name is required.');
+    }
+
+    if (!payload.contactNumber || !/^[0-9]{7,15}$/.test(payload.contactNumber)) {
+      throw new Error('Contact number must be 7 to 15 digits.');
+    }
+
+    if (
+      payload.organisationMailId &&
+      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(payload.organisationMailId)
+    ) {
+      throw new Error('Organisation mail ID must be valid.');
+    }
+
+    if (!payload.message || payload.message.length < 2) {
+      throw new Error('Message is required.');
+    }
+  }
+
+  async function saveNote(event) {
+    event.preventDefault();
+
+    if (state.busy) return;
+
+    const payload = payloadFromForm();
+
+    try {
+      validatePayload(payload);
+
+      state.busy = true;
+      els.saveBtn.disabled = true;
+      els.saveBtn.textContent = 'Saving...';
+
+      await apiFetch('/notes', {
+        method: 'POST',
+        body: JSON.stringify(payload)
+      });
+
+      els.form.reset();
+      els.mailSent.value = 'false';
+      state.page = 1;
+
+      showBanner('success', 'Note saved successfully.');
+      await loadNotes();
+    } catch (err) {
+      const errors = err.data && err.data.errors;
+      showBanner(
+        'error',
+        errors ? Object.values(errors).join(' | ') : (err.message || 'Failed to save note.'),
+        false
+      );
+    } finally {
+      state.busy = false;
+      els.saveBtn.disabled = false;
+      els.saveBtn.textContent = 'Save Note';
+      updatePagination();
+    }
+  }
+
+  function bindEvents() {
+    els.dashboardBtn.addEventListener('click', () => {
+      window.location.href = CONFIG.DASHBOARD_URL;
+    });
+
+    els.refreshBtn.addEventListener('click', () => {
+      loadNotes();
+    });
+
+    els.form.addEventListener('submit', saveNote);
+
+    els.applyBtn.addEventListener('click', () => {
+      state.page = 1;
+      loadNotes();
+    });
+
+    els.searchInput.addEventListener('keydown', e => {
+      if (e.key === 'Enter') {
+        state.page = 1;
+        loadNotes();
+      }
+    });
+
+    els.mailFilter.addEventListener('change', () => {
+      state.page = 1;
+      loadNotes();
+    });
+
+    els.prevBtn.addEventListener('click', () => {
+      if (state.page > 1) {
+        state.page -= 1;
+        loadNotes();
+      }
+    });
+
+    els.nextBtn.addEventListener('click', () => {
+      if (state.page < state.totalPages) {
+        state.page += 1;
+        loadNotes();
+      }
+    });
+  }
+
+  async function bootstrap() {
+    state.fingerprint = await getStableFingerprint();
+    bindEvents();
+    await loadNotes();
+  }
+
+  bootstrap().catch(() => {
+    showBanner('error', 'Failed to initialize HR note pad.', false);
+  });
+})();
+</script>
+</body>
+</html>
