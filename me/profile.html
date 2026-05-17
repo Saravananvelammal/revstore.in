@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Revstore HR Profile</title>
+  <meta name="robots" content="noindex,nofollow,noarchive,nosnippet" />
+  <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+
+  <style>
+    :root{--bg1:#4318b8;--bg2:#7e22ce;--bg3:#c026d3;--card:rgba(255,255,255,.97);--text:#1e1b4b;--muted:#6b7280;--line:rgba(30,27,75,.12);--primary:#5b21b6;--danger:#dc2626;--success:#059669;--shadow:0 18px 60px rgba(49,12,120,.25);--radius:24px}
+    *{box-sizing:border-box}
+    body{margin:0;min-height:100vh;padding:22px;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;color:var(--text);background:linear-gradient(135deg,var(--bg1),var(--bg2),var(--bg3))}
+    .app{max-width:1180px;margin:0 auto;display:grid;gap:18px}
+    .topbar{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;color:#fff}
+    h1{margin:0;font-size:2rem;font-weight:900}.sub{margin:8px 0 0;color:rgba(255,255,255,.86)}
+    .actions,.preview-row{display:flex;gap:10px;flex-wrap:wrap}
+    .btn{min-height:44px;padding:0 16px;border-radius:14px;border:1px solid var(--line);cursor:pointer;font-weight:850;background:#fff;color:var(--text)}
+    .btn-primary{border:0;color:#fff;background:linear-gradient(135deg,#5b21b6,#7c3aed,#a21caf)}
+    .btn-danger{border:0;color:#fff;background:linear-gradient(135deg,#dc2626,#b91c1c)}
+    .btn:disabled{opacity:.65;cursor:not-allowed}
+    .panel{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:22px}
+    .banner{display:none;padding:14px 16px;border-radius:16px;margin-bottom:14px}.banner.show{display:block}
+    .banner.error{background:rgba(239,68,68,.12);color:#7f1d1d}.banner.success{background:rgba(16,185,129,.12);color:#065f46}.banner.info{background:rgba(124,58,237,.12);color:#4c1d95}
+    .form-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+    .section-title{grid-column:1/-1;margin:10px 0 0;font-weight:950;color:#4c1d95}
+    .field{display:grid;gap:7px}
+    .full{grid-column:1/-1}
+    label{font-weight:850;font-size:.84rem}
+    input,select,textarea{width:100%;border:1px solid var(--line);border-radius:14px;padding:0 13px;min-height:44px;font:inherit;background:#fff;color:var(--text)}
+    textarea{padding:12px 13px;min-height:82px;resize:vertical}
+    input[readonly],input:disabled,select:disabled{background:#f3f4f6;color:#6b7280;cursor:not-allowed}
+    .img-preview{width:86px;height:86px;border-radius:18px;object-fit:cover;border:1px solid var(--line);background:#f3f4f6}
+    .doc-link{display:none;font-size:.84rem;font-weight:850;color:#5b21b6;cursor:pointer;text-decoration:underline}
+    .hint{font-size:.78rem;color:var(--muted);line-height:1.4}
+    .footer-actions{
+      display:flex;
+      justify-content:flex-end;
+      align-items:center;
+      gap:10px;
+      margin-top:22px;
+      padding:16px 0 0;
+      background:#fff;
+      position:sticky;
+      bottom:0;
+      z-index:5;
+    }
+
+    .footer-actions .btn{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      min-width:132px;
+      height:48px;
+      line-height:1;
+      white-space:nowrap;
+    }
+    @media(max-width:900px){.topbar{flex-direction:column}.form-grid{grid-template-columns:1fr}.footer-actions{position:static}}
+  </style>
+</head>
+
+<body>
+<main class="app">
+  <header class="topbar">
+    <div>
+      <h1>HR Profile</h1>
+      <p class="sub">Update personal, Aadhaar, PAN, bank, and document details securely.</p>
+    </div>
+    <div class="actions">
+      <button id="dashboardBtn" class="btn">Dashboard</button>
+      <button id="refreshBtn" class="btn btn-primary">Refresh</button>
+      <button id="logoutBtn" class="btn">Logout</button>
+    </div>
+  </header>
+
+  <section class="panel">
+    <div id="banner" class="banner"></div>
+
+    <form id="profileForm" enctype="multipart/form-data" novalidate>
+      <div class="form-grid">
+        <div class="section-title">Profile</div>
+
+        <div class="field">
+          <label>Name *</label>
+          <input name="name" required minlength="2" maxlength="120" />
+        </div>
+
+        <div class="field">
+          <label>Email</label>
+          <input name="email" type="email" readonly />
+          <div class="hint">Email cannot be changed.</div>
+        </div>
+
+        <div class="field">
+          <label>Designation</label>
+          <input name="designation" readonly />
+        </div>
+
+        <div class="field">
+          <label>Role</label>
+          <input name="role" readonly />
+        </div>
+
+        <div class="field">
+          <label>Date of Birth *</label>
+          <input name="dateOfBirth" type="date" required />
+        </div>
+
+        <div class="field">
+          <label>Blood Group</label>
+          <select name="bloodGroup">
+            <option value="">Not Set</option>
+            <option>A+</option><option>A-</option><option>B+</option><option>B-</option>
+            <option>AB+</option><option>AB-</option><option>O+</option><option>O-</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label>Profile Image</label>
+          <input name="profileImage" type="file" accept="image/png,image/jpeg,image/webp" />
+          <div class="preview-row">
+            <img id="profilePreviewImg" class="img-preview" alt="Profile preview" />
+            <span id="profilePreviewLink" class="doc-link">Open Profile Image</span>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Personal Mobile *</label>
+          <input name="personalMobile" inputmode="numeric" maxlength="10" required />
+        </div>
+
+        <div class="field">
+          <label>Office Mobile</label>
+          <input name="officeMobile" inputmode="numeric" maxlength="10" />
+        </div>
+
+        <div class="field">
+          <label>Emergency Contact *</label>
+          <input name="emergencyContactNumber" inputmode="numeric" maxlength="10" required />
+        </div>
+
+        <div class="section-title">Address</div>
+
+        <div class="field full">
+          <label>Address *</label>
+          <textarea name="address" required maxlength="500"></textarea>
+        </div>
+
+        <div class="field"><label>Address Line 1</label><input name="addressLine1" maxlength="180" /></div>
+        <div class="field"><label>Address Line 2</label><input name="addressLine2" maxlength="180" /></div>
+        <div class="field"><label>Area</label><input name="area" maxlength="100" /></div>
+        <div class="field"><label>City</label><input name="city" maxlength="100" /></div>
+        <div class="field"><label>State</label><input name="state" maxlength="100" /></div>
+        <div class="field"><label>Postal Code</label><input name="postalCode" inputmode="numeric" maxlength="6" /></div>
+        <div class="field"><label>Country</label><input name="country" maxlength="80" /></div>
+
+        <div class="section-title">Aadhaar</div>
+
+        <div class="field">
+          <label>Aadhaar Number *</label>
+          <input name="aadhaarNumber" inputmode="numeric" maxlength="12" required />
+        </div>
+
+        <div class="field">
+          <label>Aadhaar Front Image *</label>
+          <input name="aadhaarFrontImage" type="file" accept="image/png,image/jpeg,image/webp" />
+          <span id="aadhaarFrontPreview" class="doc-link">Open Aadhaar Front</span>
+        </div>
+
+        <div class="field">
+          <label>Aadhaar Back Image *</label>
+          <input name="aadhaarBackImage" type="file" accept="image/png,image/jpeg,image/webp" />
+          <span id="aadhaarBackPreview" class="doc-link">Open Aadhaar Back</span>
+        </div>
+
+        <div class="section-title">PAN</div>
+
+        <div class="field">
+          <label>PAN Number *</label>
+          <input name="panNumber" maxlength="10" required />
+        </div>
+
+        <div class="field">
+          <label>PAN Front Image *</label>
+          <input name="panFrontImage" type="file" accept="image/png,image/jpeg,image/webp" />
+          <span id="panFrontPreview" class="doc-link">Open PAN Front</span>
+        </div>
+
+        <div class="field">
+          <label>PAN Back Image</label>
+          <input name="panBackImage" type="file" accept="image/png,image/jpeg,image/webp" />
+          <span id="panBackPreview" class="doc-link">Open PAN Back</span>
+        </div>
+
+        <div class="section-title">Payment / Bank</div>
+
+        <div class="field">
+          <label>UPI ID *</label>
+          <input name="upiId" required />
+        </div>
+
+        <div class="field">
+          <label>Bank Name</label>
+          <input name="bankName" maxlength="120" />
+        </div>
+
+        <div class="field">
+          <label>Bank Account Number</label>
+          <input name="bankAccountNumber" inputmode="numeric" maxlength="18" />
+        </div>
+
+        <div class="field">
+          <label>IFSC</label>
+          <input name="bankIfsc" maxlength="11" />
+        </div>
+
+        <div class="field">
+          <label>Bank Proof Image</label>
+          <input name="bankProofImage" type="file" accept="image/png,image/jpeg,image/webp" />
+          <span id="bankProofPreview" class="doc-link">Open Bank Proof</span>
+        </div>
+
+        <div class="section-title">Official / Login Policy</div>
+
+        <div class="field"><label>Login Hours / Day</label><input name="loginHoursPerDay" readonly /></div>
+        <div class="field"><label>Allowed Start</label><input name="allowedLoginStartTime" readonly /></div>
+        <div class="field"><label>Allowed End</label><input name="allowedLoginEndTime" readonly /></div>
+        <div class="field"><label>Timezone</label><input name="timezone" readonly /></div>
+        <div class="field"><label>Status</label><input name="status" readonly /></div>
+      </div>
+
+      <div class="footer-actions">
+        <button type="submit" id="saveBtn" class="btn btn-primary">Save Profile</button>
+      </div>
+    </form>
+  </section>
+</main>
+
+<script>
+(function () {
+  'use strict';
+
+  const CONFIG = {
+    API_BASE: typeof window.HR_WEB_API_BASE === 'string' && window.HR_WEB_API_BASE.trim()
+      ? window.HR_WEB_API_BASE.trim().replace(/\/+$/, '')
+      : 'https://api.revstore.in/api/human-resource-web/v1',
+    LOGIN_URL: typeof window.HR_WEB_LOGIN_URL === 'string' && window.HR_WEB_LOGIN_URL.trim()
+      ? window.HR_WEB_LOGIN_URL.trim()
+      : '/hr/login',
+    DASHBOARD_URL: '/hr/dashboard',
+    FINGERPRINT_STORAGE_KEY: 'hr_web_fp_v1'
+  };
+
+  const state = {
+    fingerprint: '',
+    busy: false,
+    profile: null,
+    objectUrls: new Set(),
+    dirty: false
+  };
+
+  const els = {
+    banner: document.getElementById('banner'),
+    form: document.getElementById('profileForm'),
+    saveBtn: document.getElementById('saveBtn'),
+    refreshBtn: document.getElementById('refreshBtn'),
+    dashboardBtn: document.getElementById('dashboardBtn'),
+    logoutBtn: document.getElementById('logoutBtn'),
+    profilePreviewImg: document.getElementById('profilePreviewImg'),
+    profilePreviewLink: document.getElementById('profilePreviewLink'),
+    aadhaarFrontPreview: document.getElementById('aadhaarFrontPreview'),
+    aadhaarBackPreview: document.getElementById('aadhaarBackPreview'),
+    panFrontPreview: document.getElementById('panFrontPreview'),
+    panBackPreview: document.getElementById('panBackPreview'),
+    bankProofPreview: document.getElementById('bankProofPreview')
+  };
+
+  function showBanner(type, msg) {
+    els.banner.className = 'banner show ' + type;
+    els.banner.textContent = msg || '';
+  }
+
+  function clearBanner() {
+    els.banner.className = 'banner';
+    els.banner.textContent = '';
+  }
+
+  function getCookie(name) {
+    const target = String(name || '') + '=';
+    const found = String(document.cookie || '')
+      .split(';')
+      .map(v => v.trim())
+      .find(v => v.indexOf(target) === 0);
+    return found ? decodeURIComponent(found.slice(target.length)) : '';
+  }
+
+  async function sha256Hex(input) {
+    const data = new TextEncoder().encode(String(input));
+    const digest = await crypto.subtle.digest('SHA-256', data);
+    return Array.from(new Uint8Array(digest)).map(b => b.toString(16).padStart(2, '0')).join('');
+  }
+
+  async function getStableFingerprint() {
+    try {
+      const existing = localStorage.getItem(CONFIG.FINGERPRINT_STORAGE_KEY);
+      if (existing && existing.trim()) return existing.trim().slice(0, 200);
+    } catch (_) {}
+
+    const raw = [
+      navigator.userAgent || '',
+      navigator.language || '',
+      screen.width || '',
+      screen.height || '',
+      screen.colorDepth || '',
+      Intl.DateTimeFormat().resolvedOptions().timeZone || '',
+      navigator.platform || '',
+      crypto.getRandomValues(new Uint32Array(4)).join('-')
+    ].join('|');
+
+    const fp = (await sha256Hex(raw)).slice(0, 64);
+    try { localStorage.setItem(CONFIG.FINGERPRINT_STORAGE_KEY, fp); } catch (_) {}
+    return fp;
+  }
+
+  function redirectToLogin() {
+    window.location.replace(CONFIG.LOGIN_URL);
+  }
+
+  function cleanupObjectUrls() {
+    for (const url of state.objectUrls) URL.revokeObjectURL(url);
+    state.objectUrls.clear();
+  }
+
+  async function apiFetch(path, options) {
+    const headers = new Headers((options && options.headers) || {});
+    headers.set('Accept', 'application/json');
+    headers.set('X-Requested-With', 'XMLHttpRequest');
+
+    if (state.fingerprint) headers.set('x-device-fingerprint', state.fingerprint);
+
+    const method = String((options && options.method) || 'GET').toUpperCase();
+    const body = options && options.body;
+    const isFormData = body instanceof FormData;
+
+    if (!isFormData && body && !headers.has('Content-Type')) {
+      headers.set('Content-Type', 'application/json');
+    }
+
+    if (!['GET', 'HEAD', 'OPTIONS'].includes(method)) {
+      headers.set('x-csrf-token', getCookie('csrf_token'));
+    }
+
+    const res = await fetch(CONFIG.API_BASE + path, {
+      ...(options || {}),
+      headers,
+      credentials: 'include',
+      cache: 'no-store',
+      redirect: 'follow',
+      referrerPolicy: 'strict-origin-when-cross-origin'
+    });
+
+    let data = {};
+    try { data = await res.json(); } catch (_) {}
+
+    if (res.status === 401 || res.status === 403) {
+      throw Object.assign(new Error(data.message || 'Session expired.'), { status: res.status, data });
+    }
+
+    if (!res.ok) {
+      throw Object.assign(new Error(data.message || 'Request failed.'), { status: res.status, data });
+    }
+
+    return data;
+  }
+
+  function setValue(name, value) {
+    const el = els.form.elements[name];
+    if (!el) return;
+    el.value = value == null ? '' : String(value);
+  }
+
+  function normalizeDate(value) {
+    if (!value) return '';
+    const d = new Date(value);
+    return Number.isNaN(d.getTime()) ? '' : d.toISOString().slice(0, 10);
+  }
+
+  function docEndpoint(docType) {
+    return '/profile/documents/' + encodeURIComponent(docType);
+  }
+
+  async function fetchProtectedBlobUrl(docType) {
+    const headers = new Headers();
+    headers.set('Accept', 'image/*');
+    headers.set('X-Requested-With', 'XMLHttpRequest');
+    if (state.fingerprint) headers.set('x-device-fingerprint', state.fingerprint);
+
+    const res = await fetch(CONFIG.API_BASE + docEndpoint(docType), {
+      method: 'GET',
+      headers,
+      credentials: 'include',
+      cache: 'no-store'
+    });
+
+    if (res.status === 401 || res.status === 403) {
+      throw Object.assign(new Error('Session expired.'), { status: res.status });
+    }
+
+    if (!res.ok) throw new Error('Document not available');
+
+    const blob = await res.blob();
+    const blobUrl = URL.createObjectURL(blob);
+    state.objectUrls.add(blobUrl);
+    return blobUrl;
+  }
+
+  function setDocLink(el, docType, hasDoc) {
+    if (!el) return;
+
+    if (!hasDoc) {
+      el.style.display = 'none';
+      el.onclick = null;
+      return;
+    }
+
+    el.style.display = 'inline-flex';
+    el.onclick = async function () {
+      try {
+        const blobUrl = await fetchProtectedBlobUrl(docType);
+        window.open(blobUrl, '_blank', 'noopener,noreferrer');
+      } catch (err) {
+        if (err.status === 401 || err.status === 403) {
+          showBanner('error', 'Session expired. Redirecting...');
+          setTimeout(redirectToLogin, 700);
+          return;
+        }
+        showBanner('error', err.message || 'Failed to open document.');
+      }
+    };
+  }
+
+  async function hydrateProfilePreview(hasProfile) {
+    els.profilePreviewImg.removeAttribute('src');
+
+    if (!hasProfile) {
+      els.profilePreviewImg.alt = 'No profile image';
+      setDocLink(els.profilePreviewLink, 'profile', false);
+      return;
+    }
+
+    setDocLink(els.profilePreviewLink, 'profile', true);
+
+    try {
+      const blobUrl = await fetchProtectedBlobUrl('profile');
+      els.profilePreviewImg.src = blobUrl;
+      els.profilePreviewImg.alt = 'Profile image';
+    } catch (_) {
+      els.profilePreviewImg.alt = 'Profile unavailable';
+    }
+  }
+
+  function hasText(v) {
+    return String(v || '').trim().length > 0;
+  }
+
+  function fillForm(hr) {
+    state.profile = hr || {};
+
+    setValue('name', hr.name);
+    setValue('email', hr.email);
+    setValue('designation', hr.designation);
+    setValue('role', hr.role);
+    setValue('dateOfBirth', normalizeDate(hr.dateOfBirth));
+    setValue('bloodGroup', hr.bloodGroup);
+
+    setValue('personalMobile', hr.personalMobile);
+    setValue('officeMobile', hr.officeMobile);
+    setValue('emergencyContactNumber', hr.emergencyContactNumber);
+
+    setValue('address', hr.address);
+    setValue('addressLine1', hr.addressLine1);
+    setValue('addressLine2', hr.addressLine2);
+    setValue('area', hr.area);
+    setValue('city', hr.city);
+    setValue('state', hr.state);
+    setValue('postalCode', hr.postalCode);
+    setValue('country', hr.country);
+
+    setValue('aadhaarNumber', hr.aadhaar?.number || '');
+    setValue('panNumber', hr.pan && (hr.pan.number || hr.pan.numberMasked || ''));
+
+    setValue('upiId', hr.upiId);
+    setValue('bankName', hr.bank && hr.bank.name);
+    setValue('bankAccountNumber', hr.bank && (hr.bank.accountNumber || hr.bank.accountNumberMasked || ''));
+    setValue('bankIfsc', hr.bank && hr.bank.ifsc);
+
+    setValue('loginHoursPerDay', hr.loginHoursPerDay);
+    setValue('allowedLoginStartTime', hr.allowedLoginStartTime);
+    setValue('allowedLoginEndTime', hr.allowedLoginEndTime);
+    setValue('timezone', hr.timezone);
+    setValue('status', hr.status);
+
+    setDocLink(els.aadhaarFrontPreview, 'aadhaar_front', !!(hr.aadhaar && hr.aadhaar.frontImage));
+    setDocLink(els.aadhaarBackPreview, 'aadhaar_back', !!(hr.aadhaar && hr.aadhaar.backImage));
+    setDocLink(els.panFrontPreview, 'pan_front', !!(hr.pan && hr.pan.frontImage));
+    setDocLink(els.panBackPreview, 'pan_back', !!(hr.pan && hr.pan.backImage));
+    setDocLink(els.bankProofPreview, 'bank_proof', !!(hr.bank && hr.bank.proofImage));
+
+    hydrateProfilePreview(!!hr.profileImage);
+
+    state.dirty = false;
+    els.saveBtn.style.display = 'none';
+  }
+
+  function isPlaceholder(v) {
+    const s = String(v || '').trim().toLowerCase();
+    return !s || s === 'to be updated by hr' || s === 'to be updated';
+  }
+
+  function isMasked(v) {
+    return /\*/.test(String(v || ''));
+  }
+
+  function requireFirstTimeDocs(profile) {
+    const missing = [];
+
+    if (isPlaceholder(profile.name)) missing.push('Name');
+    if (!hasText(profile.dateOfBirth)) missing.push('Date of birth');
+    if (!/^[6-9][0-9]{9}$/.test(String(profile.personalMobile || ''))) missing.push('Personal mobile');
+    if (!/^[6-9][0-9]{9}$/.test(String(profile.emergencyContactNumber || ''))) missing.push('Emergency contact');
+
+    if (isPlaceholder(profile.address)) missing.push('Address');
+
+    if (!hasText(profile.aadhaar?.number)) missing.push('Aadhaar number');
+    if (!profile.aadhaar?.frontImage) missing.push('Aadhaar front image');
+    if (!profile.aadhaar?.backImage) missing.push('Aadhaar back image');
+
+    if (!hasText(profile.pan?.number || profile.pan?.numberMasked)) missing.push('PAN number');
+    if (!profile.pan?.frontImage) missing.push('PAN front image');
+
+    if (!hasText(profile.upiId)) missing.push('UPI ID');
+
+    if (!hasText(profile.bank?.name)) missing.push('Bank name');
+    if (!hasText(profile.bank?.accountNumber || profile.bank?.accountNumberMasked)) missing.push('Bank account number');
+    if (!hasText(profile.bank?.ifsc)) missing.push('IFSC');
+
+    return missing;
+  }
+
+  async function loadProfile() {
+    clearBanner();
+    cleanupObjectUrls();
+
+    try {
+      const data = await apiFetch('/profile', { method: 'GET' });
+      const hr = data.humanResource || {};
+      fillForm(hr);
+
+      const missing = requireFirstTimeDocs(hr);
+
+      if (missing.length) {
+        els.saveBtn.style.display = 'inline-flex';
+        showBanner('info', 'Please complete/update profile: ' + missing.join(', '));
+      } else {
+        els.saveBtn.style.display = 'none';
+      }
+    } catch (err) {
+      if (err.status === 401 || err.status === 403) {
+        showBanner('error', 'Session expired. Redirecting...');
+        setTimeout(redirectToLogin, 700);
+        return;
+      }
+      showBanner('error', err.message || 'Failed to load profile.');
+    }
+  }
+
+  function markDirty() {
+    state.dirty = true;
+    els.saveBtn.style.display = 'inline-flex';
+  }
+
+  function cleanFiles(fd) {
+    for (const [k, v] of Array.from(fd.entries())) {
+      if (v instanceof File && !v.name) fd.delete(k);
+    }
+  }
+
+  function validateBeforeSave(fd) {
+    const aadhaar = String(fd.get('aadhaarNumber') || '').trim();
+    const pan = String(fd.get('panNumber') || '').trim().toUpperCase();
+    const mobile = String(fd.get('personalMobile') || '').trim();
+    const emergency = String(fd.get('emergencyContactNumber') || '').trim();
+    const office = String(fd.get('officeMobile') || '').trim();
+    const ifsc = String(fd.get('bankIfsc') || '').trim().toUpperCase();
+    const bankAcc = String(fd.get('bankAccountNumber') || '').trim();
+    const upi = String(fd.get('upiId') || '').trim();
+
+    if (!/^[6-9][0-9]{9}$/.test(mobile)) throw new Error('Invalid personal mobile number.');
+    if (!/^[6-9][0-9]{9}$/.test(emergency)) throw new Error('Invalid emergency contact number.');
+    if (office && !/^[6-9][0-9]{9}$/.test(office)) throw new Error('Invalid office mobile number.');
+    if (!/^[0-9]{12}$/.test(aadhaar)) throw new Error('Aadhaar number must be exactly 12 digits.');
+    if (!/^[A-Z]{5}[0-9]{4}[A-Z]$/.test(pan)) throw new Error('Invalid PAN number.');
+    if (upi && !/^[a-z0-9._-]{2,256}@[a-z0-9.-]{2,64}$/i.test(upi)) throw new Error('Invalid UPI ID.');
+    if (bankAcc && isMasked(bankAcc)) {
+      fd.delete('bankAccountNumber');
+    } else if (bankAcc && !/^[0-9]{9,18}$/.test(bankAcc)) {
+      throw new Error('Bank account number must be 9–18 digits.');
+    }
+    if (ifsc && !/^[A-Z]{4}0[A-Z0-9]{6}$/.test(ifsc)) throw new Error('Invalid IFSC code.');
+
+    fd.set('panNumber', pan);
+    fd.set('bankIfsc', ifsc);
+  }
+
+  async function saveProfile(e) {
+    e.preventDefault();
+    if (state.busy) return;
+
+    clearBanner();
+
+    const fd = new FormData(els.form);
+    cleanFiles(fd);
+
+    fd.delete('email');
+    fd.delete('role');
+    fd.delete('designation');
+    fd.delete('loginHoursPerDay');
+    fd.delete('allowedLoginStartTime');
+    fd.delete('allowedLoginEndTime');
+    fd.delete('timezone');
+    fd.delete('status');
+
+    try {
+      validateBeforeSave(fd);
+
+      state.busy = true;
+      els.saveBtn.disabled = true;
+      els.saveBtn.textContent = 'Saving...';
+
+      const data = await apiFetch('/profile', {
+        method: 'POST',
+        body: fd
+      });
+
+      showBanner('success', data.message || 'Profile updated successfully.');
+      await loadProfile();
+
+      state.dirty = false;
+      els.saveBtn.style.display = 'none';
+    } catch (err) {
+      if (err.status === 401 || err.status === 403) {
+        showBanner('error', 'Session expired. Redirecting...');
+        setTimeout(redirectToLogin, 700);
+        return;
+      }
+
+      const errors = err.data && err.data.errors;
+      showBanner('error', errors ? Object.values(errors).join(' | ') : (err.message || 'Failed to save profile.'));
+    } finally {
+      state.busy = false;
+      els.saveBtn.disabled = false;
+      els.saveBtn.textContent = 'Save Profile';
+    }
+  }
+
+  async function logout() {
+    try {
+      await apiFetch('/auth/logout', { method: 'POST' });
+    } catch (_) {}
+    redirectToLogin();
+  }
+
+  document.addEventListener('DOMContentLoaded', async function () {
+    state.fingerprint = await getStableFingerprint();
+
+    els.dashboardBtn.addEventListener('click', () => window.location.href = CONFIG.DASHBOARD_URL);
+    els.refreshBtn.addEventListener('click', loadProfile);
+    els.logoutBtn.addEventListener('click', logout);
+    els.form.addEventListener('submit', saveProfile);
+    els.form.addEventListener('input', markDirty);
+    els.form.addEventListener('change', markDirty);
+
+    window.addEventListener('beforeunload', cleanupObjectUrls);
+
+    await loadProfile();
+  });
+})();
+</script>
+</body>
+</html>
