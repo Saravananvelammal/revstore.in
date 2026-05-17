@@ -187,11 +187,16 @@
     if (state.fingerprint) headers.set('x-device-fingerprint', state.fingerprint);
 
     const method = String((options && options.method) || 'GET').toUpperCase();
+
     if (!['GET', 'HEAD', 'OPTIONS'].includes(method)) {
-      headers.set('x-csrf-token', getCookie('csrf_token'));
+      headers.set('x-csrf-token', getCookie('csrf_token') || '');
     }
 
-    const res = await fetch(CONFIG.API_BASE + path, {
+    const finalPath = method === 'GET'
+      ? path + (path.includes('?') ? '&' : '?') + '_ts=' + Date.now()
+      : path;
+
+    const res = await fetch(CONFIG.API_BASE + finalPath, {
       ...(options || {}),
       headers,
       credentials: 'include',
@@ -204,7 +209,7 @@
     try { data = await res.json(); } catch (_) {}
 
     if (res.status === 401 || res.status === 403) {
-      throw Object.assign(new Error(data.message || 'Session expired.'), { status: res.status });
+      throw Object.assign(new Error(data.message || 'Session expired.'), { status: res.status, data });
     }
 
     if (!res.ok) {
@@ -227,17 +232,18 @@
   }
 
   async function loadDashboard() {
-    if (state.busy) return;
-    state.busy = true;
     clearBanner();
     els.refreshBtn.disabled = true;
+    els.refreshBtn.textContent = 'Refreshing...';
 
     try {
-      const meData = await apiFetch('/auth/me', { method: 'GET' });
-      const profileData = await apiFetch('/profile', { method: 'GET' });
-      const marketingData = await apiFetch('/marketing-executives', { method: 'GET' }).catch(() => ({}));
-      const retailersData = await apiFetch('/retailers', { method: 'GET' }).catch(() => ({}));
-      const ridersData = await apiFetch('/riders', { method: 'GET' }).catch(() => ({}));
+      const [meData, profileData, marketingData, retailersData, ridersData] = await Promise.all([
+        apiFetch('/auth/me', { method: 'GET' }),
+        apiFetch('/profile', { method: 'GET' }),
+        apiFetch('/marketing-executives', { method: 'GET' }).catch(() => ({})),
+        apiFetch('/retailers', { method: 'GET' }).catch(() => ({})),
+        apiFetch('/riders', { method: 'GET' }).catch(() => ({}))
+      ]);
 
       const me = meData.humanResource || {};
       const profile = profileData.humanResource || {};
@@ -253,7 +259,9 @@
       els.riderCount.textContent = countFromResponse(ridersData, ['riders', 'items', 'data']);
 
       const wallet = profile.wallet || {};
-      const balanceInr = wallet.balanceInr != null ? Number(wallet.balanceInr) : Number(wallet.balance || 0) / 100;
+      const balanceInr = wallet.balanceInr != null
+        ? Number(wallet.balanceInr)
+        : Number(wallet.balance || 0) / 100;
 
       els.walletBalance.textContent = money(balanceInr);
       els.walletNote.textContent = wallet.locked ? 'Locked' : 'Unlocked';
@@ -261,6 +269,8 @@
       els.welcomeSub.textContent =
         'Monthly target: ME ' + Number(monthly.marketingExecutives || 0) +
         ', Riders ' + Number(monthly.riders || 0) + '.';
+
+      showBanner('success', 'Dashboard refreshed successfully.');
     } catch (err) {
       if (err.status === 401 || err.status === 403) {
         showBanner('error', 'Session expired. Redirecting to login...');
@@ -268,10 +278,10 @@
         return;
       }
 
-      showBanner('error', err.message || 'Failed to load dashboard.');
+      showBanner('error', err.message || 'Failed to refresh dashboard.');
     } finally {
-      state.busy = false;
       els.refreshBtn.disabled = false;
+      els.refreshBtn.textContent = 'Refresh';
     }
   }
 
@@ -323,7 +333,10 @@
   document.addEventListener('DOMContentLoaded', async function () {
     state.fingerprint = await getStableFingerprint();
 
-    els.refreshBtn.addEventListener('click', loadDashboard);
+    els.refreshBtn.addEventListener('click', function (e) {
+      e.preventDefault();
+      loadDashboard();
+    });
     els.logoutBtn.addEventListener('click', logout);
     els.changePasswordBtn.addEventListener('click', openPasswordModal);
     els.cancelPasswordBtn.addEventListener('click', closePasswordModal);
