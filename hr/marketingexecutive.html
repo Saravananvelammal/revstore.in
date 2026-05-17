@@ -43,6 +43,30 @@
     .img-preview{width:48px;height:48px;border-radius:12px;object-fit:cover;border:1px solid var(--line);background:#f3f4f6;cursor:pointer}
     .doc-link{display:inline-flex;margin-top:6px;font-size:.82rem;font-weight:850;color:#5b21b6;cursor:pointer;text-decoration:underline}
     @media(max-width:980px){.toolbar,.form-grid{grid-template-columns:1fr}.topbar{flex-direction:column}}
+    @media(max-width:760px){body{padding:14px;overflow-x:hidden;}
+    .app{max-width:100%;}
+    h1{font-size:1.65rem;line-height:1.15;}
+    .sub{font-size:.95rem;}
+    .actions{width:100%;display:grid;grid-template-columns:1fr 1fr;}
+    .actions .btn{width:100%;}
+    #addBtn{grid-column:1/-1;}
+    .panel{padding:14px;border-radius:20px;}
+    .toolbar{grid-template-columns:1fr;gap:10px;}
+    .table-wrap{overflow:visible;border:0;background:transparent;}
+    table{min-width:0;width:100%;border-collapse:separate;border-spacing:0 14px;}
+    thead{display:none;}
+    tbody,
+    tr,
+    td{display:block;width:100%;}
+    tr{background:#fff;border:1px solid var(--line);border-radius:20px;padding:14px;box-shadow:0 10px 24px rgba(49,12,120,.10);}
+    td{border-bottom:0;padding:8px 0;font-size:.95rem;}
+    td::before{content:attr(data-label);display:block;font-size:.74rem;font-weight:950;text-transform:uppercase;letter-spacing:.06em;color:#4c1d95;margin-bottom:4px;}
+    .row-actions{display:grid;grid-template-columns:1fr 1fr;}
+    .row-actions .btn{width:100%;}
+    .img-preview{width:64px;height:64px;}
+    .modal-card{max-width:100%;max-height:90vh;padding:16px;border-radius:20px;}
+    .modal-actions{display:grid;grid-template-columns:1fr 1fr;}
+    .modal-actions .btn{width:100%;}}
   </style>
 </head>
 
@@ -557,40 +581,48 @@
 
       return `
         <tr>
-          <td>
+          <td data-label="Profile">
             ${
               me.profileImage
                 ? `<img class="img-preview" alt="Profile" data-doc-id="${esc(me._id)}" data-doc-type="profile">`
                 : '<span class="muted">No image</span>'
             }
           </td>
-          <td>
+
+          <td data-label="Name">
             <strong>${esc(me.name || '-')}</strong><br>
             <span class="muted">${esc(me.designation || '')}</span><br>
             <span class="muted">${esc(me.role || '')}</span>
           </td>
-          <td>
+
+          <td data-label="Contact">
             ${esc(me.email || '-')}<br>
             <span class="muted">${esc(me.personalMobile || '')}</span>
           </td>
-          <td>
+
+          <td data-label="Assigned Area">
             ${esc(me.assignedArea || me.area || '')}, ${esc(me.assignedCity || me.city || '')}<br>
             <span class="muted">${esc(me.assignedState || me.state || '')}</span>
           </td>
-          <td>
+
+          <td data-label="Targets">
             Day: Retailers ${Number(me.targetRetailersPerDay || 0)}<br>
             <span class="muted">Month: Retailers ${Number(me.targetRetailersPerMonth || 0)}</span>
           </td>
-          <td>
+
+          <td data-label="Wallet">
             ${money(me.wallet)}<br>
             <span class="muted">${me.wallet && me.wallet.locked ? 'Locked' : 'Unlocked'}</span>
           </td>
-          <td>
+
+          <td data-label="Status">
             <span class="pill ${esc(status)}">${esc(status || '-')}</span>
             ${deleted ? '<br><span class="muted">Deleted</span>' : ''}
           </td>
-          <td>${esc(me.addedBy && me.addedBy.kind || '-')}</td>
-          <td>
+
+          <td data-label="Added By">${esc(me.addedBy && me.addedBy.kind || '-')}</td>
+
+          <td data-label="Actions">
             <div class="row-actions">
               <button class="btn btn-small" data-action="edit" data-id="${esc(me._id)}">View</button>
               ${action}
