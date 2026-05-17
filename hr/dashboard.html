@@ -131,12 +131,30 @@
 
   const state = { fingerprint: '', busy: false };
 
-  function showBanner(type, msg) {
+  let bannerTimer = null;
+
+  function showBanner(type, msg, autoHide = true) {
+    if (bannerTimer) {
+      clearTimeout(bannerTimer);
+      bannerTimer = null;
+    }
+
     els.banner.className = 'banner show ' + type;
     els.banner.textContent = msg || '';
+
+    if (autoHide && type === 'success') {
+      bannerTimer = setTimeout(() => {
+        clearBanner();
+      }, 3000);
+    }
   }
 
   function clearBanner() {
+    if (bannerTimer) {
+      clearTimeout(bannerTimer);
+      bannerTimer = null;
+    }
+
     els.banner.className = 'banner';
     els.banner.textContent = '';
   }
