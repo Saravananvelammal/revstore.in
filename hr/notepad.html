@@ -26,7 +26,7 @@
     .app{max-width:1180px;margin:0 auto;display:grid;gap:18px}
     .topbar{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;color:#fff}
     h1{margin:0;font-size:2rem;font-weight:900}
-    .sub{margin:8px 0 0;color:rgba(255,255,255,.86)}
+    .sub{margin:8px 0 0;color:rgba(255,255,255,.86);line-height:1.45}
     .actions{display:flex;gap:10px;flex-wrap:wrap}
     .btn{
       min-height:46px;padding:0 16px;border-radius:15px;border:1px solid var(--line);
@@ -34,6 +34,7 @@
       display:inline-flex;align-items:center;justify-content:center;line-height:1;white-space:nowrap;
     }
     .btn-primary{border:0;color:#fff;background:linear-gradient(135deg,#5b21b6,#7c3aed,#a21caf)}
+    .btn-danger{border:0;color:#fff;background:linear-gradient(135deg,#dc2626,#b91c1c)}
     .btn:disabled{opacity:.65;cursor:not-allowed}
     .panel{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:22px}
     .banner{display:none;padding:14px 16px;border-radius:16px;margin-bottom:14px;line-height:1.5}
@@ -42,12 +43,10 @@
     .banner.success{background:rgba(16,185,129,.12);color:#065f46}
     .banner.info{background:rgba(59,130,246,.12);color:#1e3a8a}
 
-    .layout{display:grid;grid-template-columns:420px 1fr;gap:18px;align-items:start}
     .box{background:#fff;border:1px solid var(--line);border-radius:22px;padding:18px}
-    .box h2{margin:0 0 12px;font-size:1.25rem}
-    .form-grid{display:grid;gap:12px}
-    .field{display:grid;gap:7px}
-    label{font-weight:850;font-size:.9rem}
+    .box-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}
+    .box h2{margin:0;font-size:1.25rem}
+    .toolbar{display:grid;grid-template-columns:1fr 160px 120px;gap:10px;margin-bottom:14px}
     input,select,textarea{
       width:100%;min-height:48px;border:1px solid var(--line);border-radius:15px;
       padding:0 14px;font:inherit;outline:none;background:#fff;color:var(--text)
@@ -55,7 +54,6 @@
     textarea{min-height:110px;padding-top:12px;resize:vertical}
     input:focus,select:focus,textarea:focus{box-shadow:0 0 0 4px rgba(91,33,182,.14);border-color:#7c3aed}
 
-    .toolbar{display:grid;grid-template-columns:1fr 150px 120px;gap:10px;margin-bottom:14px}
     .list{display:grid;gap:12px}
     .note-card{border:1px solid var(--line);border-radius:18px;background:#fff;padding:14px;display:grid;gap:8px}
     .note-head{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
@@ -68,13 +66,42 @@
     .pill-no{background:rgba(239,68,68,.12);color:#991b1b}
     .empty,.loading{text-align:center;padding:28px;color:var(--muted);border:1px dashed var(--line);border-radius:18px;background:#fff}
     .pagination{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:14px;flex-wrap:wrap}
+    .muted{color:var(--muted)}
+
+    .modal{position:fixed;inset:0;background:rgba(0,0,0,.48);display:none;place-items:center;padding:16px;z-index:50}
+    .modal.show{display:grid}
+    .modal-card{width:100%;max-width:620px;max-height:92vh;overflow:auto;background:#fff;border-radius:24px;padding:20px;box-shadow:var(--shadow)}
+    .modal-head{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:14px}
+    .modal-head h2{margin:0}
+    .form-grid{display:grid;gap:12px}
+    .field{display:grid;gap:7px}
+    label{font-weight:850;font-size:.9rem}
+    .modal-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:16px;position:sticky;bottom:0;background:#fff;padding-top:12px}
 
     @media(max-width:900px){
-      body{padding:16px}
+      body{padding:14px}
       .topbar{flex-direction:column}
-      .layout{grid-template-columns:1fr}
+      .actions{width:100%;display:grid;grid-template-columns:1fr 1fr 1fr}
+      .actions .btn{width:100%;padding:0 10px;font-size:.92rem}
+      .panel{padding:14px;border-radius:20px}
       .toolbar{grid-template-columns:1fr}
-      h1{font-size:1.75rem}
+      h1{font-size:1.7rem}
+      .sub{font-size:.96rem}
+      .box{padding:14px;border-radius:18px}
+      .box-head{align-items:flex-start}
+      .note-head{display:grid}
+      .note-time{text-align:left;white-space:normal}
+      .pagination{display:grid;grid-template-columns:1fr;align-items:stretch}
+      .pagination .btn{width:100%}
+      .modal-card{padding:16px;border-radius:20px}
+      .modal-actions{display:grid;grid-template-columns:1fr 1fr}
+    }
+
+    @media(max-width:420px){
+      body{padding:12px}
+      .actions{grid-template-columns:1fr}
+      .btn{min-height:44px}
+      h1{font-size:1.55rem}
     }
   </style>
 </head>
@@ -89,80 +116,89 @@
     <div class="actions">
       <button id="dashboardBtn" class="btn">Dashboard</button>
       <button id="refreshBtn" class="btn btn-primary">Refresh</button>
+      <button id="openAddBtn" class="btn btn-primary">+ Add Note</button>
     </div>
   </header>
 
   <section class="panel">
     <div id="banner" class="banner"></div>
 
-    <section class="layout">
-      <aside class="box">
-        <h2>Add Note</h2>
-
-        <form id="noteForm" class="form-grid">
-          <div class="field">
-            <label>Person / Organisation Name *</label>
-            <input id="personOrOrganisationName" maxlength="180" required />
-          </div>
-
-          <div class="field">
-            <label>Contact Number *</label>
-            <input id="contactNumber" inputmode="numeric" maxlength="15" required />
-          </div>
-
-          <div class="field">
-            <label>Organisation Mail ID</label>
-            <input id="organisationMailId" type="email" maxlength="190" />
-          </div>
-
-          <div class="field">
-            <label>Message *</label>
-            <textarea id="message" maxlength="3000" required></textarea>
-          </div>
-
-          <div class="field">
-            <label>Mail Sent?</label>
-            <select id="mailSent">
-              <option value="false">No</option>
-              <option value="true">Yes</option>
-            </select>
-          </div>
-
-          <div class="field">
-            <label>Remark</label>
-            <textarea id="remark" maxlength="1500"></textarea>
-          </div>
-
-          <button id="saveBtn" type="submit" class="btn btn-primary">Save Note</button>
-        </form>
-      </aside>
-
-      <section class="box">
+    <section class="box">
+      <div class="box-head">
         <h2>Saved Notes</h2>
+      </div>
 
-        <div class="toolbar">
-          <input id="searchInput" type="search" placeholder="Search notes..." autocomplete="off" />
-          <select id="mailFilter">
-            <option value="">All</option>
-            <option value="true">Mail Sent</option>
-            <option value="false">Mail Not Sent</option>
-          </select>
-          <button id="applyBtn" class="btn btn-primary">Apply</button>
-        </div>
+      <div class="toolbar">
+        <input id="searchInput" type="search" placeholder="Search notes..." autocomplete="off" />
+        <select id="mailFilter">
+          <option value="">All</option>
+          <option value="true">Mail Sent</option>
+          <option value="false">Mail Not Sent</option>
+        </select>
+        <button id="applyBtn" class="btn btn-primary">Apply</button>
+      </div>
 
-        <div id="loading" class="loading">Loading notes...</div>
-        <div id="empty" class="empty" style="display:none;">No notes found.</div>
-        <div id="noteList" class="list"></div>
+      <div id="loading" class="loading">Loading notes...</div>
+      <div id="empty" class="empty" style="display:none;">No notes found.</div>
+      <div id="noteList" class="list"></div>
 
-        <div class="pagination">
-          <button id="prevBtn" class="btn">Previous</button>
-          <div id="pageInfo" class="muted">Page 1</div>
-          <button id="nextBtn" class="btn">Next</button>
-        </div>
-      </section>
+      <div class="pagination">
+        <button id="prevBtn" class="btn">Previous</button>
+        <div id="pageInfo" class="muted">Page 1</div>
+        <button id="nextBtn" class="btn">Next</button>
+      </div>
     </section>
   </section>
 </main>
+
+<section id="noteModal" class="modal" aria-hidden="true">
+  <div class="modal-card">
+    <div class="modal-head">
+      <h2>Add Note</h2>
+      <button id="closeModalBtn" class="btn">Close</button>
+    </div>
+
+    <form id="noteForm" class="form-grid">
+      <div class="field">
+        <label>Person / Organisation Name *</label>
+        <input id="personOrOrganisationName" maxlength="180" required />
+      </div>
+
+      <div class="field">
+        <label>Contact Number *</label>
+        <input id="contactNumber" inputmode="numeric" maxlength="15" required />
+      </div>
+
+      <div class="field">
+        <label>Organisation Mail ID</label>
+        <input id="organisationMailId" type="email" maxlength="190" />
+      </div>
+
+      <div class="field">
+        <label>Message *</label>
+        <textarea id="message" maxlength="3000" required></textarea>
+      </div>
+
+      <div class="field">
+        <label>Mail Sent?</label>
+        <select id="mailSent">
+          <option value="false">No</option>
+          <option value="true">Yes</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label>Remark</label>
+        <textarea id="remark" maxlength="1500"></textarea>
+      </div>
+
+      <div class="modal-actions">
+        <button id="cancelModalBtn" type="button" class="btn">Cancel</button>
+        <button id="saveBtn" type="submit" class="btn btn-primary">Save Note</button>
+      </div>
+    </form>
+  </div>
+</section>
 
 <script>
 (function () {
@@ -181,6 +217,11 @@
     banner: document.getElementById('banner'),
     dashboardBtn: document.getElementById('dashboardBtn'),
     refreshBtn: document.getElementById('refreshBtn'),
+    openAddBtn: document.getElementById('openAddBtn'),
+
+    modal: document.getElementById('noteModal'),
+    closeModalBtn: document.getElementById('closeModalBtn'),
+    cancelModalBtn: document.getElementById('cancelModalBtn'),
 
     form: document.getElementById('noteForm'),
     saveBtn: document.getElementById('saveBtn'),
@@ -354,6 +395,24 @@
     });
   }
 
+  function openModal() {
+    clearBanner();
+    els.form.reset();
+    els.mailSent.value = 'false';
+    els.modal.classList.add('show');
+    els.modal.setAttribute('aria-hidden', 'false');
+    setTimeout(() => els.personOrOrganisationName.focus(), 60);
+  }
+
+  function closeModal() {
+    els.modal.classList.remove('show');
+    els.modal.setAttribute('aria-hidden', 'true');
+    els.form.reset();
+    els.mailSent.value = 'false';
+    els.saveBtn.disabled = false;
+    els.saveBtn.textContent = 'Save Note';
+  }
+
   function renderNotes() {
     els.empty.style.display = state.notes.length ? 'none' : 'block';
 
@@ -494,8 +553,7 @@
         body: JSON.stringify(payload)
       });
 
-      els.form.reset();
-      els.mailSent.value = 'false';
+      closeModal();
       state.page = 1;
 
       showBanner('success', 'Note saved successfully.');
@@ -522,6 +580,18 @@
 
     els.refreshBtn.addEventListener('click', () => {
       loadNotes();
+    });
+
+    els.openAddBtn.addEventListener('click', openModal);
+    els.closeModalBtn.addEventListener('click', closeModal);
+    els.cancelModalBtn.addEventListener('click', closeModal);
+
+    els.modal.addEventListener('click', e => {
+      if (e.target === els.modal) closeModal();
+    });
+
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape' && els.modal.classList.contains('show')) closeModal();
     });
 
     els.form.addEventListener('submit', saveNote);
