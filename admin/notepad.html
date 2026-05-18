@@ -337,7 +337,6 @@
     els.noteList.innerHTML = state.notes.map(note => {
       const mailSent = note.mailSent === true;
       const owner = ownerLabel(note);
-      const ownerId = ownerIdLabel(note);
 
       return `
         <article class="note-card">
@@ -416,7 +415,15 @@
 
     if (q) params.set('q', q);
     if (ownerType) params.set('ownerType', ownerType);
-    if (ownerId) params.set('ownerId', ownerId);
+
+    if (ownerId && ownerType === 'hr') {
+      params.set('hrId', ownerId);
+    }
+
+    if (ownerId && ownerType === 'marketing_executive') {
+      params.set('marketingExecutiveId', ownerId);
+    }
+
     if (mailSent) params.set('mailSent', mailSent);
 
     return '?' + params.toString();
