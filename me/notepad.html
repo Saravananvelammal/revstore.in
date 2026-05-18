@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>Revstore HR Note Pad</title>
+  <title>Revstore Marketing Executive Note Pad</title>
   <meta name="robots" content="noindex,nofollow,noarchive,nosnippet" />
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0" />
   <meta http-equiv="Pragma" content="no-cache" />
@@ -17,24 +17,14 @@
       --danger:#dc2626;--shadow:0 18px 60px rgba(49,12,120,.25);--radius:24px;
     }
     *{box-sizing:border-box}
-    body{
-      margin:0;min-height:100vh;padding:22px;
-      font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
-      color:var(--text);
-      background:linear-gradient(135deg,var(--bg1),var(--bg2),var(--bg3));
-    }
+    body{margin:0;min-height:100vh;padding:22px;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;color:var(--text);background:linear-gradient(135deg,var(--bg1),var(--bg2),var(--bg3))}
     .app{max-width:1180px;margin:0 auto;display:grid;gap:18px}
     .topbar{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;color:#fff}
     h1{margin:0;font-size:2rem;font-weight:900}
     .sub{margin:8px 0 0;color:rgba(255,255,255,.86);line-height:1.45}
     .actions{display:flex;gap:10px;flex-wrap:wrap}
-    .btn{
-      min-height:46px;padding:0 16px;border-radius:15px;border:1px solid var(--line);
-      background:#fff;color:var(--text);font-weight:850;cursor:pointer;
-      display:inline-flex;align-items:center;justify-content:center;line-height:1;white-space:nowrap;
-    }
+    .btn{min-height:46px;padding:0 16px;border-radius:15px;border:1px solid var(--line);background:#fff;color:var(--text);font-weight:850;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;line-height:1;white-space:nowrap}
     .btn-primary{border:0;color:#fff;background:linear-gradient(135deg,#5b21b6,#7c3aed,#a21caf)}
-    .btn-danger{border:0;color:#fff;background:linear-gradient(135deg,#dc2626,#b91c1c)}
     .btn:disabled{opacity:.65;cursor:not-allowed}
     .panel{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:22px}
     .banner{display:none;padding:14px 16px;border-radius:16px;margin-bottom:14px;line-height:1.5}
@@ -42,18 +32,13 @@
     .banner.error{background:rgba(239,68,68,.12);color:#7f1d1d}
     .banner.success{background:rgba(16,185,129,.12);color:#065f46}
     .banner.info{background:rgba(59,130,246,.12);color:#1e3a8a}
-
     .box{background:#fff;border:1px solid var(--line);border-radius:22px;padding:18px}
     .box-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}
     .box h2{margin:0;font-size:1.25rem}
     .toolbar{display:grid;grid-template-columns:1fr 160px 120px;gap:10px;margin-bottom:14px}
-    input,select,textarea{
-      width:100%;min-height:48px;border:1px solid var(--line);border-radius:15px;
-      padding:0 14px;font:inherit;outline:none;background:#fff;color:var(--text)
-    }
+    input,select,textarea{width:100%;min-height:48px;border:1px solid var(--line);border-radius:15px;padding:0 14px;font:inherit;outline:none;background:#fff;color:var(--text)}
     textarea{min-height:110px;padding-top:12px;resize:vertical}
     input:focus,select:focus,textarea:focus{box-shadow:0 0 0 4px rgba(91,33,182,.14);border-color:#7c3aed}
-
     .list{display:grid;gap:12px}
     .note-card{border:1px solid var(--line);border-radius:18px;background:#fff;padding:14px;display:grid;gap:8px}
     .note-head{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
@@ -67,7 +52,6 @@
     .empty,.loading{text-align:center;padding:28px;color:var(--muted);border:1px dashed var(--line);border-radius:18px;background:#fff}
     .pagination{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:14px;flex-wrap:wrap}
     .muted{color:var(--muted)}
-
     .modal{position:fixed;inset:0;background:rgba(0,0,0,.48);display:none;place-items:center;padding:16px;z-index:50}
     .modal.show{display:grid}
     .modal-card{width:100%;max-width:620px;max-height:92vh;overflow:auto;background:#fff;border-radius:24px;padding:20px;box-shadow:var(--shadow)}
@@ -77,32 +61,14 @@
     .field{display:grid;gap:7px}
     label{font-weight:850;font-size:.9rem}
     .modal-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:16px;position:sticky;bottom:0;background:#fff;padding-top:12px}
-
     @media(max-width:900px){
-      body{padding:14px}
-      .topbar{flex-direction:column}
-      .actions{width:100%;display:grid;grid-template-columns:1fr 1fr 1fr}
-      .actions .btn{width:100%;padding:0 10px;font-size:.92rem}
-      .panel{padding:14px;border-radius:20px}
-      .toolbar{grid-template-columns:1fr}
-      h1{font-size:1.7rem}
-      .sub{font-size:.96rem}
-      .box{padding:14px;border-radius:18px}
-      .box-head{align-items:flex-start}
-      .note-head{display:grid}
-      .note-time{text-align:left;white-space:normal}
-      .pagination{display:grid;grid-template-columns:1fr;align-items:stretch}
-      .pagination .btn{width:100%}
-      .modal-card{padding:16px;border-radius:20px}
-      .modal-actions{display:grid;grid-template-columns:1fr 1fr}
+      body{padding:14px}.topbar{flex-direction:column}.actions{width:100%;display:grid;grid-template-columns:1fr 1fr 1fr}
+      .actions .btn{width:100%;padding:0 10px;font-size:.92rem}.panel{padding:14px;border-radius:20px}
+      .toolbar{grid-template-columns:1fr}h1{font-size:1.7rem}.sub{font-size:.96rem}.box{padding:14px;border-radius:18px}
+      .note-head{display:grid}.note-time{text-align:left;white-space:normal}.pagination{display:grid;grid-template-columns:1fr;align-items:stretch}
+      .pagination .btn{width:100%}.modal-card{padding:16px;border-radius:20px}.modal-actions{display:grid;grid-template-columns:1fr 1fr}
     }
-
-    @media(max-width:420px){
-      body{padding:12px}
-      .actions{grid-template-columns:1fr}
-      .btn{min-height:44px}
-      h1{font-size:1.55rem}
-    }
+    @media(max-width:420px){body{padding:12px}.actions{grid-template-columns:1fr}.btn{min-height:44px}h1{font-size:1.55rem}}
   </style>
 </head>
 
@@ -110,8 +76,8 @@
 <main class="app">
   <header class="topbar">
     <div>
-      <h1>HR Note Pad</h1>
-      <p class="sub">Save and fetch notes registered under your HR profile.</p>
+      <h1>Marketing Executive Note Pad</h1>
+      <p class="sub">Save and fetch notes registered under your Marketing Executive profile.</p>
     </div>
     <div class="actions">
       <button id="dashboardBtn" class="btn">Dashboard</button>
@@ -205,12 +171,12 @@
   'use strict';
 
   const CONFIG = {
-    API_BASE: typeof window.HR_WEB_API_BASE === 'string' && window.HR_WEB_API_BASE.trim()
-      ? window.HR_WEB_API_BASE.trim().replace(/\/+$/, '')
-      : 'https://api.revstore.in/api/human-resource-web/v1',
-    LOGIN_URL: '/hr/login',
-    DASHBOARD_URL: '/hr/dashboard',
-    FINGERPRINT_STORAGE_KEY: 'hr_web_fp_v1'
+    API_BASE: typeof window.ME_WEB_API_BASE === 'string' && window.ME_WEB_API_BASE.trim()
+      ? window.ME_WEB_API_BASE.trim().replace(/\/+$/, '')
+      : 'https://api.revstore.in/api/marketing-executive-web/v1',
+    LOGIN_URL: '/me/login',
+    DASHBOARD_URL: '/me/dashboard',
+    FINGERPRINT_STORAGE_KEY: 'me_web_fp_v1'
   };
 
   const els = {
@@ -218,11 +184,9 @@
     dashboardBtn: document.getElementById('dashboardBtn'),
     refreshBtn: document.getElementById('refreshBtn'),
     openAddBtn: document.getElementById('openAddBtn'),
-
     modal: document.getElementById('noteModal'),
     closeModalBtn: document.getElementById('closeModalBtn'),
     cancelModalBtn: document.getElementById('cancelModalBtn'),
-
     form: document.getElementById('noteForm'),
     saveBtn: document.getElementById('saveBtn'),
     personOrOrganisationName: document.getElementById('personOrOrganisationName'),
@@ -231,7 +195,6 @@
     message: document.getElementById('message'),
     mailSent: document.getElementById('mailSent'),
     remark: document.getElementById('remark'),
-
     searchInput: document.getElementById('searchInput'),
     mailFilter: document.getElementById('mailFilter'),
     applyBtn: document.getElementById('applyBtn'),
@@ -259,10 +222,7 @@
     clearTimeout(bannerTimer);
     els.banner.className = 'banner show ' + type;
     els.banner.textContent = message || '';
-
-    if (autoHide !== false) {
-      bannerTimer = setTimeout(clearBanner, 3500);
-    }
+    if (autoHide !== false) bannerTimer = setTimeout(clearBanner, 3500);
   }
 
   function clearBanner() {
@@ -273,21 +233,14 @@
 
   function getCookie(name) {
     const target = String(name || '') + '=';
-    const found = String(document.cookie || '')
-      .split(';')
-      .map(v => v.trim())
-      .find(v => v.indexOf(target) === 0);
-
+    const found = String(document.cookie || '').split(';').map(v => v.trim()).find(v => v.indexOf(target) === 0);
     return found ? decodeURIComponent(found.slice(target.length)) : '';
   }
 
   async function sha256Hex(input) {
     const data = new TextEncoder().encode(String(input));
     const digest = await crypto.subtle.digest('SHA-256', data);
-
-    return Array.from(new Uint8Array(digest))
-      .map(b => b.toString(16).padStart(2, '0'))
-      .join('');
+    return Array.from(new Uint8Array(digest)).map(b => b.toString(16).padStart(2, '0')).join('');
   }
 
   async function getStableFingerprint() {
@@ -308,11 +261,7 @@
     ].join('|');
 
     const fp = (await sha256Hex(raw)).slice(0, 64);
-
-    try {
-      localStorage.setItem(CONFIG.FINGERPRINT_STORAGE_KEY, fp);
-    } catch (_) {}
-
+    try { localStorage.setItem(CONFIG.FINGERPRINT_STORAGE_KEY, fp); } catch (_) {}
     return fp;
   }
 
@@ -325,9 +274,7 @@
     headers.set('Accept', 'application/json');
     headers.set('X-Requested-With', 'XMLHttpRequest');
 
-    if (state.fingerprint) {
-      headers.set('x-device-fingerprint', state.fingerprint);
-    }
+    if (state.fingerprint) headers.set('x-device-fingerprint', state.fingerprint);
 
     const method = String((options && options.method) || 'GET').toUpperCase();
     const body = options && options.body;
@@ -357,17 +304,11 @@
     try { data = await res.json(); } catch (_) {}
 
     if (res.status === 401 || res.status === 403) {
-      throw Object.assign(new Error(data.message || 'Session expired.'), {
-        status: res.status,
-        data
-      });
+      throw Object.assign(new Error(data.message || 'Session expired.'), { status: res.status, data });
     }
 
     if (!res.ok) {
-      throw Object.assign(new Error(data.message || 'Request failed.'), {
-        status: res.status,
-        data
-      });
+      throw Object.assign(new Error(data.message || 'Request failed.'), { status: res.status, data });
     }
 
     return data;
@@ -385,7 +326,6 @@
   function formatDate(value) {
     const d = new Date(value || Date.now());
     if (Number.isNaN(d.getTime())) return '-';
-
     return d.toLocaleString('en-IN', {
       day: '2-digit',
       month: 'short',
@@ -522,10 +462,7 @@
       throw new Error('Contact number must be 7 to 15 digits.');
     }
 
-    if (
-      payload.organisationMailId &&
-      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(payload.organisationMailId)
-    ) {
+    if (payload.organisationMailId && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(payload.organisationMailId)) {
       throw new Error('Organisation mail ID must be valid.');
     }
 
@@ -536,7 +473,6 @@
 
   async function saveNote(event) {
     event.preventDefault();
-
     if (state.busy) return;
 
     const payload = payloadFromForm();
@@ -635,7 +571,7 @@
   }
 
   bootstrap().catch(() => {
-    showBanner('error', 'Failed to initialize HR note pad.', false);
+    showBanner('error', 'Failed to initialize Marketing Executive note pad.', false);
   });
 })();
 </script>
