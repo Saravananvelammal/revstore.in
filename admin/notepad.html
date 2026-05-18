@@ -36,7 +36,7 @@
     .box{background:#fff;border:1px solid var(--line);border-radius:22px;padding:18px}
     .box-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}
     .box h2{margin:0;font-size:1.25rem}
-    .toolbar{display:grid;grid-template-columns:1.4fr 190px 190px 1fr 1fr 130px;gap:10px;margin-bottom:14px}
+    .toolbar{display:grid;grid-template-columns:1.4fr 210px 210px 190px 130px;gap:10px;margin-bottom:14px;}
     input,select{width:100%;min-height:48px;border:1px solid var(--line);border-radius:15px;padding:0 14px;font:inherit;outline:none;background:#fff;color:var(--text)}
     input:focus,select:focus{box-shadow:0 0 0 4px rgba(91,33,182,.14);border-color:#7c3aed}
 
@@ -111,8 +111,9 @@
           <option value="false">Mail Not Sent</option>
         </select>
 
-        <input id="hrIdInput" placeholder="HR ObjectId filter" autocomplete="off" />
-        <input id="marketingExecutiveIdInput" placeholder="Marketing Executive ObjectId filter" autocomplete="off" />
+        <select id="ownerNameFilter">
+          <option value="">All Names</option>
+        </select>
 
         <button id="applyBtn" class="btn btn-primary">Apply</button>
       </div>
@@ -155,8 +156,7 @@
     searchInput: document.getElementById('searchInput'),
     ownerTypeFilter: document.getElementById('ownerTypeFilter'),
     mailFilter: document.getElementById('mailFilter'),
-    hrIdInput: document.getElementById('hrIdInput'),
-    marketingExecutiveIdInput: document.getElementById('marketingExecutiveIdInput'),
+    ownerNameFilter: document.getElementById('ownerNameFilter'),
     applyBtn: document.getElementById('applyBtn'),
 
     loading: document.getElementById('loading'),
@@ -319,30 +319,16 @@
     });
   }
 
-  function ownerLabel(note) {
-    if (note.ownerType === 'marketing_executive') {
-      return 'Marketing Executive: ' + (
-        note.marketingExecutive && note.marketingExecutive.name
-          ? note.marketingExecutive.name
-          : '-'
-      );
-    }
-
-    return 'HR: ' + (
-      note.hr && note.hr.name
-        ? note.hr.name
-        : '-'
-    );
+  function getOwnerType(note) {
+    if (note.marketingExecutive && note.marketingExecutive.id) return 'marketing_executive';
+    return 'hr';
   }
 
-  function ownerIdLabel(note) {
-    if (note.ownerType === 'marketing_executive') {
-      return note.marketingExecutive && note.marketingExecutive.id
-        ? note.marketingExecutive.id
-        : '';
+  function ownerLabel(note) {
+    if (getOwnerType(note) === 'marketing_executive') {
+      return 'Marketing Executive: ' + (note.marketingExecutive?.name || '-');
     }
-
-    return note.hr && note.hr.id ? note.hr.id : '';
+    return 'HR: ' + (note.hr?.name || '-');
   }
 
   function renderNotes() {
@@ -359,8 +345,7 @@
             <div>
               <div class="note-title">${escapeHtml(note.personOrOrganisationName || '-')}</div>
               <div class="note-meta">
-                <span class="pill pill-owner">${escapeHtml(owner)}</span>
-                ${ownerId ? `<span>${escapeHtml(ownerId)}</span>` : ''}
+                <span class="pill pill-owner">${escapeHtml(owner)}</span>                
                 <span>${escapeHtml(note.contactNumber || '-')}</span>
                 ${note.organisationMailId ? `<span>${escapeHtml(note.organisationMailId)}</span>` : ''}
               </div>
@@ -381,6 +366,35 @@
     updatePagination();
   }
 
+  function rebuildOwnerNameDropdown() {
+    const selected = els.ownerNameFilter.value;
+    const ownerType = els.ownerTypeFilter.value.trim();
+
+    const map = new Map();
+
+    state.notes.forEach(note => {
+      const type = getOwnerType(note);
+      if (ownerType && ownerType !== type) return;
+
+      const owner = type === 'marketing_executive' ? note.marketingExecutive : note.hr;
+      const id = owner?.id || '';
+      const name = owner?.name || '';
+
+      if (id && name) map.set(id, name);
+    });
+
+    els.ownerNameFilter.innerHTML =
+      '<option value="">All Names</option>' +
+      Array.from(map.entries())
+        .sort((a, b) => a[1].localeCompare(b[1]))
+        .map(([id, name]) => `<option value="${escapeHtml(id)}">${escapeHtml(name)}</option>`)
+        .join('');
+
+    if (selected && map.has(selected)) {
+      els.ownerNameFilter.value = selected;
+    }
+  }
+
   function updatePagination() {
     els.pageInfo.textContent =
       'Page ' + state.page + ' of ' + Math.max(1, state.totalPages) + ' • Total ' + state.total;
@@ -397,15 +411,13 @@
 
     const q = els.searchInput.value.trim();
     const ownerType = els.ownerTypeFilter.value.trim();
+    const ownerId = els.ownerNameFilter.value.trim();
     const mailSent = els.mailFilter.value.trim();
-    const hrId = els.hrIdInput.value.trim();
-    const marketingExecutiveId = els.marketingExecutiveIdInput.value.trim();
 
     if (q) params.set('q', q);
     if (ownerType) params.set('ownerType', ownerType);
+    if (ownerId) params.set('ownerId', ownerId);
     if (mailSent) params.set('mailSent', mailSent);
-    if (hrId) params.set('hrId', hrId);
-    if (marketingExecutiveId) params.set('marketingExecutiveId', marketingExecutiveId);
 
     return '?' + params.toString();
   }
@@ -430,6 +442,7 @@
       state.total = Number(data.total || 0);
       state.totalPages = Math.max(1, Number(data.totalPages || 1));
 
+      rebuildOwnerNameDropdown();
       renderNotes();
     } catch (err) {
       if (err.status === 401 || err.status === 403) {
@@ -462,14 +475,18 @@
 
     els.applyBtn.addEventListener('click', applyFilters);
 
-    [els.searchInput, els.hrIdInput, els.marketingExecutiveIdInput].forEach(input => {
-      input.addEventListener('keydown', e => {
-        if (e.key === 'Enter') applyFilters();
-      });
+    els.ownerTypeFilter.addEventListener('change', () => {
+      els.ownerNameFilter.value = '';
+      state.page = 1;
+      loadNotes();
     });
 
-    els.ownerTypeFilter.addEventListener('change', applyFilters);
+    els.ownerNameFilter.addEventListener('change', applyFilters);
     els.mailFilter.addEventListener('change', applyFilters);
+
+    els.searchInput.addEventListener('keydown', e => {
+      if (e.key === 'Enter') applyFilters();
+    });
 
     els.prevBtn.addEventListener('click', () => {
       if (state.page > 1) {
