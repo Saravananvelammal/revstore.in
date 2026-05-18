@@ -416,6 +416,8 @@
     if (q) params.set('q', q);
     if (ownerType) params.set('ownerType', ownerType);
 
+    if (ownerId) params.set('ownerId', ownerId);
+
     if (ownerId && ownerType === 'hr') {
       params.set('hrId', ownerId);
     }
