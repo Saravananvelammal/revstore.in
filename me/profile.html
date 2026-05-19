@@ -391,8 +391,8 @@
     setValue('postalCode', me.postalCode);
     setValue('country', me.country);
 
-    setValue('aadhaarNumber', me.aadhaar?.number || me.aadhaar?.numberMasked || '');
-    setValue('panNumber', me.pan?.number || me.pan?.numberMasked || '');
+    setValue('aadhaarNumber', me.aadhaar?.number || '');
+    setValue('panNumber', me.pan?.number || '');
 
     setValue('upiId', me.upiId);
     setValue('bankName', me.bank?.name);
@@ -419,7 +419,7 @@
     hydrateProfilePreview(!!me.profileImage);
 
     state.dirty = false;
-    els.saveBtn.style.display = 'none';
+    els.saveBtn.style.display = 'inline-flex';
   }
 
   function isPlaceholder(v) {
@@ -459,16 +459,30 @@
     try {
       const data = await apiFetch('/profile', { method: 'GET' });
       const me = data.marketingExecutive || {};
+
       fillForm(me);
 
       const missing = requireFirstTimeDocs(me);
 
       if (missing.length) {
-        els.saveBtn.style.display = 'inline-flex';
-        showBanner('info', 'Please complete/update profile: ' + missing.join(', '));
+        showBanner(
+          'info',
+          'Please complete/update profile: ' + missing.join(', ')
+        );
       } else {
-        els.saveBtn.style.display = 'none';
+        showBanner(
+          'success',
+          'Profile loaded successfully.'
+        );
       }
+
+      /*
+        IMPORTANT:
+        Always keep save button available for editable profile pages.
+        Users may want to update any field anytime.
+      */
+      els.saveBtn.style.display = 'inline-flex';
+
     } catch (err) {
       if (err.status === 401 || err.status === 403) {
         showBanner('error', 'Session expired. Redirecting...');
@@ -505,9 +519,7 @@
     if (!/^[6-9][0-9]{9}$/.test(emergency)) throw new Error('Invalid emergency contact number.');
     if (office && !/^[6-9][0-9]{9}$/.test(office)) throw new Error('Invalid office mobile number.');
 
-    if (aadhaar && isMasked(aadhaar)) {
-      fd.delete('aadhaarNumber');
-    } else if (!/^[0-9]{12}$/.test(aadhaar)) {
+    if (!/^[0-9]{12}$/.test(aadhaar)) {
       throw new Error('Aadhaar number must be exactly 12 digits.');
     }
 
@@ -575,7 +587,7 @@
       await loadProfile();
 
       state.dirty = false;
-      els.saveBtn.style.display = 'none';
+      els.saveBtn.style.display = 'inline-flex';
     } catch (err) {
       if (err.status === 401 || err.status === 403) {
         showBanner('error', 'Session expired. Redirecting...');
