@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>Revstore HR Profile</title>
+  <title>Revstore Marketing Executive Profile</title>
   <meta name="robots" content="noindex,nofollow,noarchive,nosnippet" />
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0" />
   <meta http-equiv="Pragma" content="no-cache" />
@@ -19,15 +19,13 @@
     .actions,.preview-row{display:flex;gap:10px;flex-wrap:wrap}
     .btn{min-height:44px;padding:0 16px;border-radius:14px;border:1px solid var(--line);cursor:pointer;font-weight:850;background:#fff;color:var(--text)}
     .btn-primary{border:0;color:#fff;background:linear-gradient(135deg,#5b21b6,#7c3aed,#a21caf)}
-    .btn-danger{border:0;color:#fff;background:linear-gradient(135deg,#dc2626,#b91c1c)}
     .btn:disabled{opacity:.65;cursor:not-allowed}
     .panel{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:22px}
     .banner{display:none;padding:14px 16px;border-radius:16px;margin-bottom:14px}.banner.show{display:block}
     .banner.error{background:rgba(239,68,68,.12);color:#7f1d1d}.banner.success{background:rgba(16,185,129,.12);color:#065f46}.banner.info{background:rgba(124,58,237,.12);color:#4c1d95}
     .form-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
     .section-title{grid-column:1/-1;margin:10px 0 0;font-weight:950;color:#4c1d95}
-    .field{display:grid;gap:7px}
-    .full{grid-column:1/-1}
+    .field{display:grid;gap:7px}.full{grid-column:1/-1}
     label{font-weight:850;font-size:.84rem}
     input,select,textarea{width:100%;border:1px solid var(--line);border-radius:14px;padding:0 13px;min-height:44px;font:inherit;background:#fff;color:var(--text)}
     textarea{padding:12px 13px;min-height:82px;resize:vertical}
@@ -35,28 +33,8 @@
     .img-preview{width:86px;height:86px;border-radius:18px;object-fit:cover;border:1px solid var(--line);background:#f3f4f6}
     .doc-link{display:none;font-size:.84rem;font-weight:850;color:#5b21b6;cursor:pointer;text-decoration:underline}
     .hint{font-size:.78rem;color:var(--muted);line-height:1.4}
-    .footer-actions{
-      display:flex;
-      justify-content:flex-end;
-      align-items:center;
-      gap:10px;
-      margin-top:22px;
-      padding:16px 0 0;
-      background:#fff;
-      position:sticky;
-      bottom:0;
-      z-index:5;
-    }
-
-    .footer-actions .btn{
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      min-width:132px;
-      height:48px;
-      line-height:1;
-      white-space:nowrap;
-    }
+    .footer-actions{display:flex;justify-content:flex-end;align-items:center;gap:10px;margin-top:22px;padding:16px 0 0;background:#fff;position:sticky;bottom:0;z-index:5}
+    .footer-actions .btn{display:inline-flex;align-items:center;justify-content:center;min-width:132px;height:48px;line-height:1;white-space:nowrap}
     @media(max-width:900px){.topbar{flex-direction:column}.form-grid{grid-template-columns:1fr}.footer-actions{position:static}}
   </style>
 </head>
@@ -65,7 +43,7 @@
 <main class="app">
   <header class="topbar">
     <div>
-      <h1>HR Profile</h1>
+      <h1>Marketing Executive Profile</h1>
       <p class="sub">Update personal, Aadhaar, PAN, bank, and document details securely.</p>
     </div>
     <div class="actions">
@@ -82,10 +60,7 @@
       <div class="form-grid">
         <div class="section-title">Profile</div>
 
-        <div class="field">
-          <label>Name *</label>
-          <input name="name" required minlength="2" maxlength="120" />
-        </div>
+        <div class="field"><label>Name *</label><input name="name" required minlength="2" maxlength="120" /></div>
 
         <div class="field">
           <label>Email</label>
@@ -93,20 +68,9 @@
           <div class="hint">Email cannot be changed.</div>
         </div>
 
-        <div class="field">
-          <label>Designation</label>
-          <input name="designation" readonly />
-        </div>
-
-        <div class="field">
-          <label>Role</label>
-          <input name="role" readonly />
-        </div>
-
-        <div class="field">
-          <label>Date of Birth *</label>
-          <input name="dateOfBirth" type="date" required />
-        </div>
+        <div class="field"><label>Designation</label><input name="designation" readonly /></div>
+        <div class="field"><label>Role</label><input name="role" readonly /></div>
+        <div class="field"><label>Date of Birth *</label><input name="dateOfBirth" type="date" required /></div>
 
         <div class="field">
           <label>Blood Group</label>
@@ -126,28 +90,12 @@
           </div>
         </div>
 
-        <div class="field">
-          <label>Personal Mobile *</label>
-          <input name="personalMobile" inputmode="numeric" maxlength="10" required />
-        </div>
-
-        <div class="field">
-          <label>Office Mobile</label>
-          <input name="officeMobile" inputmode="numeric" maxlength="10" />
-        </div>
-
-        <div class="field">
-          <label>Emergency Contact *</label>
-          <input name="emergencyContactNumber" inputmode="numeric" maxlength="10" required />
-        </div>
+        <div class="field"><label>Personal Mobile *</label><input name="personalMobile" inputmode="numeric" maxlength="10" required /></div>
+        <div class="field"><label>Office Mobile</label><input name="officeMobile" inputmode="numeric" maxlength="10" /></div>
+        <div class="field"><label>Emergency Contact *</label><input name="emergencyContactNumber" inputmode="numeric" maxlength="10" required /></div>
 
         <div class="section-title">Address</div>
-
-        <div class="field full">
-          <label>Address *</label>
-          <textarea name="address" required maxlength="500"></textarea>
-        </div>
-
+        <div class="field full"><label>Address *</label><textarea name="address" required maxlength="500"></textarea></div>
         <div class="field"><label>Address Line 1</label><input name="addressLine1" maxlength="180" /></div>
         <div class="field"><label>Address Line 2</label><input name="addressLine2" maxlength="180" /></div>
         <div class="field"><label>Area</label><input name="area" maxlength="100" /></div>
@@ -157,73 +105,28 @@
         <div class="field"><label>Country</label><input name="country" maxlength="80" /></div>
 
         <div class="section-title">Aadhaar</div>
-
-        <div class="field">
-          <label>Aadhaar Number *</label>
-          <input name="aadhaarNumber" inputmode="numeric" maxlength="12" required />
-        </div>
-
-        <div class="field">
-          <label>Aadhaar Front Image *</label>
-          <input name="aadhaarFrontImage" type="file" accept="image/png,image/jpeg,image/webp" />
-          <span id="aadhaarFrontPreview" class="doc-link">Open Aadhaar Front</span>
-        </div>
-
-        <div class="field">
-          <label>Aadhaar Back Image *</label>
-          <input name="aadhaarBackImage" type="file" accept="image/png,image/jpeg,image/webp" />
-          <span id="aadhaarBackPreview" class="doc-link">Open Aadhaar Back</span>
-        </div>
+        <div class="field"><label>Aadhaar Number *</label><input name="aadhaarNumber" inputmode="numeric" maxlength="12" required /></div>
+        <div class="field"><label>Aadhaar Front Image *</label><input name="aadhaarFrontImage" type="file" accept="image/png,image/jpeg,image/webp" /><span id="aadhaarFrontPreview" class="doc-link">Open Aadhaar Front</span></div>
+        <div class="field"><label>Aadhaar Back Image *</label><input name="aadhaarBackImage" type="file" accept="image/png,image/jpeg,image/webp" /><span id="aadhaarBackPreview" class="doc-link">Open Aadhaar Back</span></div>
 
         <div class="section-title">PAN</div>
-
-        <div class="field">
-          <label>PAN Number *</label>
-          <input name="panNumber" maxlength="10" required />
-        </div>
-
-        <div class="field">
-          <label>PAN Front Image *</label>
-          <input name="panFrontImage" type="file" accept="image/png,image/jpeg,image/webp" />
-          <span id="panFrontPreview" class="doc-link">Open PAN Front</span>
-        </div>
-
-        <div class="field">
-          <label>PAN Back Image</label>
-          <input name="panBackImage" type="file" accept="image/png,image/jpeg,image/webp" />
-          <span id="panBackPreview" class="doc-link">Open PAN Back</span>
-        </div>
+        <div class="field"><label>PAN Number *</label><input name="panNumber" maxlength="10" required /></div>
+        <div class="field"><label>PAN Front Image *</label><input name="panFrontImage" type="file" accept="image/png,image/jpeg,image/webp" /><span id="panFrontPreview" class="doc-link">Open PAN Front</span></div>
+        <div class="field"><label>PAN Back Image</label><input name="panBackImage" type="file" accept="image/png,image/jpeg,image/webp" /><span id="panBackPreview" class="doc-link">Open PAN Back</span></div>
 
         <div class="section-title">Payment / Bank</div>
+        <div class="field"><label>UPI ID *</label><input name="upiId" required /></div>
+        <div class="field"><label>Bank Name</label><input name="bankName" maxlength="120" /></div>
+        <div class="field"><label>Bank Account Number</label><input name="bankAccountNumber" inputmode="numeric" maxlength="18" /></div>
+        <div class="field"><label>IFSC</label><input name="bankIfsc" maxlength="11" /></div>
+        <div class="field"><label>Bank Proof Image</label><input name="bankProofImage" type="file" accept="image/png,image/jpeg,image/webp" /><span id="bankProofPreview" class="doc-link">Open Bank Proof</span></div>
 
-        <div class="field">
-          <label>UPI ID *</label>
-          <input name="upiId" required />
-        </div>
-
-        <div class="field">
-          <label>Bank Name</label>
-          <input name="bankName" maxlength="120" />
-        </div>
-
-        <div class="field">
-          <label>Bank Account Number</label>
-          <input name="bankAccountNumber" inputmode="numeric" maxlength="18" />
-        </div>
-
-        <div class="field">
-          <label>IFSC</label>
-          <input name="bankIfsc" maxlength="11" />
-        </div>
-
-        <div class="field">
-          <label>Bank Proof Image</label>
-          <input name="bankProofImage" type="file" accept="image/png,image/jpeg,image/webp" />
-          <span id="bankProofPreview" class="doc-link">Open Bank Proof</span>
-        </div>
-
-        <div class="section-title">Official / Login Policy</div>
-
+        <div class="section-title">Assignment / Login Policy</div>
+        <div class="field"><label>Assigned Area</label><input name="assignedArea" readonly /></div>
+        <div class="field"><label>Assigned City</label><input name="assignedCity" readonly /></div>
+        <div class="field"><label>Assigned State</label><input name="assignedState" readonly /></div>
+        <div class="field"><label>Target Retailers / Day</label><input name="targetRetailersPerDay" readonly /></div>
+        <div class="field"><label>Target Retailers / Month</label><input name="targetRetailersPerMonth" readonly /></div>
         <div class="field"><label>Login Hours / Day</label><input name="loginHoursPerDay" readonly /></div>
         <div class="field"><label>Allowed Start</label><input name="allowedLoginStartTime" readonly /></div>
         <div class="field"><label>Allowed End</label><input name="allowedLoginEndTime" readonly /></div>
@@ -243,23 +146,19 @@
   'use strict';
 
   const CONFIG = {
-    API_BASE: typeof window.HR_WEB_API_BASE === 'string' && window.HR_WEB_API_BASE.trim()
-      ? window.HR_WEB_API_BASE.trim().replace(/\/+$/, '')
-      : 'https://api.revstore.in/api/human-resource-web/v1',
-    LOGIN_URL: typeof window.HR_WEB_LOGIN_URL === 'string' && window.HR_WEB_LOGIN_URL.trim()
-      ? window.HR_WEB_LOGIN_URL.trim()
-      : '/hr/login',
-    DASHBOARD_URL: '/hr/dashboard',
-    FINGERPRINT_STORAGE_KEY: 'hr_web_fp_v1'
+    API_BASE: typeof window.ME_WEB_API_BASE === 'string' && window.ME_WEB_API_BASE.trim()
+      ? window.ME_WEB_API_BASE.trim().replace(/\/+$/, '')
+      : 'https://api.revstore.in/api/marketing-executive-web/v1',
+    LOGIN_URL: typeof window.ME_WEB_LOGIN_URL === 'string' && window.ME_WEB_LOGIN_URL.trim()
+      ? window.ME_WEB_LOGIN_URL.trim()
+      : '/me/login',
+    DASHBOARD_URL: typeof window.ME_WEB_DASHBOARD_URL === 'string' && window.ME_WEB_DASHBOARD_URL.trim()
+      ? window.ME_WEB_DASHBOARD_URL.trim()
+      : '/me/dashboard',
+    FINGERPRINT_STORAGE_KEY: 'me_web_fp_v1'
   };
 
-  const state = {
-    fingerprint: '',
-    busy: false,
-    profile: null,
-    objectUrls: new Set(),
-    dirty: false
-  };
+  const state = { fingerprint: '', busy: false, profile: null, objectUrls: new Set(), dirty: false };
 
   const els = {
     banner: document.getElementById('banner'),
@@ -349,10 +248,14 @@
     }
 
     if (!['GET', 'HEAD', 'OPTIONS'].includes(method)) {
-      headers.set('x-csrf-token', getCookie('csrf_token'));
+      headers.set('x-csrf-token', getCookie('csrf_token') || '');
     }
 
-    const res = await fetch(CONFIG.API_BASE + path, {
+    const finalPath = method === 'GET'
+      ? path + (path.includes('?') ? '&' : '?') + '_ts=' + Date.now()
+      : path;
+
+    const res = await fetch(CONFIG.API_BASE + finalPath, {
       ...(options || {}),
       headers,
       credentials: 'include',
@@ -397,7 +300,7 @@
     headers.set('X-Requested-With', 'XMLHttpRequest');
     if (state.fingerprint) headers.set('x-device-fingerprint', state.fingerprint);
 
-    const res = await fetch(CONFIG.API_BASE + docEndpoint(docType), {
+    const res = await fetch(CONFIG.API_BASE + docEndpoint(docType) + '?_ts=' + Date.now(), {
       method: 'GET',
       headers,
       credentials: 'include',
@@ -465,50 +368,55 @@
     return String(v || '').trim().length > 0;
   }
 
-  function fillForm(hr) {
-    state.profile = hr || {};
+  function fillForm(me) {
+    state.profile = me || {};
 
-    setValue('name', hr.name);
-    setValue('email', hr.email);
-    setValue('designation', hr.designation);
-    setValue('role', hr.role);
-    setValue('dateOfBirth', normalizeDate(hr.dateOfBirth));
-    setValue('bloodGroup', hr.bloodGroup);
+    setValue('name', me.name);
+    setValue('email', me.email);
+    setValue('designation', me.designation);
+    setValue('role', me.role);
+    setValue('dateOfBirth', normalizeDate(me.dateOfBirth));
+    setValue('bloodGroup', me.bloodGroup);
 
-    setValue('personalMobile', hr.personalMobile);
-    setValue('officeMobile', hr.officeMobile);
-    setValue('emergencyContactNumber', hr.emergencyContactNumber);
+    setValue('personalMobile', me.personalMobile);
+    setValue('officeMobile', me.officeMobile);
+    setValue('emergencyContactNumber', me.emergencyContactNumber);
 
-    setValue('address', hr.address);
-    setValue('addressLine1', hr.addressLine1);
-    setValue('addressLine2', hr.addressLine2);
-    setValue('area', hr.area);
-    setValue('city', hr.city);
-    setValue('state', hr.state);
-    setValue('postalCode', hr.postalCode);
-    setValue('country', hr.country);
+    setValue('address', me.address);
+    setValue('addressLine1', me.addressLine1);
+    setValue('addressLine2', me.addressLine2);
+    setValue('area', me.area);
+    setValue('city', me.city);
+    setValue('state', me.state);
+    setValue('postalCode', me.postalCode);
+    setValue('country', me.country);
 
-    setValue('aadhaarNumber', hr.aadhaar?.number || '');
-    setValue('panNumber', hr.pan && (hr.pan.number || hr.pan.numberMasked || ''));
+    setValue('aadhaarNumber', me.aadhaar?.number || me.aadhaar?.numberMasked || '');
+    setValue('panNumber', me.pan?.number || me.pan?.numberMasked || '');
 
-    setValue('upiId', hr.upiId);
-    setValue('bankName', hr.bank && hr.bank.name);
-    setValue('bankAccountNumber', hr.bank && (hr.bank.accountNumber || hr.bank.accountNumberMasked || ''));
-    setValue('bankIfsc', hr.bank && hr.bank.ifsc);
+    setValue('upiId', me.upiId);
+    setValue('bankName', me.bank?.name);
+    setValue('bankAccountNumber', me.bank?.accountNumber || me.bank?.accountNumberMasked || '');
+    setValue('bankIfsc', me.bank?.ifsc);
 
-    setValue('loginHoursPerDay', hr.loginHoursPerDay);
-    setValue('allowedLoginStartTime', hr.allowedLoginStartTime);
-    setValue('allowedLoginEndTime', hr.allowedLoginEndTime);
-    setValue('timezone', hr.timezone);
-    setValue('status', hr.status);
+    setValue('assignedArea', me.assignedArea);
+    setValue('assignedCity', me.assignedCity);
+    setValue('assignedState', me.assignedState);
+    setValue('targetRetailersPerDay', me.targetRetailersPerDay);
+    setValue('targetRetailersPerMonth', me.targetRetailersPerMonth);
+    setValue('loginHoursPerDay', me.loginHoursPerDay);
+    setValue('allowedLoginStartTime', me.allowedLoginStartTime);
+    setValue('allowedLoginEndTime', me.allowedLoginEndTime);
+    setValue('timezone', me.timezone);
+    setValue('status', me.status);
 
-    setDocLink(els.aadhaarFrontPreview, 'aadhaar_front', !!(hr.aadhaar && hr.aadhaar.frontImage));
-    setDocLink(els.aadhaarBackPreview, 'aadhaar_back', !!(hr.aadhaar && hr.aadhaar.backImage));
-    setDocLink(els.panFrontPreview, 'pan_front', !!(hr.pan && hr.pan.frontImage));
-    setDocLink(els.panBackPreview, 'pan_back', !!(hr.pan && hr.pan.backImage));
-    setDocLink(els.bankProofPreview, 'bank_proof', !!(hr.bank && hr.bank.proofImage));
+    setDocLink(els.aadhaarFrontPreview, 'aadhaar_front', !!(me.aadhaar && me.aadhaar.frontImage));
+    setDocLink(els.aadhaarBackPreview, 'aadhaar_back', !!(me.aadhaar && me.aadhaar.backImage));
+    setDocLink(els.panFrontPreview, 'pan_front', !!(me.pan && me.pan.frontImage));
+    setDocLink(els.panBackPreview, 'pan_back', !!(me.pan && me.pan.backImage));
+    setDocLink(els.bankProofPreview, 'bank_proof', !!(me.bank && me.bank.proofImage));
 
-    hydrateProfilePreview(!!hr.profileImage);
+    hydrateProfilePreview(!!me.profileImage);
 
     state.dirty = false;
     els.saveBtn.style.display = 'none';
@@ -516,7 +424,7 @@
 
   function isPlaceholder(v) {
     const s = String(v || '').trim().toLowerCase();
-    return !s || s === 'to be updated by hr' || s === 'to be updated';
+    return !s || s === 'to be updated by me' || s === 'to be updated';
   }
 
   function isMasked(v) {
@@ -530,10 +438,9 @@
     if (!hasText(profile.dateOfBirth)) missing.push('Date of birth');
     if (!/^[6-9][0-9]{9}$/.test(String(profile.personalMobile || ''))) missing.push('Personal mobile');
     if (!/^[6-9][0-9]{9}$/.test(String(profile.emergencyContactNumber || ''))) missing.push('Emergency contact');
-
     if (isPlaceholder(profile.address)) missing.push('Address');
 
-    if (!hasText(profile.aadhaar?.number)) missing.push('Aadhaar number');
+    if (!hasText(profile.aadhaar?.number || profile.aadhaar?.numberMasked)) missing.push('Aadhaar number');
     if (!profile.aadhaar?.frontImage) missing.push('Aadhaar front image');
     if (!profile.aadhaar?.backImage) missing.push('Aadhaar back image');
 
@@ -541,10 +448,6 @@
     if (!profile.pan?.frontImage) missing.push('PAN front image');
 
     if (!hasText(profile.upiId)) missing.push('UPI ID');
-
-    if (!hasText(profile.bank?.name)) missing.push('Bank name');
-    if (!hasText(profile.bank?.accountNumber || profile.bank?.accountNumberMasked)) missing.push('Bank account number');
-    if (!hasText(profile.bank?.ifsc)) missing.push('IFSC');
 
     return missing;
   }
@@ -555,10 +458,10 @@
 
     try {
       const data = await apiFetch('/profile', { method: 'GET' });
-      const hr = data.humanResource || {};
-      fillForm(hr);
+      const me = data.marketingExecutive || {};
+      fillForm(me);
 
-      const missing = requireFirstTimeDocs(hr);
+      const missing = requireFirstTimeDocs(me);
 
       if (missing.length) {
         els.saveBtn.style.display = 'inline-flex';
@@ -572,6 +475,7 @@
         setTimeout(redirectToLogin, 700);
         return;
       }
+
       showBanner('error', err.message || 'Failed to load profile.');
     }
   }
@@ -595,22 +499,40 @@
     const office = String(fd.get('officeMobile') || '').trim();
     const ifsc = String(fd.get('bankIfsc') || '').trim().toUpperCase();
     const bankAcc = String(fd.get('bankAccountNumber') || '').trim();
-    const upi = String(fd.get('upiId') || '').trim();
+    const upi = String(fd.get('upiId') || '').trim().toLowerCase();
 
     if (!/^[6-9][0-9]{9}$/.test(mobile)) throw new Error('Invalid personal mobile number.');
     if (!/^[6-9][0-9]{9}$/.test(emergency)) throw new Error('Invalid emergency contact number.');
     if (office && !/^[6-9][0-9]{9}$/.test(office)) throw new Error('Invalid office mobile number.');
-    if (!/^[0-9]{12}$/.test(aadhaar)) throw new Error('Aadhaar number must be exactly 12 digits.');
-    if (!/^[A-Z]{5}[0-9]{4}[A-Z]$/.test(pan)) throw new Error('Invalid PAN number.');
-    if (upi && !/^[a-z0-9._-]{2,256}@[a-z0-9.-]{2,64}$/i.test(upi)) throw new Error('Invalid UPI ID.');
+
+    if (aadhaar && isMasked(aadhaar)) {
+      fd.delete('aadhaarNumber');
+    } else if (!/^[0-9]{12}$/.test(aadhaar)) {
+      throw new Error('Aadhaar number must be exactly 12 digits.');
+    }
+
+    if (pan && isMasked(pan)) {
+      fd.delete('panNumber');
+    } else if (!/^[A-Z]{5}[0-9]{4}[A-Z]$/.test(pan)) {
+      throw new Error('Invalid PAN number.');
+    }
+
+    if (!upi || !/^[a-z0-9._-]{2,256}@[a-z0-9.-]{2,64}$/i.test(upi)) {
+      throw new Error('Invalid UPI ID.');
+    }
+
     if (bankAcc && isMasked(bankAcc)) {
       fd.delete('bankAccountNumber');
     } else if (bankAcc && !/^[0-9]{9,18}$/.test(bankAcc)) {
       throw new Error('Bank account number must be 9–18 digits.');
     }
-    if (ifsc && !/^[A-Z]{4}0[A-Z0-9]{6}$/.test(ifsc)) throw new Error('Invalid IFSC code.');
 
-    fd.set('panNumber', pan);
+    if (ifsc && !/^[A-Z]{4}0[A-Z0-9]{6}$/.test(ifsc)) {
+      throw new Error('Invalid IFSC code.');
+    }
+
+    if (fd.has('panNumber')) fd.set('panNumber', pan);
+    fd.set('upiId', upi);
     fd.set('bankIfsc', ifsc);
   }
 
@@ -626,6 +548,11 @@
     fd.delete('email');
     fd.delete('role');
     fd.delete('designation');
+    fd.delete('assignedArea');
+    fd.delete('assignedCity');
+    fd.delete('assignedState');
+    fd.delete('targetRetailersPerDay');
+    fd.delete('targetRetailersPerMonth');
     fd.delete('loginHoursPerDay');
     fd.delete('allowedLoginStartTime');
     fd.delete('allowedLoginEndTime');
