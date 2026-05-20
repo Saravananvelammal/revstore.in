@@ -449,6 +449,7 @@
     const missing = [];
 
     if (isPlaceholder(profile.name)) missing.push('Name');
+    if (!hasText(profile.bloodGroup)) missing.push('Blood group');
     if (!hasText(profile.dateOfBirth)) missing.push('Date of birth');
     if (!/^[6-9][0-9]{9}$/.test(String(profile.personalMobile || ''))) missing.push('Personal mobile');
     if (!/^[6-9][0-9]{9}$/.test(String(profile.emergencyContactNumber || ''))) missing.push('Emergency contact');
@@ -602,7 +603,8 @@
       await loadProfile();
 
       state.dirty = false;
-      els.saveBtn.style.display = 'none';
+      const missing = requireFirstTimeDocs(state.profile || {});
+      els.saveBtn.style.display = missing.length ? 'inline-flex' : 'none';
     } catch (err) {
       if (err.status === 401 || err.status === 403) {
         showBanner('error', 'Session expired. Redirecting...');
