@@ -321,7 +321,7 @@
       ' • View-only allowed categories';
 
     els.categoryGrid.innerHTML = allowed.length
-      ? allowed.map(key => <div class="cat">${escapeHtml(key)}</div>).join('')
+      ? allowed.map(key => `<div class="cat">${escapeHtml(key)}</div>`).join('')
       : '<div class="empty">No allowed categories assigned.</div>';
   }
 
