@@ -419,7 +419,7 @@
     hydrateProfilePreview(!!me.profileImage);
 
     state.dirty = false;
-    els.saveBtn.style.display = 'inline-flex';
+    els.saveBtn.style.display = 'none';
   }
 
   function isPlaceholder(v) {
@@ -481,7 +481,7 @@
         Always keep save button available for editable profile pages.
         Users may want to update any field anytime.
       */
-      els.saveBtn.style.display = 'inline-flex';
+      els.saveBtn.style.display = missing.length ? 'inline-flex' : 'none';
 
     } catch (err) {
       if (err.status === 401 || err.status === 403) {
