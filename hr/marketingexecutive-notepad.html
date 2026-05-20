@@ -292,7 +292,6 @@
     els.noteList.innerHTML = state.notes.map(note => {
       const mailSent = note.mailSent === true;
       const meName = marketingExecutiveName(note);
-      const meMeta = marketingExecutiveMeta(note);
 
       return `
         <article class="note-card">
@@ -303,8 +302,7 @@
                 <span class="pill pill-owner">Marketing Executive: ${escapeHtml(meName)}</span>
                 <span>${escapeHtml(note.contactNumber || '-')}</span>
                 ${note.organisationMailId ? `<span>${escapeHtml(note.organisationMailId)}</span>` : ''}
-              </div>
-              ${meMeta ? `<div class="note-meta">${escapeHtml(meMeta)}</div>` : ''}
+              </div>             
             </div>
             <div class="note-time">${escapeHtml(formatDate(note.currentTime || note.createdAt))}</div>
           </div>
