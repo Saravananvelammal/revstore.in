@@ -176,9 +176,23 @@
     bankProofPreview: document.getElementById('bankProofPreview')
   };
 
-  function showBanner(type, msg) {
+  let bannerTimer = null;
+
+  function showBanner(type, msg, autoHideMs = 0) {
+    if (bannerTimer) {
+      clearTimeout(bannerTimer);
+      bannerTimer = null;
+    }
+
     els.banner.className = 'banner show ' + type;
     els.banner.textContent = msg || '';
+
+    if (autoHideMs > 0) {
+      bannerTimer = setTimeout(() => {
+        clearBanner();
+        bannerTimer = null;
+      }, autoHideMs);
+    }
   }
 
   function clearBanner() {
@@ -472,7 +486,8 @@
       } else {
         showBanner(
           'success',
-          'Profile loaded successfully.'
+          'Profile loaded successfully.',
+          3000
         );
       }
 
@@ -587,7 +602,7 @@
       await loadProfile();
 
       state.dirty = false;
-      els.saveBtn.style.display = 'inline-flex';
+      els.saveBtn.style.display = 'none';
     } catch (err) {
       if (err.status === 401 || err.status === 403) {
         showBanner('error', 'Session expired. Redirecting...');
