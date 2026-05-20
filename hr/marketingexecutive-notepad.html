@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Revstore HR - Marketing Executive Notes</title>
+  <meta name="robots" content="noindex,nofollow,noarchive,nosnippet" />
+  <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+
+  <style>
+    :root{--bg1:#4318b8;--bg2:#7e22ce;--bg3:#c026d3;--card:rgba(255,255,255,.96);--text:#1e1b4b;--muted:#6b7280;--line:rgba(30,27,75,.12);--shadow:0 18px 60px rgba(49,12,120,.25);--radius:24px}
+    *{box-sizing:border-box}
+    body{margin:0;min-height:100vh;padding:22px;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;color:var(--text);background:linear-gradient(135deg,var(--bg1),var(--bg2),var(--bg3))}
+    .app{max-width:1240px;margin:0 auto;display:grid;gap:18px}
+    .topbar{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;color:#fff}
+    h1{margin:0;font-size:2rem;font-weight:900}
+    .sub{margin:8px 0 0;color:rgba(255,255,255,.86);line-height:1.45}
+    .actions{display:flex;gap:10px;flex-wrap:wrap}
+    .btn{min-height:46px;padding:0 16px;border-radius:15px;border:1px solid var(--line);background:#fff;color:var(--text);font-weight:850;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;line-height:1;white-space:nowrap}
+    .btn-primary{border:0;color:#fff;background:linear-gradient(135deg,#5b21b6,#7c3aed,#a21caf)}
+    .btn:disabled{opacity:.65;cursor:not-allowed}
+    .panel{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:22px}
+    .banner{display:none;padding:14px 16px;border-radius:16px;margin-bottom:14px;line-height:1.5}
+    .banner.show{display:block}.banner.error{background:rgba(239,68,68,.12);color:#7f1d1d}.banner.success{background:rgba(16,185,129,.12);color:#065f46}.banner.info{background:rgba(59,130,246,.12);color:#1e3a8a}
+    .box{background:#fff;border:1px solid var(--line);border-radius:22px;padding:18px}
+    .box-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}
+    .box h2{margin:0;font-size:1.25rem}
+    .toolbar{display:grid;grid-template-columns:1.5fr 260px 180px 130px;gap:10px;margin-bottom:14px}
+    input,select{width:100%;min-height:48px;border:1px solid var(--line);border-radius:15px;padding:0 14px;font:inherit;outline:none;background:#fff;color:var(--text)}
+    input:focus,select:focus{box-shadow:0 0 0 4px rgba(91,33,182,.14);border-color:#7c3aed}
+    .list{display:grid;gap:12px}
+    .note-card{border:1px solid var(--line);border-radius:18px;background:#fff;padding:14px;display:grid;gap:8px}
+    .note-head{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+    .note-title{font-weight:950;font-size:1.05rem}
+    .note-time{color:var(--muted);font-size:.82rem;text-align:right;white-space:nowrap}
+    .note-msg{color:#374151;line-height:1.5;white-space:pre-wrap;word-break:break-word}
+    .note-meta{display:flex;gap:8px;flex-wrap:wrap;color:var(--muted);font-size:.88rem}
+    .pill{display:inline-flex;border-radius:999px;padding:6px 10px;font-weight:850;font-size:.78rem}
+    .pill-yes{background:rgba(16,185,129,.13);color:#065f46}
+    .pill-no{background:rgba(239,68,68,.12);color:#991b1b}
+    .pill-owner{background:rgba(91,33,182,.12);color:#4c1d95}
+    .empty,.loading{text-align:center;padding:28px;color:var(--muted);border:1px dashed var(--line);border-radius:18px;background:#fff}
+    .pagination{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:14px;flex-wrap:wrap}
+    .muted{color:var(--muted)}
+    @media(max-width:1050px){.toolbar{grid-template-columns:1fr 1fr}}
+    @media(max-width:760px){body{padding:14px}.topbar{flex-direction:column}.actions{width:100%;display:grid;grid-template-columns:1fr 1fr}.actions .btn{width:100%;padding:0 10px;font-size:.92rem}.panel{padding:14px;border-radius:20px}.toolbar{grid-template-columns:1fr}h1{font-size:1.7rem}.box{padding:14px;border-radius:18px}.note-head{display:grid}.note-time{text-align:left;white-space:normal}.pagination{display:grid;grid-template-columns:1fr;align-items:stretch}.pagination .btn{width:100%}}
+  </style>
+</head>
+
+<body>
+<main class="app">
+  <header class="topbar">
+    <div>
+      <h1>Marketing Executive Monitoring</h1>
+      <p class="sub">View notepad entries created by Marketing Executives added under your HR profile.</p>
+    </div>
+    <div class="actions">
+      <button id="dashboardBtn" class="btn">Dashboard</button>
+      <button id="refreshBtn" class="btn btn-primary">Refresh</button>
+    </div>
+  </header>
+
+  <section class="panel">
+    <div id="banner" class="banner"></div>
+
+    <section class="box">
+      <div class="box-head">
+        <h2>Marketing Executive Notes</h2>
+      </div>
+
+      <div class="toolbar">
+        <input id="searchInput" type="search" placeholder="Search notes, person, organisation, mobile, mail..." autocomplete="off" />
+
+        <select id="marketingExecutiveFilter">
+          <option value="">All Marketing Executives</option>
+        </select>
+
+        <select id="mailFilter">
+          <option value="">All Mail Status</option>
+          <option value="true">Mail Sent</option>
+          <option value="false">Mail Not Sent</option>
+        </select>
+
+        <button id="applyBtn" class="btn btn-primary">Apply</button>
+      </div>
+
+      <div id="loading" class="loading">Loading notes...</div>
+      <div id="empty" class="empty" style="display:none;">No marketing executive notes found.</div>
+      <div id="noteList" class="list"></div>
+
+      <div class="pagination">
+        <button id="prevBtn" class="btn">Previous</button>
+        <div id="pageInfo" class="muted">Page 1</div>
+        <button id="nextBtn" class="btn">Next</button>
+      </div>
+    </section>
+  </section>
+</main>
+
+<script>
+(function () {
+  'use strict';
+
+  const CONFIG = {
+    API_BASE: typeof window.HR_WEB_API_BASE === 'string' && window.HR_WEB_API_BASE.trim()
+      ? window.HR_WEB_API_BASE.trim().replace(/\/+$/, '')
+      : 'https://api.revstore.in/api/human-resource-web/v1',
+    LOGIN_URL: typeof window.HR_WEB_LOGIN_URL === 'string' && window.HR_WEB_LOGIN_URL.trim()
+      ? window.HR_WEB_LOGIN_URL.trim()
+      : '/hr/login',
+    DASHBOARD_URL: typeof window.HR_WEB_DASHBOARD_URL === 'string' && window.HR_WEB_DASHBOARD_URL.trim()
+      ? window.HR_WEB_DASHBOARD_URL.trim()
+      : '/hr/dashboard',
+    FINGERPRINT_STORAGE_KEY: 'hr_web_fp_v1'
+  };
+
+  const els = {
+    banner: document.getElementById('banner'),
+    dashboardBtn: document.getElementById('dashboardBtn'),
+    refreshBtn: document.getElementById('refreshBtn'),
+    searchInput: document.getElementById('searchInput'),
+    marketingExecutiveFilter: document.getElementById('marketingExecutiveFilter'),
+    mailFilter: document.getElementById('mailFilter'),
+    applyBtn: document.getElementById('applyBtn'),
+    loading: document.getElementById('loading'),
+    empty: document.getElementById('empty'),
+    noteList: document.getElementById('noteList'),
+    prevBtn: document.getElementById('prevBtn'),
+    nextBtn: document.getElementById('nextBtn'),
+    pageInfo: document.getElementById('pageInfo')
+  };
+
+  const state = {
+    fingerprint: '',
+    page: 1,
+    limit: 20,
+    totalPages: 1,
+    total: 0,
+    busy: false,
+    notes: [],
+    marketingExecutives: []
+  };
+
+  let bannerTimer = null;
+
+  function showBanner(type, message, autoHide) {
+    clearTimeout(bannerTimer);
+    els.banner.className = 'banner show ' + type;
+    els.banner.textContent = message || '';
+    if (autoHide !== false) bannerTimer = setTimeout(clearBanner, 3500);
+  }
+
+  function clearBanner() {
+    clearTimeout(bannerTimer);
+    els.banner.className = 'banner';
+    els.banner.textContent = '';
+  }
+
+  function getCookie(name) {
+    const target = String(name || '') + '=';
+    const found = String(document.cookie || '')
+      .split(';')
+      .map(v => v.trim())
+      .find(v => v.indexOf(target) === 0);
+    return found ? decodeURIComponent(found.slice(target.length)) : '';
+  }
+
+  async function sha256Hex(input) {
+    const data = new TextEncoder().encode(String(input));
+    const digest = await crypto.subtle.digest('SHA-256', data);
+    return Array.from(new Uint8Array(digest))
+      .map(b => b.toString(16).padStart(2, '0'))
+      .join('');
+  }
+
+  async function getStableFingerprint() {
+    try {
+      const existing = localStorage.getItem(CONFIG.FINGERPRINT_STORAGE_KEY);
+      if (existing && existing.trim()) return existing.trim().slice(0, 200);
+    } catch (_) {}
+
+    const raw = [
+      navigator.userAgent || '',
+      navigator.language || '',
+      screen.width || '',
+      screen.height || '',
+      screen.colorDepth || '',
+      Intl.DateTimeFormat().resolvedOptions().timeZone || '',
+      navigator.platform || '',
+      crypto.getRandomValues(new Uint32Array(4)).join('-')
+    ].join('|');
+
+    const fp = (await sha256Hex(raw)).slice(0, 64);
+    try { localStorage.setItem(CONFIG.FINGERPRINT_STORAGE_KEY, fp); } catch (_) {}
+    return fp;
+  }
+
+  function redirectToLogin() {
+    window.location.replace(CONFIG.LOGIN_URL);
+  }
+
+  async function apiFetch(path, options) {
+    const headers = new Headers((options && options.headers) || {});
+    headers.set('Accept', 'application/json');
+    headers.set('X-Requested-With', 'XMLHttpRequest');
+
+    if (state.fingerprint) headers.set('x-device-fingerprint', state.fingerprint);
+
+    const method = String((options && options.method) || 'GET').toUpperCase();
+    const body = options && options.body;
+
+    if (body && !(body instanceof FormData) && !headers.has('Content-Type')) {
+      headers.set('Content-Type', 'application/json');
+    }
+
+    if (!['GET', 'HEAD', 'OPTIONS'].includes(method)) {
+      headers.set('x-csrf-token', getCookie('csrf_token') || '');
+    }
+
+    const finalPath = method === 'GET'
+      ? path + (path.includes('?') ? '&' : '?') + '_ts=' + Date.now()
+      : path;
+
+    const res = await fetch(CONFIG.API_BASE + finalPath, {
+      ...(options || {}),
+      headers,
+      credentials: 'include',
+      cache: 'no-store',
+      redirect: 'follow',
+      referrerPolicy: 'strict-origin-when-cross-origin'
+    });
+
+    let data = {};
+    try { data = await res.json(); } catch (_) {}
+
+    if (res.status === 401 || res.status === 403) {
+      throw Object.assign(new Error(data.message || 'Session expired.'), { status: res.status, data });
+    }
+
+    if (!res.ok) {
+      throw Object.assign(new Error(data.message || 'Request failed.'), { status: res.status, data });
+    }
+
+    return data;
+  }
+
+  function escapeHtml(v) {
+    return String(v == null ? '' : v)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  function formatDate(value) {
+    const d = new Date(value || Date.now());
+    if (Number.isNaN(d.getTime())) return '-';
+
+    return d.toLocaleString('en-IN', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  }
+
+  function marketingExecutiveName(note) {
+    return note.marketingExecutiveDetails?.name ||
+      note.marketingExecutive?.name ||
+      '-';
+  }
+
+  function marketingExecutiveMeta(note) {
+    const d = note.marketingExecutiveDetails || {};
+    const parts = [
+      d.email || '',
+      d.personalMobile || '',
+      d.designation || '',
+      [d.assignedArea, d.assignedCity, d.assignedState].filter(Boolean).join(', ')
+    ].filter(Boolean);
+
+    return parts.join(' • ');
+  }
+
+  function renderNotes() {
+    els.empty.style.display = state.notes.length ? 'none' : 'block';
+
+    els.noteList.innerHTML = state.notes.map(note => {
+      const mailSent = note.mailSent === true;
+      const meName = marketingExecutiveName(note);
+      const meMeta = marketingExecutiveMeta(note);
+
+      return `
+        <article class="note-card">
+          <div class="note-head">
+            <div>
+              <div class="note-title">${escapeHtml(note.personOrOrganisationName || '-')}</div>
+              <div class="note-meta">
+                <span class="pill pill-owner">Marketing Executive: ${escapeHtml(meName)}</span>
+                <span>${escapeHtml(note.contactNumber || '-')}</span>
+                ${note.organisationMailId ? `<span>${escapeHtml(note.organisationMailId)}</span>` : ''}
+              </div>
+              ${meMeta ? `<div class="note-meta">${escapeHtml(meMeta)}</div>` : ''}
+            </div>
+            <div class="note-time">${escapeHtml(formatDate(note.currentTime || note.createdAt))}</div>
+          </div>
+
+          <div class="note-msg">${escapeHtml(note.message || '')}</div>
+
+          <div class="note-meta">
+            <span class="pill ${mailSent ? 'pill-yes' : 'pill-no'}">${mailSent ? 'Mail Sent' : 'Mail Not Sent'}</span>
+            ${note.remark ? `<span>Remark: ${escapeHtml(note.remark)}</span>` : ''}
+          </div>
+        </article>
+      `;
+    }).join('');
+
+    updatePagination();
+  }
+
+  function rebuildMarketingExecutiveDropdown() {
+    const selected = els.marketingExecutiveFilter.value;
+    const map = new Map();
+
+    state.marketingExecutives.forEach(me => {
+      const id = String(me._id || me.id || '').trim();
+      const name = String(me.name || '').trim();
+      if (id && name) map.set(id, name);
+    });
+
+    state.notes.forEach(note => {
+      const id = String(
+        note.marketingExecutiveDetails?.id ||
+        note.marketingExecutive?._id ||
+        note.marketingExecutive?.id ||
+        ''
+      ).trim();
+      const name = String(marketingExecutiveName(note) || '').trim();
+      if (id && name && name !== '-') map.set(id, name);
+    });
+
+    els.marketingExecutiveFilter.innerHTML =
+      '<option value="">All Marketing Executives</option>' +
+      Array.from(map.entries())
+        .sort((a, b) => a[1].localeCompare(b[1]))
+        .map(([id, name]) => `<option value="${escapeHtml(id)}">${escapeHtml(name)}</option>`)
+        .join('');
+
+    if (selected && map.has(selected)) {
+      els.marketingExecutiveFilter.value = selected;
+    }
+  }
+
+  function updatePagination() {
+    els.pageInfo.textContent =
+      'Page ' + state.page + ' of ' + Math.max(1, state.totalPages) + ' • Total ' + state.total;
+
+    els.prevBtn.disabled = state.busy || state.page <= 1;
+    els.nextBtn.disabled = state.busy || state.page >= state.totalPages;
+  }
+
+  function buildQuery() {
+    const params = new URLSearchParams();
+
+    params.set('page', String(state.page));
+    params.set('limit', String(state.limit));
+
+    const q = els.searchInput.value.trim();
+    const marketingExecutiveId = els.marketingExecutiveFilter.value.trim();
+    const mailSent = els.mailFilter.value.trim();
+
+    if (q) params.set('q', q);
+    if (marketingExecutiveId) params.set('marketingExecutiveId', marketingExecutiveId);
+    if (mailSent) params.set('mailSent', mailSent);
+
+    return '?' + params.toString();
+  }
+
+  async function loadNotes() {
+    if (state.busy) return;
+
+    state.busy = true;
+    els.loading.style.display = 'block';
+    els.empty.style.display = 'none';
+    els.noteList.innerHTML = '';
+    updatePagination();
+
+    try {
+      await apiFetch('/auth/me', { method: 'GET' });
+
+      const data = await apiFetch('/marketing-executives-notes' + buildQuery(), {
+        method: 'GET'
+      });
+
+      state.notes = Array.isArray(data.notes) ? data.notes : [];
+      state.marketingExecutives = Array.isArray(data.marketingExecutives)
+        ? data.marketingExecutives
+        : [];
+      state.total = Number(data.total || 0);
+      state.totalPages = Math.max(1, Number(data.totalPages || 1));
+
+      rebuildMarketingExecutiveDropdown();
+      renderNotes();
+    } catch (err) {
+      if (err.status === 401 || err.status === 403) {
+        showBanner('error', 'Session expired. Redirecting to login...', false);
+        setTimeout(redirectToLogin, 600);
+        return;
+      }
+
+      showBanner('error', err.message || 'Failed to load marketing executive notes.', false);
+    } finally {
+      state.busy = false;
+      els.loading.style.display = 'none';
+      updatePagination();
+    }
+  }
+
+  function applyFilters() {
+    state.page = 1;
+    loadNotes();
+  }
+
+  function bindEvents() {
+    els.dashboardBtn.addEventListener('click', () => {
+      window.location.href = CONFIG.DASHBOARD_URL;
+    });
+
+    els.refreshBtn.addEventListener('click', () => {
+      loadNotes();
+    });
+
+    els.applyBtn.addEventListener('click', applyFilters);
+    els.marketingExecutiveFilter.addEventListener('change', applyFilters);
+    els.mailFilter.addEventListener('change', applyFilters);
+
+    els.searchInput.addEventListener('keydown', e => {
+      if (e.key === 'Enter') applyFilters();
+    });
+
+    els.prevBtn.addEventListener('click', () => {
+      if (state.page > 1) {
+        state.page -= 1;
+        loadNotes();
+      }
+    });
+
+    els.nextBtn.addEventListener('click', () => {
+      if (state.page < state.totalPages) {
+        state.page += 1;
+        loadNotes();
+      }
+    });
+  }
+
+  async function bootstrap() {
+    state.fingerprint = await getStableFingerprint();
+    bindEvents();
+    await loadNotes();
+  }
+
+  bootstrap().catch(() => {
+    showBanner('error', 'Failed to initialize marketing executive monitoring page.', false);
+  });
+})();
+</script>
+</body>
+</html>
