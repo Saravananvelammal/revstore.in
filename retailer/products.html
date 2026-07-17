@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1, viewport-fit=cover"
+  />
+
+  <title>Products | RevStore Retailer</title>
+
+  <meta
+    name="robots"
+    content="noindex,nofollow,noarchive,nosnippet"
+  />
+
+  <meta
+    http-equiv="Cache-Control"
+    content="no-store, no-cache, must-revalidate, max-age=0"
+  />
+
+  <meta
+    http-equiv="Pragma"
+    content="no-cache"
+  />
+
+  <meta
+    http-equiv="Expires"
+    content="0"
+  />
+
+  <link
+    rel="stylesheet"
+    href="css/products.css"
+  />
+
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
+    referrerpolicy="no-referrer"
+  />
+</head>
+
+<body>
+  <div class="page">
+
+    <!-- Categories -->
+    <aside
+      class="sidebar"
+      aria-label="Product categories"
+    >
+      <div class="sidebar-title">
+        <i
+          class="fa-solid fa-layer-group"
+          aria-hidden="true"
+        ></i>
+
+        <span>Categories</span>
+      </div>
+
+      <div
+        id="categoryList"
+        class="category-list"
+        aria-live="polite"
+      ></div>
+    </aside>
+
+    <!-- Subcategories -->
+    <aside
+      class="subcategory-panel"
+      aria-label="Product subcategories"
+    >
+      <div class="sidebar-title">
+        <i
+          class="fa-solid fa-list"
+          aria-hidden="true"
+        ></i>
+
+        <span>Subcategories</span>
+      </div>
+
+      <div
+        id="subcategoryList"
+        class="subcategory-list"
+        aria-live="polite"
+      ></div>
+    </aside>
+
+    <!-- Main content -->
+    <main class="content">
+
+      <!-- Toolbar -->
+      <header class="toolbar">
+        <div class="toolbar-left">
+          <div class="search-box">
+            <i
+              class="fa-solid fa-magnifying-glass"
+              aria-hidden="true"
+            ></i>
+
+            <input
+              id="txtSearch"
+              type="search"
+              placeholder="Search products"
+              autocomplete="off"
+              spellcheck="false"
+              aria-label="Search products"
+            />
+          </div>
+        </div>
+
+        <div class="toolbar-right">
+          <div class="deleted-filter">
+            <label
+              class="switch"
+              for="includeDeleted"
+            >
+              <input
+                id="includeDeleted"
+                type="checkbox"
+              />
+
+              <span
+                class="slider"
+                aria-hidden="true"
+              ></span>
+            </label>
+
+            <label
+              class="switch-label"
+              for="includeDeleted"
+            >
+              Include Deleted
+            </label>
+          </div>
+
+          <button
+            id="btnRefresh"
+            class="btn btn-light"
+            type="button"
+          >
+            <i
+              class="fa-solid fa-rotate"
+              aria-hidden="true"
+            ></i>
+
+            <span>Refresh</span>
+          </button>
+
+          <button
+            id="btnGrid"
+            class="btn btn-light"
+            type="button"
+            aria-label="Toggle product grid view"
+            title="Toggle grid view"
+          >
+            <i
+              class="fa-solid fa-border-all"
+              aria-hidden="true"
+            ></i>
+          </button>
+
+          <button
+            id="btnAddProduct"
+            class="btn btn-primary"
+            type="button"
+          >
+            <i
+              class="fa-solid fa-plus"
+              aria-hidden="true"
+            ></i>
+
+            <span>Add Product</span>
+          </button>
+        </div>
+      </header>
+
+      <!-- Optional selected-filter summary -->
+      <section
+        class="selection-summary"
+        aria-label="Current product filters"
+      >
+        <div>
+          <span class="selection-label">Category</span>
+
+          <strong id="selectedCategoryLabel">
+            No category selected
+          </strong>
+        </div>
+
+        <div>
+          <span class="selection-label">Subcategory</span>
+
+          <strong id="selectedSubcategoryLabel">
+            No subcategory selected
+          </strong>
+        </div>
+      </section>
+
+      <!-- Optional product statistics -->
+      <section
+        class="product-statistics"
+        aria-label="Product statistics"
+      >
+        <article class="product-stat">
+          <span>Total Products</span>
+          <strong id="totalProductsValue">0</strong>
+        </article>
+
+        <article class="product-stat">
+          <span>Active</span>
+          <strong id="activeProductsValue">0</strong>
+        </article>
+
+        <article class="product-stat">
+          <span>Deleted</span>
+          <strong id="deletedProductsValue">0</strong>
+        </article>
+
+        <article class="product-stat">
+          <span>Total Stock</span>
+          <strong id="totalStockValue">0</strong>
+        </article>
+      </section>
+
+      <!-- Products -->
+      <section
+        id="productGrid"
+        class="product-grid"
+        aria-live="polite"
+        aria-label="Retailer products"
+      ></section>
+
+      <!-- Empty state -->
+      <section
+        id="emptyState"
+        class="empty-state"
+        aria-live="polite"
+      >
+        <i
+          class="fa-solid fa-box-open"
+          aria-hidden="true"
+        ></i>
+
+        <h2 id="emptyStateTitle">
+          No Products Found
+        </h2>
+
+        <p id="emptyStateText">
+          Select another subcategory or add a new product.
+        </p>
+      </section>
+
+      <!-- Pagination -->
+      <nav
+        id="pagination"
+        class="pagination hidden"
+        aria-label="Products pagination"
+      ></nav>
+    </main>
+  </div>
+
+  <!-- Loading overlay -->
+  <div
+    id="loadingOverlay"
+    class="loading-overlay"
+    role="status"
+    aria-live="polite"
+    aria-label="Loading"
+  >
+    <div class="loading-content">
+      <div
+        class="loader"
+        aria-hidden="true"
+      ></div>
+
+      <p id="loadingMessage">
+        Loading retailer products...
+      </p>
+    </div>
+  </div>
+
+  <!-- Toast container -->
+  <div
+    id="toastContainer"
+    class="toast-container"
+    aria-live="polite"
+    aria-atomic="true"
+  ></div>
+
+  <!-- Product modal -->
+  <div
+    id="productModal"
+    class="modal"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="modalTitle"
+    aria-hidden="true"
+  >
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="modalTitle">
+          Add Product
+        </h2>
+
+        <button
+          id="closeModal"
+          class="icon-btn"
+          type="button"
+          aria-label="Close product form"
+        >
+          <i
+            class="fa-solid fa-xmark"
+            aria-hidden="true"
+          ></i>
+        </button>
+      </div>
+
+      <form
+        id="productForm"
+        novalidate
+      >
+        <input
+          id="productId"
+          type="hidden"
+        />
+
+        <div class="form-body">
+          <div class="form-grid">
+
+            <!-- Product name -->
+            <div class="form-group form-group-wide">
+              <label for="productName">
+                Product Name
+              </label>
+
+              <input
+                id="productName"
+                class="form-control"
+                type="text"
+                maxlength="180"
+                autocomplete="off"
+                required
+              />
+
+              <p
+                class="field-error"
+                id="productNameError"
+              ></p>
+            </div>
+
+            <!-- Stock -->
+            <div class="form-group">
+              <label for="productStock">
+                Stock
+              </label>
+
+              <input
+                id="productStock"
+                class="form-control"
+                type="number"
+                min="0"
+                step="1"
+                inputmode="numeric"
+                required
+              />
+
+              <p
+                class="field-error"
+                id="productStockError"
+              ></p>
+            </div>
+
+            <!-- Category -->
+            <div class="form-group">
+              <label for="productCategory">
+                Category
+              </label>
+
+              <select id="productCategory" class="form-control" disabled></select>
+            </div>
+
+            <!-- Subcategory -->
+            <div class="form-group">
+              <label for="productSubcategory">
+                Subcategory
+              </label>
+
+              <select id="productSubcategory" class="form-control" disabled></select>
+            </div>
+
+            <!-- Rev price -->
+            <div class="form-group">
+              <label for="productRevPrice">
+                Rev Price
+              </label>
+
+              <input
+                id="productRevPrice"
+                class="form-control"
+                type="number"
+                min="0"
+                step="0.01"
+                inputmode="decimal"
+                required
+              />
+
+              <p
+                class="field-error"
+                id="productRevPriceError"
+              ></p>
+            </div>
+
+            <!-- Offer price -->
+            <div class="form-group">
+              <label for="productOfferPrice">
+                Offer Price
+              </label>
+
+              <input
+                id="productOfferPrice"
+                class="form-control"
+                type="number"
+                min="0"
+                step="0.01"
+                inputmode="decimal"
+                required
+              />
+
+              <p
+                class="field-error"
+                id="productOfferPriceError"
+              ></p>
+            </div>
+
+            <!-- Display price -->
+            <div class="form-group">
+              <label for="productPrice">
+                Display Price
+              </label>
+
+              <input
+                id="productPrice"
+                class="form-control"
+                type="number"
+                min="0"
+                step="0.01"
+                inputmode="decimal"
+                required
+              />
+
+              <p
+                class="field-error"
+                id="productPriceError"
+              ></p>
+            </div>
+
+            <!-- Actual price -->
+            <div class="form-group">
+              <label for="productActualPrice">
+                Actual Price / MRP
+              </label>
+
+              <input
+                id="productActualPrice"
+                class="form-control"
+                type="number"
+                min="0"
+                step="0.01"
+                inputmode="decimal"
+                required
+              />
+
+              <p
+                class="field-error"
+                id="productActualPriceError"
+              ></p>
+            </div>
+
+            <!-- Description -->
+            <div class="form-group form-group-wide">
+              <label for="productDescription">
+                Description
+              </label>
+
+              <textarea
+                id="productDescription"
+                class="form-control form-textarea"
+                rows="4"
+                maxlength="1000"
+              ></textarea>
+            </div>
+
+            <!-- Images -->
+            <div class="form-group form-group-wide">
+              <label for="productImages">
+                Add Product Images
+              </label>
+
+              <input
+                id="productImages"
+                class="form-control file-control"
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                multiple
+              />
+
+              <p class="field-help">
+                JPEG, PNG and WebP images are supported.
+                Maximum combined existing and new images: 7.
+              </p>
+            </div>
+          </div>
+
+          <!-- Existing images -->
+          <section
+            id="existingImagesSection"
+            class="image-section hidden"
+          >
+            <div class="image-section-head">
+              <div>
+                <h3>Existing Images</h3>
+
+                <p>
+                  Select Remove for images that should be deleted
+                  when the product is updated.
+                </p>
+              </div>
+            </div>
+
+            <div
+              id="existingImagePreview"
+              class="preview-grid"
+            ></div>
+          </section>
+
+          <!-- New images -->
+          <section
+            id="newImagesSection"
+            class="image-section hidden"
+          >
+            <div class="image-section-head">
+              <div>
+                <h3>New Images</h3>
+
+                <p>
+                  These images will be uploaded when the product is saved.
+                </p>
+              </div>
+            </div>
+
+            <div
+              id="newImagePreview"
+              class="preview-grid"
+            ></div>
+          </section>
+        </div>
+
+        <div class="modal-footer">
+          <button
+            id="cancelProductBtn"
+            class="btn btn-secondary"
+            type="button"
+          >
+            Cancel
+          </button>
+
+          <button
+            id="saveProductBtn"
+            class="btn btn-primary"
+            type="submit"
+          >
+            Save Product
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script
+    src="js/products.js"
+    defer
+  ></script>
+</body>
+</html>
