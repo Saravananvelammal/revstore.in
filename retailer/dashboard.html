@@ -488,18 +488,57 @@
 
     .banner {
       display: none;
-      padding: 14px 15px;
-      border-radius: 16px;
-      border: 1px solid transparent;
-      font-size: 0.95rem;
-      line-height: 1.5;
+      padding: 14px 16px;
       margin-bottom: 14px;
+      border: 1px solid rgba(255, 255, 255, 0.24);
+      border-radius: 16px;
+      color: #ffffff;
+      font-size: 0.95rem;
+      font-weight: 700;
+      line-height: 1.5;
+      letter-spacing: 0.005em;
+      text-shadow: 0 1px 2px rgba(30, 27, 75, 0.22);
+      box-shadow: 0 12px 28px rgba(30, 10, 80, 0.16);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      opacity: 0;
+      transform: translateY(-6px);
+      transition:
+        opacity 0.22s ease,
+        transform 0.22s ease,
+        background-color 0.22s ease,
+        border-color 0.22s ease;
     }
 
-    .banner.show { display: block; }
-    .banner.info { color: #1e3a8a; background: rgba(59, 130, 246, 0.10); border-color: rgba(59, 130, 246, 0.18); }
-    .banner.success { color: #065f46; background: rgba(16, 185, 129, 0.10); border-color: rgba(16, 185, 129, 0.18); }
-    .banner.error { color: #7f1d1d; background: rgba(239, 68, 68, 0.10); border-color: rgba(239, 68, 68, 0.18); }
+    .banner.show {
+      display: block;
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .banner.hiding {
+      display: block;
+      opacity: 0;
+      transform: translateY(-6px);
+    }
+
+    .banner.info {
+      color: #ffffff;
+      background: rgba(37, 99, 235, 0.32);
+      border-color: rgba(191, 219, 254, 0.48);
+    }
+
+    .banner.success {
+      color: #ffffff;
+      background: rgba(5, 150, 105, 0.40);
+      border-color: rgba(167, 243, 208, 0.48);
+    }
+
+    .banner.error {
+      color: #ffffff;
+      background: rgba(220, 38, 38, 0.42);
+      border-color: rgba(254, 202, 202, 0.50);
+    }
 
     .orders-list { display: grid; gap: 12px; }
 
@@ -914,6 +953,7 @@
         <p>Protected retailer orders with fast summary, status updates, and print-ready order details.</p>
       </div>
       <div class="topbar-actions">
+        <button type="button" id="productsBtn" class="btn btn-secondary">Products</button>
         <button type="button" id="refreshBtn" class="btn btn-primary">Refresh</button>
         <button type="button" id="logoutBtn" class="btn btn-secondary">Logout</button>
       </div>
@@ -1079,6 +1119,13 @@
         LOGIN_URL: typeof window.RETAILER_WEB_LOGIN_URL === 'string' && window.RETAILER_WEB_LOGIN_URL.trim()
           ? window.RETAILER_WEB_LOGIN_URL.trim()
           : '/retailer/login',
+
+        PRODUCTS_URL:
+          typeof window.RETAILER_WEB_PRODUCTS_URL === 'string' &&
+          window.RETAILER_WEB_PRODUCTS_URL.trim()
+            ? window.RETAILER_WEB_PRODUCTS_URL.trim()
+            : '/retailer/products',
+
         FINGERPRINT_STORAGE_KEY: 'retailer_web_fp_v1',
         IMAGE_BASE: typeof window.RETAILER_IMAGE_BASE === 'string' && window.RETAILER_IMAGE_BASE.trim()
           ? window.RETAILER_IMAGE_BASE.trim().replace(/\/+$/, '')
@@ -1095,6 +1142,7 @@
       const els = {
         banner: document.getElementById('banner'),
         welcomeTitle: document.getElementById('welcomeTitle'),
+        productsBtn: document.getElementById('productsBtn'),
         printBtn: document.getElementById('printBtn'),
         printShopName: document.getElementById('printShopName'),
         printTotalItems: document.getElementById('printTotalItems'),
@@ -1131,18 +1179,50 @@
         retailerName: 'Retailer'
       };
 
+      let bannerTimer = null;
+      let bannerHideTimer = null;
+
       function showBanner(type, message) {
-        els.banner.className = 'banner show ' + type;
-        els.banner.textContent = message || '';
+          if (bannerTimer) {
+            clearTimeout(bannerTimer);
+            bannerTimer = null;
+          }
+
+          if (bannerHideTimer) {
+            clearTimeout(bannerHideTimer);
+            bannerHideTimer = null;
+          }
+
+          els.banner.className = 'banner show ' + type;
+          els.banner.textContent = message || '';
+
+          bannerTimer = window.setTimeout(function () {
+           els.banner.className = 'banner hiding ' + type;
+
+          bannerHideTimer = window.setTimeout(function () {
+            clearBanner();
+          }, 220);
+        }, 3000);
       }
 
       function clearBanner() {
+        if (bannerTimer) {
+          clearTimeout(bannerTimer);
+          bannerTimer = null;
+        }
+
+        if (bannerHideTimer) {
+          clearTimeout(bannerHideTimer);
+          bannerHideTimer = null;
+        }
+
         els.banner.className = 'banner';
         els.banner.textContent = '';
       }
 
       function setLoading(isLoading) {
         state.loading = !!isLoading;
+        els.productsBtn.disabled = state.loading || state.statusLoading;
         els.refreshBtn.disabled = state.loading || state.statusLoading;
         els.logoutBtn.disabled = state.loading || state.statusLoading;
         els.searchInput.disabled = state.loading || state.statusLoading;
@@ -1159,6 +1239,7 @@
         state.statusLoading = !!isLoading;
         const buttons = els.statusActions.querySelectorAll('button');
         buttons.forEach(function (btn) { btn.disabled = state.statusLoading || state.loading || state.detailLoading; });
+        els.productsBtn.disabled = state.loading || state.statusLoading;
         els.refreshBtn.disabled = state.loading || state.statusLoading;
         els.logoutBtn.disabled = state.loading || state.statusLoading;
       }
@@ -1236,6 +1317,14 @@
         } finally {
           redirectToLogin();
         }
+      }
+
+      function redirectToProducts() {
+        const productsUrl = String(
+          CONFIG.PRODUCTS_URL || '/retailer/products'
+        ).trim();
+
+        window.location.assign(productsUrl);
       }
 
       async function apiFetch(path, options) {
@@ -1818,6 +1907,12 @@
       }
 
       function bindEvents() {
+
+        els.productsBtn.addEventListener('click', function () {
+          if (state.loading || state.statusLoading) return;
+          redirectToProducts();
+        });
+
         els.refreshBtn.addEventListener('click', function () {
           if (!state.loading && !state.statusLoading) loadOrders({ preserveSelection: true, preferredOrderId: state.selectedOrderId });
         });
