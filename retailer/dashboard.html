@@ -134,6 +134,90 @@
       letter-spacing: -0.03em;
     }
 
+    .retailer-status-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 12px;
+    }
+
+    .retailer-status-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 32px;
+      padding: 6px 12px;
+      border: 1px solid transparent;
+      border-radius: 999px;
+      font-size: 0.82rem;
+      font-weight: 900;
+      line-height: 1;
+      letter-spacing: 0.02em;
+      transition:
+        color 0.2s ease,
+        background-color 0.2s ease,
+        border-color 0.2s ease,
+        box-shadow 0.2s ease,
+        opacity 0.2s ease;
+    }
+
+    .retailer-status-badge::before {
+      content: "";
+      width: 8px;
+      height: 8px;
+      margin-right: 8px;
+      border-radius: 50%;
+      background: currentColor;
+      flex: 0 0 auto;
+    }
+
+    .retailer-status-badge.is-loading {
+      color: rgba(255, 255, 255, 0.84);
+      background: rgba(255, 255, 255, 0.12);
+      border-color: rgba(255, 255, 255, 0.20);
+    }
+
+    .retailer-status-badge.is-online {
+      color: #d1fae5;
+      background: rgba(5, 150, 105, 0.32);
+      border-color: rgba(167, 243, 208, 0.42);
+      box-shadow: 0 8px 20px rgba(5, 150, 105, 0.18);
+    }
+
+    .retailer-status-badge.is-closing {
+      color: #fef3c7;
+      background: rgba(217, 119, 6, 0.34);
+      border-color: rgba(253, 230, 138, 0.46);
+      box-shadow: 0 8px 20px rgba(217, 119, 6, 0.18);
+    }
+
+    .retailer-status-badge.is-closed {
+      color: #fee2e2;
+      background: rgba(220, 38, 38, 0.30);
+      border-color: rgba(254, 202, 202, 0.44);
+      box-shadow: 0 8px 20px rgba(220, 38, 38, 0.16);
+    }
+
+    .retailer-status-badge.is-holiday {
+      color: #e0e7ff;
+      background: rgba(79, 70, 229, 0.34);
+      border-color: rgba(199, 210, 254, 0.44);
+    }
+
+    .retailer-status-badge.is-error {
+      color: #fef3c7;
+      background: rgba(217, 119, 6, 0.30);
+      border-color: rgba(253, 230, 138, 0.42);
+    }
+
+    .retailer-timing-text {
+      color: rgba(255, 255, 255, 0.84);
+      font-size: 0.84rem;
+      font-weight: 700;
+      line-height: 1.4;
+    }
+
     .welcome-subtitle {
       margin: 10px 0 0;
       line-height: 1.6;
@@ -965,10 +1049,34 @@
       <aside class="summary-shell" aria-label="Selected order summary">
         <section class="welcome-card">
           <p class="eyebrow">Retailer session</p>
-          <h2 id="welcomeTitle" class="welcome-title">Welcome, Retailer</h2>
-          <p class="welcome-subtitle">Select an order from the right side to view full order summary, print it, or update retailer-side order status.</p>
-        </section>
 
+          <h2 id="welcomeTitle" class="welcome-title">
+            Welcome, Retailer
+          </h2>
+
+          <div
+            id="retailerStatusRow"
+            class="retailer-status-row"
+            aria-live="polite"
+          >
+            <span
+              id="retailerStatusBadge"
+              class="retailer-status-badge is-loading"
+            >
+              Checking status...
+            </span>
+
+            <span
+              id="retailerTimingText"
+              class="retailer-timing-text"
+            ></span>
+            </div>
+
+            <p class="welcome-subtitle">
+              Select an order from the right side to view full order summary,
+              print it, or update retailer-side order status.
+            </p>
+        </section>
         <section class="summary-card">
           <div class="summary-head">
             <div>
@@ -1142,6 +1250,9 @@
       const els = {
         banner: document.getElementById('banner'),
         welcomeTitle: document.getElementById('welcomeTitle'),
+        retailerStatusRow: document.getElementById('retailerStatusRow'),
+        retailerStatusBadge: document.getElementById('retailerStatusBadge'),
+        retailerTimingText: document.getElementById('retailerTimingText'),
         productsBtn: document.getElementById('productsBtn'),
         printBtn: document.getElementById('printBtn'),
         printShopName: document.getElementById('printShopName'),
@@ -1173,10 +1284,12 @@
         loading: false,
         detailLoading: false,
         statusLoading: false,
+        retailerStatusLoading: false,
         rawOrders: [],
         selectedOrderId: '',
         selectedOrder: null,
-        retailerName: 'Retailer'
+        retailerName: 'Retailer',
+        retailerStatus: null
       };
 
       let bannerTimer = null;
@@ -1221,13 +1334,28 @@
       }
 
       function setLoading(isLoading) {
-        state.loading = !!isLoading;
-        els.productsBtn.disabled = state.loading || state.statusLoading;
-        els.refreshBtn.disabled = state.loading || state.statusLoading;
-        els.logoutBtn.disabled = state.loading || state.statusLoading;
-        els.searchInput.disabled = state.loading || state.statusLoading;
-        els.statusFilter.disabled = state.loading || state.statusLoading;
-        els.ordersLoading.classList.toggle('hidden', !state.loading);
+        state.loading = Boolean(isLoading);
+
+        const busy =
+          state.loading ||
+          state.statusLoading ||
+          state.retailerStatusLoading;
+
+        els.productsBtn.disabled = busy;
+        els.refreshBtn.disabled = busy;
+        els.logoutBtn.disabled =
+          state.loading || state.statusLoading;
+
+        els.searchInput.disabled =
+          state.loading || state.statusLoading;
+
+        els.statusFilter.disabled =
+          state.loading || state.statusLoading;
+
+        els.ordersLoading.classList.toggle(
+          'hidden',
+          !state.loading
+        );
 
         if (state.loading) {
           els.ordersEmpty.classList.add('hidden');
@@ -1236,12 +1364,39 @@
       }
 
       function setStatusLoading(isLoading) {
-        state.statusLoading = !!isLoading;
-        const buttons = els.statusActions.querySelectorAll('button');
-        buttons.forEach(function (btn) { btn.disabled = state.statusLoading || state.loading || state.detailLoading; });
-        els.productsBtn.disabled = state.loading || state.statusLoading;
-        els.refreshBtn.disabled = state.loading || state.statusLoading;
-        els.logoutBtn.disabled = state.loading || state.statusLoading;
+        state.statusLoading = Boolean(isLoading);
+
+        const buttons =
+          els.statusActions.querySelectorAll('button');
+
+        buttons.forEach(function (btn) {
+          btn.disabled =
+            state.statusLoading ||
+            state.loading ||
+            state.detailLoading;
+        });
+
+        const busy =
+          state.loading ||
+          state.statusLoading ||
+          state.retailerStatusLoading;
+
+        els.productsBtn.disabled = busy;
+        els.refreshBtn.disabled = busy;
+        els.logoutBtn.disabled =
+          state.loading || state.statusLoading;
+      }
+
+      function syncTopbarButtonState() {
+        const busy =
+          state.loading ||
+          state.statusLoading ||
+          state.retailerStatusLoading;
+
+        els.productsBtn.disabled = busy;
+        els.refreshBtn.disabled = busy;
+        els.logoutBtn.disabled =
+          state.loading || state.statusLoading;
       }
 
       function resetStats() {
@@ -1598,6 +1753,219 @@
             : 'Welcome, Retailer';
       }
 
+
+      function renderRetailerStatusLoading() {
+        els.retailerStatusBadge.className =
+          'retailer-status-badge is-loading';
+
+        els.retailerStatusBadge.textContent =
+          'Checking status...';
+
+        els.retailerTimingText.textContent = '';
+      }
+
+      function renderRetailerStatusError() {
+        els.retailerStatusBadge.className =
+          'retailer-status-badge is-error';
+
+        els.retailerStatusBadge.textContent =
+          'Status unavailable';
+
+        els.retailerTimingText.textContent = '';
+      }
+
+      function formatTodaySlots(today) {
+        const slots =
+          today &&
+          Array.isArray(today.slots)
+            ? today.slots
+            : [];
+
+        return slots
+          .map(function (slot) {
+            const openTime = String(
+              slot && slot.openTime || ''
+            ).trim();
+
+            const closeTime = String(
+              slot && slot.closeTime || ''
+            ).trim();
+
+            if (!openTime || !closeTime) {
+              return '';
+            }
+
+            return openTime + ' – ' + closeTime;
+          })
+          .filter(Boolean)
+          .join(', ');
+      }
+
+      function renderRetailerStatus(retailer) {
+        const source =
+          retailer && typeof retailer === 'object'
+            ? retailer
+            : {};
+
+        const displayName = String(
+          source.displayName ||
+          source.shopName ||
+          source.name ||
+          ''
+        ).trim();
+
+        updateWelcomeTitle(displayName);
+
+        const shopStatus = String(
+          source.shopStatus ||
+          source.statusReason ||
+          ''
+        ).trim().toLowerCase();
+
+        const isOpenNow =
+          source.isOpenNow === true ||
+          source.isOnline === true;
+
+        let badgeClass = 'is-closed';
+        let badgeText = String(
+          source.statusLabel || 'Closed'
+        ).trim();
+
+        if (shopStatus === 'holiday') {
+          badgeClass = 'is-holiday';
+          badgeText = 'Holiday';
+        } else if (
+          isOpenNow &&
+          shopStatus === 'closing_soon'
+        ) {
+          badgeClass = 'is-closing';
+          badgeText = 'Closing Soon';
+        } else if (isOpenNow) {
+          badgeClass = 'is-online';
+          badgeText = 'Online';
+        }
+
+        els.retailerStatusBadge.className =
+          'retailer-status-badge ' + badgeClass;
+
+        els.retailerStatusBadge.textContent =
+          badgeText;
+
+        const today =
+          source.today &&
+          typeof source.today === 'object'
+            ? source.today
+            : {};
+
+        const holiday =
+          source.todayHoliday &&
+          typeof source.todayHoliday === 'object'
+            ? source.todayHoliday
+            : {};
+
+        const timingText = formatTodaySlots(today);
+        const statusMessage = String(
+          source.statusMessage || ''
+        ).trim();
+
+        if (holiday.activeToday === true) {
+          const reason = String(
+            holiday.reason || ''
+          ).trim();
+
+          els.retailerTimingText.textContent =
+            reason
+              ? 'Holiday: ' + reason
+              : 'Holiday today';
+        } else if (today.isOpen === false) {
+          els.retailerTimingText.textContent =
+            'Closed today';
+        } else if (
+          shopStatus === 'closing_soon' &&
+          statusMessage
+        ) {
+          els.retailerTimingText.textContent =
+            statusMessage;
+        } else if (timingText) {
+          els.retailerTimingText.textContent =
+            'Today: ' + timingText;
+        } else if (statusMessage) {
+          els.retailerTimingText.textContent =
+            statusMessage;
+        } else {
+          els.retailerTimingText.textContent = '';
+        }
+
+        state.retailerStatus = source;
+      }
+
+      async function loadRetailerStatus(options) {
+        const opts = options || {};
+
+        if (state.retailerStatusLoading) {
+          return;
+        }
+
+        state.retailerStatusLoading = true;
+
+        if (!opts.silent) {
+          renderRetailerStatusLoading();
+        }
+
+        try {
+          const payload = await apiFetch(
+            '/auth/status',
+            { method: 'GET' }
+          );
+
+          const retailer =
+            payload &&
+            payload.retailer &&
+            typeof payload.retailer === 'object'
+              ? payload.retailer
+              : null;
+
+          if (!retailer) {
+            throw new Error(
+              'Retailer profile was not returned.'
+            );
+          }
+
+          renderRetailerStatus(retailer);
+        } catch (err) {
+          if (
+            err &&
+            (err.status === 401 || err.status === 403)
+          ) {
+            showBanner(
+              'error',
+              'Session expired. Redirecting to login...'
+            );
+
+            window.setTimeout(
+              redirectToLogin,
+              450
+            );
+
+            return;
+          }
+
+          renderRetailerStatusError();
+
+          if (!opts.silent) {
+            showBanner(
+              'error',
+              err && err.message
+                ? err.message
+                : 'Failed to load retailer status.'
+            );
+          }
+        } finally {
+          state.retailerStatusLoading = false;
+          syncTopbarButtonState();
+        }
+      }
+
       function getShopName(order) {
         const candidates = [
           order.shopName,
@@ -1951,18 +2319,22 @@
 
           state.rawOrders = normalizedOrders;
           renderStats(normalizedOrders);
-          renderOrders(normalizedOrders);
-
-          const retailerName = extractRetailerNameFromPayload(
-            payload,
-            rawOrders
-          );
-
-          updateWelcomeTitle(retailerName);
+          renderOrders(normalizedOrders);          
 
           if (!normalizedOrders.length) {
             clearSummary();
-            showBanner('info', 'Session is valid. No orders were returned for this retailer.');
+
+            els.ordersEmpty.classList.remove('hidden');
+            els.ordersEmpty.textContent =
+            'No orders are currently available for this retailer.';
+
+            if (!state.retailerStatusLoading) {
+              showBanner(
+                'info',
+                'No orders are currently available.'
+              );
+            }
+
             return;
           }
 
@@ -2005,8 +2377,23 @@
           redirectToProducts();
         });
 
-        els.refreshBtn.addEventListener('click', function () {
-          if (!state.loading && !state.statusLoading) loadOrders({ preserveSelection: true, preferredOrderId: state.selectedOrderId });
+        els.refreshBtn.addEventListener('click', async function () {
+          if (
+            state.loading ||
+            state.statusLoading ||
+            state.retailerStatusLoading
+          )   {
+            return;
+          }
+
+          await Promise.all([
+            loadRetailerStatus({ silent: true }),
+
+            loadOrders({
+              preserveSelection: true,
+              preferredOrderId: state.selectedOrderId
+            })
+          ]);
         });
 
         els.logoutBtn.addEventListener('click', function () { logoutAndRedirect(); });
@@ -2049,9 +2436,26 @@
       }
 
       async function bootstrap() {
-        state.fingerprint = await getStableFingerprint();
+        state.fingerprint =
+          await getStableFingerprint();
+
         bindEvents();
-        await loadOrders();
+        renderRetailerStatusLoading();
+
+        const results = await Promise.allSettled([
+          loadRetailerStatus(),
+          loadOrders()
+        ]);
+
+        const bothFailed = results.every(function (result) {
+          return result.status === 'rejected';
+        });
+
+        if (bothFailed) {
+          throw new Error(
+            'Dashboard initialization failed.'
+          );
+        }
       }
 
       bootstrap().catch(function () {
