@@ -1487,20 +1487,115 @@
         return '';
       }
 
-      function getPrimaryRetailerName(order) {
-        if (!order || typeof order !== 'object') return '';
+      function getPrimaryRetailerName(source) {
+        if (!source || typeof source !== 'object') return '';
+
+        const retailer =
+          source.retailer && typeof source.retailer === 'object'
+            ? source.retailer
+            : null;
+
+        const profile =
+          source.profile && typeof source.profile === 'object'
+            ? source.profile
+            : null;
+
+        const user =
+          source.user && typeof source.user === 'object'
+            ? source.user
+            : null;
+
         const candidates = [
-          order.shopName,
-          order.retailer && order.retailer.name,
-          order.retailer && order.retailer.shopName,
-          order.retailerName,
-          order.retailer && order.retailer.email
+          source.shopName,
+          source.retailerName,
+          source.name,
+
+          retailer && retailer.shopName,
+          retailer && retailer.name,
+
+          profile && profile.shopName,
+          profile && profile.name,
+
+          user && user.shopName,
+          user && user.name
         ];
+
         for (let i = 0; i < candidates.length; i += 1) {
           const value = String(candidates[i] || '').trim();
-          if (value) return value;
+
+          if (value) {
+            return value;
+          }
         }
+
         return '';
+      }
+
+      function extractRetailerNameFromPayload(payload, rawOrders) {
+        const sources = [];
+
+        if (payload && typeof payload === 'object') {
+          sources.push(payload);
+
+          if (payload.retailer) {
+            sources.push(payload.retailer);
+          }
+
+          if (payload.profile) {
+            sources.push(payload.profile);
+          }
+
+          if (payload.user) {
+            sources.push(payload.user);
+          }
+
+          if (payload.data && typeof payload.data === 'object') {
+            sources.push(payload.data);
+
+            if (payload.data.retailer) {
+              sources.push(payload.data.retailer);
+            }
+
+            if (payload.data.profile) {
+              sources.push(payload.data.profile);
+            }
+
+            if (payload.data.user) {
+              sources.push(payload.data.user);
+            }
+          }
+        }
+
+        if (Array.isArray(rawOrders)) {
+          rawOrders.forEach(function (order) {
+            sources.push(order);
+          });
+        }
+
+        for (let i = 0; i < sources.length; i += 1) {
+          const name = getPrimaryRetailerName(sources[i]);
+
+          if (name) {
+            return name;
+          }
+        }
+
+        return '';
+      }
+
+      function updateWelcomeTitle(retailerName) {
+        const cleanName = String(retailerName || '').trim();
+
+        if (cleanName) {
+          state.retailerName = cleanName;
+          els.welcomeTitle.textContent = 'Welcome, ' + cleanName;
+          return;
+        }
+
+        els.welcomeTitle.textContent =
+          state.retailerName && state.retailerName !== 'Retailer'
+            ? 'Welcome, ' + state.retailerName
+            : 'Welcome, Retailer';
       }
 
       function getShopName(order) {
@@ -1858,15 +1953,12 @@
           renderStats(normalizedOrders);
           renderOrders(normalizedOrders);
 
-          const retailerName = rawOrders.reduce(function (acc, item) {
-            return acc || getPrimaryRetailerName(item);
-          }, '');
-          if (retailerName) {
-            state.retailerName = retailerName;
-            els.welcomeTitle.textContent = 'Welcome, ' + retailerName;
-          } else {
-            els.welcomeTitle.textContent = 'Welcome, Retailer';
-          }
+          const retailerName = extractRetailerNameFromPayload(
+            payload,
+            rawOrders
+          );
+
+          updateWelcomeTitle(retailerName);
 
           if (!normalizedOrders.length) {
             clearSummary();
