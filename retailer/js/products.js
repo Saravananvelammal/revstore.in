@@ -270,6 +270,62 @@
     return cleanText(value).toLowerCase();
   }
 
+  function getCategoryKey(category) {
+    return cleanText(
+      category &&
+        (
+          category.key ||
+          category.categoryKey ||
+          category.slug ||
+          category.value ||
+          category.id ||
+          category._id
+        )
+    );
+  }
+
+  function getCategoryName(category) {
+    return cleanText(
+      category &&
+        (
+          category.name ||
+          category.label ||
+          category.title ||
+          category.displayName
+        ),
+      getCategoryKey(category) || 'Category'
+    );
+  }
+
+  function getSubcategoryKey(subcategory) {
+    return cleanText(
+      subcategory &&
+        (
+          subcategory.key ||
+          subcategory.subcategoryKey ||
+          subcategory.subCategoryKey ||
+          subcategory.slug ||
+          subcategory.value ||
+          subcategory.id ||
+          subcategory._id
+        )
+    );
+  }
+
+  function getSubcategoryName(subcategory) {
+    return cleanText(
+      subcategory &&
+        (
+          subcategory.name ||
+          subcategory.label ||
+          subcategory.title ||
+          subcategory.displayName
+        ),
+      getSubcategoryKey(subcategory) ||
+        'Subcategory'
+    );
+  }
+
   function getProductId(product) {
     return cleanText(
       product && (product._id || product.id || product.productId)
@@ -286,32 +342,88 @@
     }
   }
 
-  function extractArray(payload, key) {
-    if (!payload || typeof payload !== 'object') {
+  function extractArray(payload, keys) {
+    const requestedKeys = Array.isArray(keys)
+      ? keys
+      : [keys];
+
+    const visited = new Set();
+
+    function search(value, depth) {
+      if (depth > 5 || value == null) {
+        return [];
+      }
+
+      if (Array.isArray(value)) {
+        return value;
+      }
+
+      if (typeof value !== 'object') {
+        return [];
+      }
+
+      if (visited.has(value)) {
+        return [];
+      }
+
+      visited.add(value);
+
+      for (
+        let index = 0;
+        index < requestedKeys.length;
+        index += 1
+      ) {
+        const key = requestedKeys[index];
+
+        if (Array.isArray(value[key])) {
+          return value[key];
+        }
+
+        if (
+          value[key] &&
+          typeof value[key] === 'object'
+        ) {
+          const nestedResult = search(
+            value[key],
+            depth + 1
+          );
+
+          if (nestedResult.length) {
+            return nestedResult;
+          }
+        }
+      }
+
+      const wrapperKeys = [
+        'data',
+        'result',
+        'results',
+        'items',
+        'payload',
+        'response'
+      ];
+
+      for (
+        let index = 0;
+        index < wrapperKeys.length;
+        index += 1
+      ) {
+        const wrapper = value[wrapperKeys[index]];
+
+        const nestedResult = search(
+          wrapper,
+          depth + 1
+        );
+
+        if (nestedResult.length) {
+          return nestedResult;
+        }
+      }
+
       return [];
     }
 
-    if (Array.isArray(payload[key])) {
-      return payload[key];
-    }
-
-    if (
-      payload.data &&
-      typeof payload.data === 'object' &&
-      Array.isArray(payload.data[key])
-    ) {
-      return payload.data[key];
-    }
-
-    if (Array.isArray(payload.data)) {
-      return payload.data;
-    }
-
-    if (Array.isArray(payload.items)) {
-      return payload.items;
-    }
-
-    return [];
+    return search(payload, 0);
   }
 
   function debounce(callback, delay) {
@@ -953,12 +1065,8 @@
   }
 
   function renderCategoryCard(category) {
-    const categoryKey = cleanText(category && category.key);
-    const categoryName = cleanText(
-      category && category.name,
-      categoryKey || 'Category'
-    );
-
+    const categoryKey = getCategoryKey(category);
+    const categoryName = getCategoryName(category);
     if (!categoryKey) {
       return;
     }
@@ -971,7 +1079,12 @@
 
     const image = document.createElement('img');
     image.className = 'category-image';
-    image.src = resolveImageUrl(category.image);
+    image.src = resolveImageUrl(
+      category.image ||
+      category.imageUrl ||
+      category.icon ||
+      category.thumbnail
+    );
     image.alt = categoryName;
     image.loading = 'lazy';
     setImageFallback(image);
@@ -1016,6 +1129,9 @@
         } catch (error) {
           State.subcategories = [];
           State.products = [];
+          State.total = 0;
+          State.pages = 1;
+          State.page = 1;
 
           clearElement(UI.subcategoryList);
           clearElement(UI.productGrid);
@@ -1023,13 +1139,18 @@
           showEmptyState(
             'Subcategories could not be loaded',
             cleanText(
-              error.message,
+              error && error.message,
               'Please refresh and try again.'
             )
           );
 
+          renderPagination();
           handleError(error);
         } finally {
+          /*
+          * loadProducts may already have cleared this state.
+          * Calling false again is harmless.
+          */
           setProductLoading(false);
         }
       }
@@ -1053,11 +1174,19 @@
 
     const categories = extractArray(
       payload,
-      'categories'
+      [
+        'categories',
+        'assignedCategories',
+        'allowedCategories',
+        'items',
+        'results'
+      ]
     ).filter(function (category) {
       return (
         category &&
-        category.isDeleted !== true
+        typeof category === 'object' &&
+        category.isDeleted !== true &&
+        getCategoryKey(category)
       );
     });
 
@@ -1097,14 +1226,18 @@
       preserveSelection &&
       categories.some(function (category) {
         return (
-          normalizeKey(category.key) ===
-          normalizeKey(State.selectedCategory)
+          normalizeKey(
+            getCategoryKey(category)
+          ) ===
+          normalizeKey(
+            State.selectedCategory
+          )
         );
       });
 
     if (!selectedStillExists) {
       State.selectedCategory =
-        cleanText(categories[0].key);
+        getCategoryKey(categories[0]);
 
       State.selectedSubcategory = '';
       State.page = 1;
@@ -1145,14 +1278,11 @@
   }  
 
   function renderSubcategoryCard(subcategory) {
-    const subcategoryKey = cleanText(
-      subcategory && subcategory.key
-    );
+    const subcategoryKey =
+      getSubcategoryKey(subcategory);
 
-    const subcategoryName = cleanText(
-      subcategory && subcategory.name,
-      subcategoryKey || 'Subcategory'
-    );
+    const subcategoryName =
+      getSubcategoryName(subcategory);
 
     if (!subcategoryKey) {
       return;
@@ -1166,7 +1296,12 @@
 
     const image = document.createElement('img');
     image.className = 'subcategory-image';
-    image.src = resolveImageUrl(subcategory.image);
+    image.src = resolveImageUrl(
+      subcategory.image ||
+      subcategory.imageUrl ||
+      subcategory.icon ||
+      subcategory.thumbnail
+    );
     image.alt = subcategoryName;
     image.loading = 'lazy';
     setImageFallback(image);
@@ -1261,11 +1396,20 @@
 
     const subcategories = extractArray(
       payload,
-      'subcategories'
+      [
+        'subcategories',
+        'subCategories',
+        'assignedSubcategories',
+        'allowedSubcategories',
+        'items',
+        'results'
+      ]
     ).filter(function (subcategory) {
       return (
         subcategory &&
-        subcategory.isDeleted !== true
+        typeof subcategory === 'object' &&
+        subcategory.isDeleted !== true &&
+        getSubcategoryKey(subcategory)
       );
     });
 
@@ -1300,7 +1444,9 @@
       preserveSelection &&
       subcategories.some(function (subcategory) {
         return (
-          normalizeKey(subcategory.key) ===
+          normalizeKey(
+            getSubcategoryKey(subcategory)
+          ) ===
           normalizeKey(
             State.selectedSubcategory
           )
@@ -1309,7 +1455,7 @@
 
     if (!selectedStillExists) {
       State.selectedSubcategory =
-        cleanText(subcategories[0].key);
+        getSubcategoryKey(subcategories[0]);
 
       State.page = 1;
     }
@@ -1711,20 +1857,15 @@
     );
 
     try {
+      State.search = '';
+      State.page = 1;
+
+      if (UI.searchInput) {
+        UI.searchInput.value = '';
+      }
+
       await loadCategories({
         preserveSelection: true
-      });
-
-      loadRetailerStatus().catch(function (error) {
-        if (Number(error && error.status) === 401) {
-          handleError(error);
-          return;
-        }
-
-        console.warn(
-          '[Retailer Products] Status refresh failed:',
-          error
-        );
       });
     } catch (error) {
       handleError(error, {
@@ -1748,46 +1889,20 @@
       bindBaseEvents();
       ensureProductEventsBound();
       bindFinalEvents();
-    } catch (error) {
-      State.initialized = false;
-      console.error(
-        '[Retailer Products] Initialization error:',
-        error
+
+      resetProductFilters();
+
+      setPageLoading(
+        true,
+        'Loading retailer products...'
       );
 
-      return;
-    }
-
-    setPageLoading(
-      true,
-      'Loading retailer products...'
-    );
-
-    try {
-      /*
-      * Categories are the primary page data and must not be
-      * blocked by optional retailer-profile rendering.
-      */
       await loadCategories({
         preserveSelection: false
       });
-
-      /*
-      * Status is supplementary on this HTML page.
-      * Load it without preventing the catalogue from rendering.
-      */
-      loadRetailerStatus().catch(function (error) {
-        if (Number(error && error.status) === 401) {
-          handleError(error);
-          return;
-        }
-
-        console.warn(
-          '[Retailer Products] Status could not be loaded:',
-          error
-        );
-      });
     } catch (error) {
+      State.initialized = false;
+
       handleError(error, {
         redirectOnForbidden: true
       });
@@ -1924,15 +2039,11 @@
     }
 
     if (UI.productCategory) {
-      UI.productCategory.disabled =
-        State.submitLoading ||
-        Boolean(State.editingProduct);
+      UI.productCategory.disabled = true;
     }
 
     if (UI.productSubcategory) {
-      UI.productSubcategory.disabled =
-        State.submitLoading ||
-        Boolean(State.editingProduct);
+      UI.productSubcategory.disabled = true;
     }
 
     [
@@ -3111,13 +3222,19 @@
     );
 
     State.categories.forEach(function (category) {
-      const option = document.createElement('option');
+      const categoryKey =
+        getCategoryKey(category);
 
-      option.value = cleanText(category.key);
-      option.textContent = cleanText(
-        category.name,
-        category.key
-      );
+      if (!categoryKey) {
+        return;
+      }
+
+      const option =
+        document.createElement('option');
+
+      option.value = categoryKey;
+      option.textContent =
+        getCategoryName(category);
 
       UI.productCategory.appendChild(option);
     });
@@ -3144,13 +3261,19 @@
     );
 
     State.subcategories.forEach(function (subcategory) {
-      const option = document.createElement('option');
+      const subcategoryKey =
+        getSubcategoryKey(subcategory);
 
-      option.value = cleanText(subcategory.key);
-      option.textContent = cleanText(
-        subcategory.name,
-        subcategory.key
-      );
+      if (!subcategoryKey) {
+        return;
+      }
+
+      const option =
+        document.createElement('option');
+
+      option.value = subcategoryKey;
+      option.textContent =
+        getSubcategoryName(subcategory);
 
       UI.productSubcategory.appendChild(option);
     });
@@ -3444,52 +3567,7 @@
     if (UI.searchInput) {
       UI.searchInput.value = '';
     }
-  }
-
-  /* ========================================================
-     Modal form category safety
-  ======================================================== */
-
-  function bindModalCategoryEvents() {
-    if (UI.productCategory) {
-      UI.productCategory.addEventListener(
-        'change',
-        function () {
-          if (State.editingProduct) {
-            UI.productCategory.value =
-              cleanText(
-                State.editingProduct.category
-              );
-
-            showToast(
-              'Category cannot be changed while editing this product.',
-              'warning'
-            );
-          }
-        }
-      );
-    }
-
-    if (UI.productSubcategory) {
-      UI.productSubcategory.addEventListener(
-        'change',
-        function () {
-          if (State.editingProduct) {
-            UI.productSubcategory.value =
-              cleanText(
-                State.editingProduct
-                  .subCategory
-              );
-
-            showToast(
-              'Subcategory cannot be changed while editing this product.',
-              'warning'
-            );
-          }
-        }
-      );
-    }
-  }
+  }  
 
   /* ========================================================
      Input cleanup
@@ -3604,13 +3682,7 @@
 
     finalEventsBound = true;
 
-    bindModalCategoryEvents();
     bindNumericInputSafety();
-
-    document.addEventListener(
-      'visibilitychange',
-      handlePageVisibility
-    );
 
     window.addEventListener(
       'beforeunload',
