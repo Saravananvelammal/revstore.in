@@ -49,6 +49,8 @@
 
     FALLBACK_IMAGE: '/images/no-image.png',
 
+    FINGERPRINT_STORAGE_KEY: 'retailer_web_fp_v1',
+
     PAGE_LIMIT: 20,
     MAX_IMAGES: 7,
     SEARCH_DELAY_MS: 400,
@@ -100,6 +102,7 @@
     pageLoading: false,
     productLoading: false,
     submitLoading: false,
+    fingerprint: '',
 
     retailer: null,
 
@@ -343,6 +346,110 @@
     while (element.firstChild) {
       element.removeChild(element.firstChild);
     }
+  }
+
+  function bytesToHex(buffer) {
+    const bytes = new Uint8Array(buffer);
+    let output = '';
+
+    for (let index = 0; index < bytes.length; index += 1) {
+      output += bytes[index]
+        .toString(16)
+        .padStart(2, '0');
+    }
+
+    return output;
+  }
+
+  async function sha256Hex(value) {
+    if (
+      !window.crypto ||
+      !window.crypto.subtle ||
+      typeof TextEncoder !== 'function'
+    ) {
+      return '';
+    }
+
+    const encoded = new TextEncoder().encode(
+      String(value == null ? '' : value)
+    );
+
+    const digest = await window.crypto.subtle.digest(
+      'SHA-256',
+      encoded
+    );
+
+    return bytesToHex(digest);
+  }
+
+  async function getStableFingerprint() {
+    try {
+      const existing = window.localStorage.getItem(
+        CONFIG.FINGERPRINT_STORAGE_KEY
+      );
+
+      if (existing && existing.trim()) {
+        return existing.trim().slice(0, 200);
+      }
+    } catch (_) {
+      // Storage may be unavailable in private or restricted mode.
+    }
+
+    const seedParts = [
+      navigator.userAgent || '',
+      navigator.language || '',
+      String(window.screen && window.screen.width || ''),
+      String(window.screen && window.screen.height || ''),
+      String(window.screen && window.screen.colorDepth || ''),
+      Intl.DateTimeFormat().resolvedOptions().timeZone || '',
+      navigator.platform || '',
+      String(navigator.hardwareConcurrency || ''),
+      String(new Date().getTimezoneOffset())
+    ];
+
+    let randomPart = '';
+
+    if (
+      window.crypto &&
+      typeof window.crypto.getRandomValues === 'function'
+    ) {
+      const randomValues = new Uint32Array(4);
+      window.crypto.getRandomValues(randomValues);
+      randomPart = Array.from(randomValues).join('-');
+    } else {
+      randomPart =
+        String(Date.now()) +
+        '-' +
+        String(Math.random());
+    }
+
+    const rawFingerprint =
+      seedParts.join('|') +
+      '|' +
+      randomPart;
+
+    let fingerprint = await sha256Hex(
+      rawFingerprint
+    );
+
+    if (!fingerprint) {
+      fingerprint = rawFingerprint
+        .replace(/[^a-zA-Z0-9_-]/g, '')
+        .slice(0, 64);
+    } else {
+      fingerprint = fingerprint.slice(0, 64);
+    }
+
+    try {
+      window.localStorage.setItem(
+        CONFIG.FINGERPRINT_STORAGE_KEY,
+        fingerprint
+      );
+    } catch (_) {
+      // Continue with the in-memory fingerprint.
+    }
+
+    return fingerprint;
   }
 
   function extractArray(payload, keys) {
@@ -775,6 +882,13 @@
     headers.set('Accept', 'application/json');
     headers.set('X-Requested-With', 'XMLHttpRequest');
 
+    if (State.fingerprint) {
+      headers.set(
+        'x-device-fingerprint',
+        State.fingerprint
+      );
+    }
+
     if (!['GET', 'HEAD', 'OPTIONS'].includes(method)) {
       const csrfToken = getCsrfToken();
 
@@ -832,11 +946,20 @@
     }
 
     if (!response.ok) {
+      const backendMessage = cleanText(
+        data &&
+          (
+            data.message ||
+            data.error ||
+            data.detail
+          )
+      );
+
       const error = new Error(
-        cleanText(
-          data && data.message,
+        backendMessage ||
+        (
           response.status === 401
-            ? 'Session expired. Please login again.'
+            ? 'Retailer session is missing, expired, or does not match this browser.'
             : response.status === 403
               ? 'You are not allowed to perform this action.'
               : 'Request failed.'
@@ -856,22 +979,38 @@
     const config = options || {};
     const status = Number(error && error.status);
 
-    console.error('[Retailer Products]', error);
+    console.error(
+      '[Retailer Products]',
+      {
+        status,
+        message: error && error.message,
+        payload: error && error.payload
+      }
+    );
 
     if (status === 401) {
       showToast(
         cleanText(
           error && error.message,
-          'Session expired. Redirecting to login.'
+          'Retailer session expired. Please login again.'
         ),
         'error'
       );
 
-      window.setTimeout(redirectToLogin, 700);
+      if (config.redirectOnUnauthorized !== false) {
+        window.setTimeout(
+          redirectToLogin,
+          900
+        );
+      }
+
       return;
     }
 
-    if (status === 403 && config.redirectOnForbidden === true) {
+    if (
+      status === 403 &&
+      config.redirectOnForbidden === true
+    ) {
       showToast(
         cleanText(
           error && error.message,
@@ -880,7 +1019,11 @@
         'error'
       );
 
-      window.setTimeout(redirectToLogin, 700);
+      window.setTimeout(
+        redirectToLogin,
+        900
+      );
+
       return;
     }
 
@@ -1208,7 +1351,7 @@
         category &&
         typeof category === 'object' &&
         category.isDeleted !== true &&
-        cleanText(category.key)
+        getCategoryKey(category)
       );
     });
 
@@ -1248,8 +1391,12 @@
       preserveSelection &&
       categories.some(function (category) {
         return (
-          normalizeKey(category.key) ===
-          normalizeKey(State.selectedCategory)
+          normalizeKey(
+            getCategoryKey(category)
+          ) ===
+          normalizeKey(
+            State.selectedCategory
+          )
         );
       });
 
@@ -1449,7 +1596,7 @@
         subcategory &&
         typeof subcategory === 'object' &&
         subcategory.isDeleted !== true &&
-        cleanText(subcategory.key)
+        getSubcategoryKey(subcategory)
       );
     });
 
@@ -1484,7 +1631,9 @@
       preserveSelection &&
       subcategories.some(function (subcategory) {
         return (
-          normalizeKey(subcategory.key) ===
+          normalizeKey(
+            getSubcategoryKey(subcategory)
+          ) ===
           normalizeKey(State.selectedSubcategory)
         );
       });
@@ -1953,6 +2102,23 @@
         true,
         'Loading product categories...'
       );
+
+      /*
+       * The retailer web session is device-bound.
+      * Resolve the same persistent browser fingerprint used
+      * by dashboard.html before making authenticated requests.
+      */
+      State.fingerprint =
+        await getStableFingerprint();
+
+      if (!State.fingerprint) {
+        const fingerprintError = new Error(
+          'Browser security fingerprint could not be created. Please reload the page.'
+        );
+
+        fingerprintError.status = 0;
+        throw fingerprintError;
+      }
 
       await loadCategories({
         preserveSelection: false
@@ -3694,28 +3860,7 @@
      Page lifecycle
   ======================================================== */
 
-  function handlePageVisibility() {
-        if (document.visibilityState !== 'visible') {
-            return;
-        }
-
-        if (
-            State.pageLoading ||
-            State.productLoading ||
-            State.submitLoading
-        ) {
-            return;
-        }
-
-        loadRetailerStatus()
-            .catch(function (error) {
-                console.error(
-                    '[Retailer Products] Status refresh:',
-                    error
-                );
-            });
-    }
-
+  
   function handleBeforeUnload() {
     revokeSelectedFilePreviews();
   }
