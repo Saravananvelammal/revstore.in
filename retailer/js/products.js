@@ -3,10 +3,7 @@
 'use strict';
 
 /* ==========================================================
-   RevStore Retailer Products
-   Production Web Session Implementation
-   Part 1 of 3
-
+   
    Backend routes:
    GET    /catalog/categories
    GET    /catalog/categories/:categoryKey/subcategories
@@ -289,6 +286,34 @@
     }
   }
 
+  function extractArray(payload, key) {
+    if (!payload || typeof payload !== 'object') {
+      return [];
+    }
+
+    if (Array.isArray(payload[key])) {
+      return payload[key];
+    }
+
+    if (
+      payload.data &&
+      typeof payload.data === 'object' &&
+      Array.isArray(payload.data[key])
+    ) {
+      return payload.data[key];
+    }
+
+    if (Array.isArray(payload.data)) {
+      return payload.data;
+    }
+
+    if (Array.isArray(payload.items)) {
+      return payload.items;
+    }
+
+    return [];
+  }
+
   function debounce(callback, delay) {
     let timer = null;
 
@@ -507,18 +532,26 @@
   /* ========================================================
      Loading state
   ======================================================== */
-
-  function setPageLoading(isLoading, message) {
-    State.pageLoading = Boolean(isLoading);
+  function updateLoadingOverlay(message) {
+    const visible =
+      State.pageLoading ||
+      State.productLoading;
 
     if (UI.loadingText && message) {
       UI.loadingText.textContent = message;
     }
 
-    UI.loadingOverlay.classList.toggle(
-      'show',
-      State.pageLoading
-    );
+    if (UI.loadingOverlay) {
+      UI.loadingOverlay.classList.toggle(
+        'show',
+        visible
+      );
+
+      UI.loadingOverlay.setAttribute(
+        'aria-hidden',
+        visible ? 'false' : 'true'
+      );
+    }
 
     if (UI.refreshBtn) {
       UI.refreshBtn.disabled =
@@ -530,33 +563,26 @@
     if (UI.addProductBtn) {
       UI.addProductBtn.disabled =
         State.pageLoading ||
-        State.submitLoading;
-    }
-  }
-
-  function setProductLoading(isLoading, message) {
-    State.productLoading = Boolean(isLoading);
-
-    if (UI.loadingText && message) {
-      UI.loadingText.textContent = message;
-    }
-
-    UI.loadingOverlay.classList.toggle(
-      'show',
-      State.productLoading
-    );
-
-    if (UI.refreshBtn) {
-      UI.refreshBtn.disabled =
-        State.pageLoading ||
         State.productLoading ||
         State.submitLoading;
     }
 
     if (UI.searchInput) {
-      UI.searchInput.disabled = State.productLoading;
-    }    
+      UI.searchInput.disabled =
+        State.pageLoading ||
+        State.productLoading;
+    }
   }
+
+  function setPageLoading(isLoading, message) {
+    State.pageLoading = Boolean(isLoading);
+    updateLoadingOverlay(message);
+  }
+
+  function setProductLoading(isLoading, message) {
+    State.productLoading = Boolean(isLoading);
+    updateLoadingOverlay(message);
+  }  
 
   /* ========================================================
      Toast notifications
@@ -860,20 +886,49 @@
       method: 'GET'
     });
 
-    const retailer =
-      payload &&
+    let retailer = null;
+
+    if (
       payload.retailer &&
       typeof payload.retailer === 'object'
-        ? payload.retailer
-        : null;
+    ) {
+      retailer = payload.retailer;
+    } else if (
+      payload.data &&
+      payload.data.retailer &&
+      typeof payload.data.retailer === 'object'
+    ) {
+      retailer = payload.data.retailer;
+    } else if (
+      payload.data &&
+      typeof payload.data === 'object' &&
+      !Array.isArray(payload.data)
+    ) {
+      retailer = payload.data;
+    } else if (
+      payload.user &&
+      typeof payload.user === 'object'
+    ) {
+      retailer = payload.user;
+    }
 
+    /*
+    * The products page does not contain retailer-status
+    * elements, so a missing retailer object must not prevent
+    * categories and products from loading.
+    */
     if (!retailer) {
-      throw new Error(
-        'Retailer profile could not be loaded.'
+      console.warn(
+        '[Retailer Products] Retailer status response did not contain a retailer object.',
+        payload
       );
+
+      return null;
     }
 
     renderRetailerStatus(retailer);
+
+    return retailer;
   }
 
   /* ========================================================
@@ -932,41 +987,79 @@
     card.appendChild(image);
     card.appendChild(info);
 
-    card.addEventListener('click', async function () {
-      if (
-        State.productLoading ||
-        State.submitLoading ||
-        State.selectedCategory === categoryKey
-      ) {
-        return;
+    card.addEventListener(
+      'click',
+      async function () {
+        if (
+          State.pageLoading ||
+          State.productLoading ||
+          State.submitLoading ||
+          normalizeKey(State.selectedCategory) ===
+            normalizeKey(categoryKey)
+        ) {
+          return;
+        }
+
+        State.selectedCategory = categoryKey;
+        State.selectedSubcategory = '';
+        State.page = 1;
+
+        setActiveCategoryCard(categoryKey);
+
+        setProductLoading(
+          true,
+          'Loading subcategories...'
+        );
+
+        try {
+          await loadSubcategories(categoryKey);
+        } catch (error) {
+          State.subcategories = [];
+          State.products = [];
+
+          clearElement(UI.subcategoryList);
+          clearElement(UI.productGrid);
+
+          showEmptyState(
+            'Subcategories could not be loaded',
+            cleanText(
+              error.message,
+              'Please refresh and try again.'
+            )
+          );
+
+          handleError(error);
+        } finally {
+          setProductLoading(false);
+        }
       }
-
-      State.selectedCategory = categoryKey;
-      State.selectedSubcategory = '';
-      State.page = 1;
-
-      setActiveCategoryCard(categoryKey);
-
-      await loadSubcategories(categoryKey);
-    });
+    );
 
     UI.categoryList.appendChild(card);
   }
 
   async function loadCategories(options) {
     const config = options || {};
+
     const preserveSelection =
       config.preserveSelection === true;
 
-    const payload = await apiFetch(API.categories, {
-      method: 'GET'
-    });
+    const payload = await apiFetch(
+      API.categories,
+      {
+        method: 'GET'
+      }
+    );
 
-    const categories = Array.isArray(payload.categories)
-      ? payload.categories.filter(function (category) {
-          return category && category.isDeleted !== true;
-        })
-      : [];
+    const categories = extractArray(
+      payload,
+      'categories'
+    ).filter(function (category) {
+      return (
+        category &&
+        category.isDeleted !== true
+      );
+    });
 
     State.categories = categories;
 
@@ -977,13 +1070,21 @@
       State.selectedSubcategory = '';
       State.subcategories = [];
       State.products = [];
+      State.total = 0;
+      State.pages = 1;
+      State.page = 1;
 
       clearElement(UI.subcategoryList);
       clearElement(UI.productGrid);
 
+      syncModalCategoryOptions();
+
       showEmptyState(
         'No categories available',
-        'No active product categories are assigned to this retailer.'
+        cleanText(
+          payload.message,
+          'No active product categories are assigned to this retailer.'
+        )
       );
 
       renderPagination();
@@ -1002,16 +1103,23 @@
       });
 
     if (!selectedStillExists) {
-      State.selectedCategory = cleanText(categories[0].key);
+      State.selectedCategory =
+        cleanText(categories[0].key);
+
       State.selectedSubcategory = '';
       State.page = 1;
     }
 
-    setActiveCategoryCard(State.selectedCategory);
+    setActiveCategoryCard(
+      State.selectedCategory
+    );
 
-    await loadSubcategories(State.selectedCategory, {
-      preserveSelection
-    });
+    await loadSubcategories(
+      State.selectedCategory,
+      {
+        preserveSelection
+      }
+    );
   }
 
   /* ========================================================
@@ -1074,47 +1182,92 @@
     card.appendChild(image);
     card.appendChild(info);
 
-    card.addEventListener('click', async function () {
-      if (
-        State.productLoading ||
-        State.submitLoading ||
-        State.selectedSubcategory === subcategoryKey
-      ) {
-        return;
+    card.addEventListener(
+      'click',
+      async function () {
+        if (
+          State.pageLoading ||
+          State.productLoading ||
+          State.submitLoading ||
+          normalizeKey(
+            State.selectedSubcategory
+          ) === normalizeKey(subcategoryKey)
+        ) {
+          return;
+        }
+
+        State.selectedSubcategory =
+          subcategoryKey;
+
+        State.page = 1;
+
+        setActiveSubcategoryCard(
+          subcategoryKey
+        );
+
+        syncModalCategoryOptions();
+
+        await loadProducts(1);
       }
-
-      State.selectedSubcategory = subcategoryKey;
-      State.page = 1;
-
-      setActiveSubcategoryCard(subcategoryKey);
-      syncModalCategoryOptions();
-
-      await loadProducts(1);
-    });
+    );
 
     UI.subcategoryList.appendChild(card);
   }
 
-  async function loadSubcategories(categoryKey, options) {
+  async function loadSubcategories(
+    categoryKey,
+    options
+  ) {
     const config = options || {};
+
     const preserveSelection =
       config.preserveSelection === true;
+
+    const safeCategoryKey =
+      cleanText(categoryKey);
+
+    if (!safeCategoryKey) {
+      State.subcategories = [];
+      State.selectedSubcategory = '';
+      State.products = [];
+      State.total = 0;
+      State.pages = 1;
+      State.page = 1;
+
+      clearElement(UI.subcategoryList);
+      clearElement(UI.productGrid);
+
+      syncModalCategoryOptions();
+
+      showEmptyState(
+        'Select a category',
+        'Select a category to load its subcategories.'
+      );
+
+      renderPagination();
+      return;
+    }
 
     clearElement(UI.subcategoryList);
     clearElement(UI.productGrid);
     hideEmptyState();
 
     const payload = await apiFetch(
-      API.subcategories(categoryKey),
-      { method: 'GET' }
+      API.subcategories(safeCategoryKey),
+      {
+        method: 'GET'
+      }
     );
 
-    const subcategories =
-      Array.isArray(payload.subcategories)
-        ? payload.subcategories.filter(function (subcategory) {
-            return subcategory && subcategory.isDeleted !== true;
-          })
-        : [];
+    const subcategories = extractArray(
+      payload,
+      'subcategories'
+    ).filter(function (subcategory) {
+      return (
+        subcategory &&
+        subcategory.isDeleted !== true
+      );
+    });
 
     State.subcategories = subcategories;
 
@@ -1129,21 +1282,28 @@
 
       showEmptyState(
         'No subcategories available',
-        'This category does not contain any active subcategories.'
+        cleanText(
+          payload.message,
+          'This category does not contain any active subcategories.'
+        )
       );
 
       renderPagination();
       return;
     }
 
-    subcategories.forEach(renderSubcategoryCard);
+    subcategories.forEach(
+      renderSubcategoryCard
+    );
 
     const selectedStillExists =
       preserveSelection &&
       subcategories.some(function (subcategory) {
         return (
           normalizeKey(subcategory.key) ===
-          normalizeKey(State.selectedSubcategory)
+          normalizeKey(
+            State.selectedSubcategory
+          )
         );
       });
 
@@ -1234,19 +1394,44 @@
         { method: 'GET' }
       );
 
-      const products = Array.isArray(payload.products)
-        ? payload.products
-        : [];
+      const products = extractArray(
+        payload,
+        'products'
+      );
 
       State.products = products;
+      const paginationSource =
+        payload.pagination &&
+        typeof payload.pagination === 'object'
+          ? payload.pagination
+          : payload.data &&
+              payload.data.pagination &&
+              typeof payload.data.pagination === 'object'
+            ? payload.data.pagination
+            : payload.data &&
+                typeof payload.data === 'object'
+              ? payload.data
+              : payload;
+
       State.total = Math.max(
         0,
-        Number(payload.total) || 0
+        Number(
+          paginationSource.total ??
+          paginationSource.totalProducts ??
+          paginationSource.count ??
+          products.length
+        ) || 0
       );
 
       State.pages = Math.max(
         1,
-        Number(payload.pages) || 1
+        Number(
+          paginationSource.pages ??
+          paginationSource.totalPages ??
+          Math.ceil(
+            State.total / State.limit
+          )
+        ) || 1
       );
 
       State.page = Math.min(
@@ -1512,15 +1697,35 @@
   ======================================================== */
 
   async function refreshPageData() {
-    setPageLoading(true, 'Refreshing products...');
+    if (
+      State.pageLoading ||
+      State.productLoading ||
+      State.submitLoading
+    ) {
+      return;
+    }
+
+    setPageLoading(
+      true,
+      'Refreshing products...'
+    );
 
     try {
-      await Promise.all([
-        loadRetailerStatus(),
-        loadCategories({
-          preserveSelection: true
-        })
-      ]);
+      await loadCategories({
+        preserveSelection: true
+      });
+
+      loadRetailerStatus().catch(function (error) {
+        if (Number(error && error.status) === 401) {
+          handleError(error);
+          return;
+        }
+
+        console.warn(
+          '[Retailer Products] Status refresh failed:',
+          error
+        );
+      });
     } catch (error) {
       handleError(error, {
         redirectOnForbidden: true
@@ -1537,19 +1742,50 @@
 
     State.initialized = true;
 
-    assertRequiredElements();
+    try {
+      assertRequiredElements();
 
-    bindBaseEvents();
-    ensureProductEventsBound();
-    bindFinalEvents();
+      bindBaseEvents();
+      ensureProductEventsBound();
+      bindFinalEvents();
+    } catch (error) {
+      State.initialized = false;
+      console.error(
+        '[Retailer Products] Initialization error:',
+        error
+      );
 
-    setPageLoading(true, 'Loading retailer products...');
+      return;
+    }
+
+    setPageLoading(
+      true,
+      'Loading retailer products...'
+    );
 
     try {
-      await loadRetailerStatus();
-
+      /*
+      * Categories are the primary page data and must not be
+      * blocked by optional retailer-profile rendering.
+      */
       await loadCategories({
         preserveSelection: false
+      });
+
+      /*
+      * Status is supplementary on this HTML page.
+      * Load it without preventing the catalogue from rendering.
+      */
+      loadRetailerStatus().catch(function (error) {
+        if (Number(error && error.status) === 401) {
+          handleError(error);
+          return;
+        }
+
+        console.warn(
+          '[Retailer Products] Status could not be loaded:',
+          error
+        );
       });
     } catch (error) {
       handleError(error, {
@@ -3381,5 +3617,40 @@
       handleBeforeUnload
     );
   }
+
+  /* ========================================================
+     Global Error Logging
+  ======================================================== */
+
+  window.addEventListener(
+    'error',
+    function (event) {
+      console.error(
+        '[Retailer Products] Unhandled error:',
+        event.error || event.message
+      );
+    }
+  );
+
+  window.addEventListener(
+    'unhandledrejection',
+    function (event) {
+      console.error(
+        '[Retailer Products] Unhandled promise rejection:',
+        event.reason
+      );
+
+      if (UI.toastContainer) {
+        showToast(
+          cleanText(
+            event.reason &&
+              event.reason.message,
+            'An unexpected request error occurred.'
+          ),
+          'error'
+        );
+      }
+    }
+  );
 
 })();
