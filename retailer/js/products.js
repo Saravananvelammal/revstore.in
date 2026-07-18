@@ -113,7 +113,7 @@
     selectedCategory: '',
     selectedSubcategory: '',
 
-    includeDeleted: false,
+    includeDeleted: true,
     search: '',
 
     page: 1,
@@ -161,29 +161,20 @@
       document.getElementById('txtSearch') ||
       document.getElementById('searchInput'),
 
-    includeDeleted:
-      document.getElementById('includeDeleted') ||
-      document.getElementById('showDeleted'),
-
+    
     pagination: document.getElementById('pagination'),
 
     loadingOverlay: document.getElementById('loadingOverlay'),
-    loadingText: document.getElementById("loadingMessage"),
+    loadingText:
+      document.getElementById('loadingMessage') ||
+      document.getElementById('loadingText'),
 
     toastContainer: document.getElementById('toastContainer'),
 
     productModal: document.getElementById('productModal'),
     productForm: document.getElementById('productForm'),
     productId: document.getElementById('productId'),
-    modalTitle: document.getElementById('modalTitle'),
-
-    selectedCategoryLabel: document.getElementById('selectedCategoryLabel'),
-    selectedSubcategoryLabel: document.getElementById('selectedSubcategoryLabel'),
-
-    totalProductsValue: document.getElementById('totalProductsValue'),
-    activeProductsValue: document.getElementById('activeProductsValue'),
-    deletedProductsValue: document.getElementById('deletedProductsValue'),
-    totalStockValue: document.getElementById('totalStockValue'),
+    modalTitle: document.getElementById('modalTitle'),   
     
     closeModalBtn:
       document.getElementById('closeModalBtn') ||
@@ -231,7 +222,6 @@
       ['subcategoryList', UI.subcategoryList],
       ['productGrid', UI.productGrid],
       ['search input', UI.searchInput],
-      ['includeDeleted checkbox', UI.includeDeleted],
       ['add product button', UI.addProductBtn],
       ['refresh button', UI.refreshBtn],
       ['loading overlay', UI.loadingOverlay],
@@ -565,11 +555,7 @@
 
     if (UI.searchInput) {
       UI.searchInput.disabled = State.productLoading;
-    }
-
-    if (UI.includeDeleted) {
-      UI.includeDeleted.disabled = State.productLoading;
-    }
+    }    
   }
 
   /* ========================================================
@@ -1189,20 +1175,14 @@
       String(Math.max(1, Number(page) || 1))
     );
 
-    params.set(
-      'limit',
-      String(State.limit)
-    );
+    params.set('limit', String(State.limit));
 
     if (State.search) {
       params.set('search', State.search);
     }
 
     if (State.selectedCategory) {
-      params.set(
-        'category',
-        State.selectedCategory
-      );
+      params.set('category', State.selectedCategory);
     }
 
     if (State.selectedSubcategory) {
@@ -1212,9 +1192,8 @@
       );
     }
 
-    if (State.includeDeleted) {
-      params.set('includeDeleted', 'true');
-    }
+    // Required for displaying deleted products with Restore action.
+    params.set('includeDeleted', 'true');
 
     return params.toString();
   }
@@ -1466,16 +1445,11 @@
 
     if (!State.products.length) {
       showEmptyState(
-        State.includeDeleted
-          ? 'No products found'
-          : 'No active products found',
+        'No products found',
         State.search
           ? 'No products matched your search.'
           : 'No products are available in this subcategory.'
       );
-
-       renderProductStatistics();
-       updateSelectionLabels();
 
       return;
     }
@@ -1483,9 +1457,6 @@
     hideEmptyState();
 
     State.products.forEach(renderProductCard);
-
-    renderProductStatistics();
-    updateSelectionLabels();
   }
   
 
@@ -1506,18 +1477,7 @@
         State.page = 1;
         await loadProducts(1);
       }, CONFIG.SEARCH_DELAY_MS)
-    );
-
-    UI.includeDeleted.addEventListener(
-      'change',
-      async function () {
-        State.includeDeleted =
-          UI.includeDeleted.checked === true;
-
-        State.page = 1;
-        await loadProducts(1);
-      }
-    );
+    );    
 
     UI.refreshBtn.addEventListener(
       'click',
@@ -2990,109 +2950,7 @@
 
     UI.productSubcategory.value =
       subcategoryValue;
-  }
-
-  function updateSelectionLabels() {
-    if (UI.selectedCategoryLabel) {
-      const category = State.categories.find(
-        function (item) {
-          return (
-            normalizeKey(item.key) ===
-            normalizeKey(State.selectedCategory)
-          );
-        }
-      );
-
-      UI.selectedCategoryLabel.textContent =
-        category
-          ? cleanText(category.name, category.key)
-          : 'No category selected';
-    }
-
-    if (UI.selectedSubcategoryLabel) {
-      const subcategory =
-        State.subcategories.find(
-          function (item) {
-            return (
-              normalizeKey(item.key) ===
-              normalizeKey(
-                State.selectedSubcategory
-              )
-            );
-          }
-        );
-
-      UI.selectedSubcategoryLabel.textContent =
-        subcategory
-          ? cleanText(
-              subcategory.name,
-              subcategory.key
-            )
-          : 'No subcategory selected';
-    }
-  }
-
-  /* ========================================================
-     Product statistics
-  ======================================================== */
-
-  function renderProductStatistics() {
-    const visibleProducts =
-      Array.isArray(State.products)
-        ? State.products
-        : [];
-
-    const activeCount =
-      visibleProducts.filter(function (product) {
-        return product.isDeleted !== true;
-      }).length;
-
-    const deletedCount =
-      visibleProducts.filter(function (product) {
-        return product.isDeleted === true;
-      }).length;
-
-    const totalStock =
-      visibleProducts.reduce(function (
-        total,
-        product
-      ) {
-        const stock = Number(product.stock);
-
-        return (
-          total +
-          (
-            Number.isFinite(stock)
-              ? Math.max(0, stock)
-              : 0
-          )
-        );
-      }, 0);
-
-    if (UI.totalProductsValue) {
-      UI.totalProductsValue.textContent =
-        String(
-          Number.isFinite(Number(State.total))
-            ? Number(State.total)
-            : visibleProducts.length
-        );
-    }
-
-    if (UI.activeProductsValue) {
-      UI.activeProductsValue.textContent =
-        String(activeCount);
-    }
-
-    if (UI.deletedProductsValue) {
-      UI.deletedProductsValue.textContent =
-        String(deletedCount);
-    }
-
-    if (UI.totalStockValue) {
-      UI.totalStockValue.textContent =
-        String(totalStock);
-    }
-  }
+  }  
 
   /* ========================================================
      Pagination
@@ -3349,11 +3207,6 @@
 
     if (UI.searchInput) {
       UI.searchInput.value = '';
-    }
-
-    if (UI.includeDeleted) {
-      UI.includeDeleted.checked =
-        State.includeDeleted;
     }
   }
 

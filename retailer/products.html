@@ -111,30 +111,6 @@
         </div>
 
         <div class="toolbar-right">
-          <div class="deleted-filter">
-            <label
-              class="switch"
-              for="includeDeleted"
-            >
-              <input
-                id="includeDeleted"
-                type="checkbox"
-              />
-
-              <span
-                class="slider"
-                aria-hidden="true"
-              ></span>
-            </label>
-
-            <label
-              class="switch-label"
-              for="includeDeleted"
-            >
-              Include Deleted
-            </label>
-          </div>
-
           <button
             id="btnRefresh"
             class="btn btn-light"
@@ -146,19 +122,6 @@
             ></i>
 
             <span>Refresh</span>
-          </button>
-
-          <button
-            id="btnGrid"
-            class="btn btn-light"
-            type="button"
-            aria-label="Toggle product grid view"
-            title="Toggle grid view"
-          >
-            <i
-              class="fa-solid fa-border-all"
-              aria-hidden="true"
-            ></i>
           </button>
 
           <button
@@ -174,55 +137,7 @@
             <span>Add Product</span>
           </button>
         </div>
-      </header>
-
-      <!-- Optional selected-filter summary -->
-      <section
-        class="selection-summary"
-        aria-label="Current product filters"
-      >
-        <div>
-          <span class="selection-label">Category</span>
-
-          <strong id="selectedCategoryLabel">
-            No category selected
-          </strong>
-        </div>
-
-        <div>
-          <span class="selection-label">Subcategory</span>
-
-          <strong id="selectedSubcategoryLabel">
-            No subcategory selected
-          </strong>
-        </div>
-      </section>
-
-      <!-- Optional product statistics -->
-      <section
-        class="product-statistics"
-        aria-label="Product statistics"
-      >
-        <article class="product-stat">
-          <span>Total Products</span>
-          <strong id="totalProductsValue">0</strong>
-        </article>
-
-        <article class="product-stat">
-          <span>Active</span>
-          <strong id="activeProductsValue">0</strong>
-        </article>
-
-        <article class="product-stat">
-          <span>Deleted</span>
-          <strong id="deletedProductsValue">0</strong>
-        </article>
-
-        <article class="product-stat">
-          <span>Total Stock</span>
-          <strong id="totalStockValue">0</strong>
-        </article>
-      </section>
+      </header>     
 
       <!-- Products -->
       <section
