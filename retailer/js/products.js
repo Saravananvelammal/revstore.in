@@ -125,6 +125,9 @@
     selectedNewFiles: []
   };
 
+  let productEventsBound = false;
+  let finalEventsBound = false;
+
   /* ========================================================
      DOM references
 
@@ -1106,18 +1109,36 @@
         if (
           State.pageLoading ||
           State.productLoading ||
-          State.submitLoading ||
+          State.submitLoading
+        ) {
+          return;
+        }
+
+        if (
           normalizeKey(State.selectedCategory) ===
-            normalizeKey(categoryKey)
+          normalizeKey(categoryKey)
         ) {
           return;
         }
 
         State.selectedCategory = categoryKey;
         State.selectedSubcategory = '';
+        State.subcategories = [];
+        State.products = [];
+        State.total = 0;
+        State.pages = 1;
         State.page = 1;
 
         setActiveCategoryCard(categoryKey);
+        setActiveSubcategoryCard('');
+
+        clearElement(UI.subcategoryList);
+        clearElement(UI.productGrid);
+
+        showEmptyState(
+          'Loading subcategories',
+          'Please wait while subcategories are loaded.'
+        );
 
         setProductLoading(
           true,
@@ -1125,9 +1146,12 @@
         );
 
         try {
-          await loadSubcategories(categoryKey);
+          await loadSubcategories(categoryKey, {
+            preserveSelection: false
+          });
         } catch (error) {
           State.subcategories = [];
+          State.selectedSubcategory = '';
           State.products = [];
           State.total = 0;
           State.pages = 1;
@@ -1135,6 +1159,8 @@
 
           clearElement(UI.subcategoryList);
           clearElement(UI.productGrid);
+
+          syncModalCategoryOptions();
 
           showEmptyState(
             'Subcategories could not be loaded',
@@ -1147,10 +1173,6 @@
           renderPagination();
           handleError(error);
         } finally {
-          /*
-          * loadProducts may already have cleared this state.
-          * Calling false again is harmless.
-          */
           setProductLoading(false);
         }
       }
@@ -1186,7 +1208,7 @@
         category &&
         typeof category === 'object' &&
         category.isDeleted !== true &&
-        getCategoryKey(category)
+        cleanText(category.key)
       );
     });
 
@@ -1211,7 +1233,7 @@
       showEmptyState(
         'No categories available',
         cleanText(
-          payload.message,
+          payload && payload.message,
           'No active product categories are assigned to this retailer.'
         )
       );
@@ -1222,25 +1244,36 @@
 
     categories.forEach(renderCategoryCard);
 
-    const selectedStillExists =
+    const selectedCategoryStillExists =
       preserveSelection &&
       categories.some(function (category) {
         return (
-          normalizeKey(
-            getCategoryKey(category)
-          ) ===
-          normalizeKey(
-            State.selectedCategory
-          )
+          normalizeKey(category.key) ===
+          normalizeKey(State.selectedCategory)
         );
       });
 
-    if (!selectedStillExists) {
-      State.selectedCategory =
-        getCategoryKey(categories[0]);
-
+    if (!selectedCategoryStillExists) {
+      State.selectedCategory = '';
       State.selectedSubcategory = '';
+      State.subcategories = [];
+      State.products = [];
+      State.total = 0;
+      State.pages = 1;
       State.page = 1;
+
+      clearElement(UI.subcategoryList);
+      clearElement(UI.productGrid);
+
+      syncModalCategoryOptions();
+
+      showEmptyState(
+        'Select a category',
+        'Choose a category from the left panel to load its subcategories.'
+      );
+
+      renderPagination();
+      return;
     }
 
     setActiveCategoryCard(
@@ -1250,7 +1283,7 @@
     await loadSubcategories(
       State.selectedCategory,
       {
-        preserveSelection
+        preserveSelection: true
       }
     );
   }
@@ -1323,10 +1356,14 @@
         if (
           State.pageLoading ||
           State.productLoading ||
-          State.submitLoading ||
-          normalizeKey(
-            State.selectedSubcategory
-          ) === normalizeKey(subcategoryKey)
+          State.submitLoading
+        ) {
+          return;
+        }
+
+        if (
+          normalizeKey(State.selectedSubcategory) ===
+          normalizeKey(subcategoryKey)
         ) {
           return;
         }
@@ -1335,6 +1372,9 @@
           subcategoryKey;
 
         State.page = 1;
+        State.products = [];
+        State.total = 0;
+        State.pages = 1;
 
         setActiveSubcategoryCard(
           subcategoryKey
@@ -1376,7 +1416,7 @@
 
       showEmptyState(
         'Select a category',
-        'Select a category to load its subcategories.'
+        'Choose a category to load its subcategories.'
       );
 
       renderPagination();
@@ -1409,7 +1449,7 @@
         subcategory &&
         typeof subcategory === 'object' &&
         subcategory.isDeleted !== true &&
-        getSubcategoryKey(subcategory)
+        cleanText(subcategory.key)
       );
     });
 
@@ -1427,7 +1467,7 @@
       showEmptyState(
         'No subcategories available',
         cleanText(
-          payload.message,
+          payload && payload.message,
           'This category does not contain any active subcategories.'
         )
       );
@@ -1440,33 +1480,45 @@
       renderSubcategoryCard
     );
 
-    const selectedStillExists =
+    const selectedSubcategoryStillExists =
       preserveSelection &&
       subcategories.some(function (subcategory) {
         return (
-          normalizeKey(
-            getSubcategoryKey(subcategory)
-          ) ===
-          normalizeKey(
-            State.selectedSubcategory
-          )
+          normalizeKey(subcategory.key) ===
+          normalizeKey(State.selectedSubcategory)
         );
       });
 
-    if (!selectedStillExists) {
-      State.selectedSubcategory =
-        getSubcategoryKey(subcategories[0]);
+    if (
+      selectedSubcategoryStillExists &&
+      State.selectedSubcategory
+    ) {
+      setActiveSubcategoryCard(
+        State.selectedSubcategory
+      );
 
-      State.page = 1;
+      syncModalCategoryOptions();
+
+      await loadProducts(State.page);
+      return;
     }
 
-    setActiveSubcategoryCard(
-      State.selectedSubcategory
-    );
+    State.selectedSubcategory = '';
+    State.products = [];
+    State.total = 0;
+    State.pages = 1;
+    State.page = 1;
+
+    setActiveSubcategoryCard('');
 
     syncModalCategoryOptions();
 
-    await loadProducts(State.page);
+    showEmptyState(
+      'Select a subcategory',
+      'Choose a subcategory to load its products.'
+    );
+
+    renderPagination();
   }
 
   /* ========================================================
@@ -1853,7 +1905,7 @@
 
     setPageLoading(
       true,
-      'Refreshing products...'
+      'Refreshing product catalogue...'
     );
 
     try {
@@ -1890,11 +1942,16 @@
       ensureProductEventsBound();
       bindFinalEvents();
 
-      resetProductFilters();
+      State.search = '';
+      State.page = 1;
+
+      if (UI.searchInput) {
+        UI.searchInput.value = '';
+      }
 
       setPageLoading(
         true,
-        'Loading retailer products...'
+        'Loading product categories...'
       );
 
       await loadCategories({
@@ -1902,6 +1959,11 @@
       });
     } catch (error) {
       State.initialized = false;
+
+      console.error(
+        '[Retailer Products] Initialization failed:',
+        error
+      );
 
       handleError(error, {
         redirectOnForbidden: true
@@ -1913,17 +1975,7 @@
   
   /* ========================================================
      Start
-  ======================================================== */
-
-  if (document.readyState === 'loading') {
-    document.addEventListener(
-      'DOMContentLoaded',
-      initialize,
-      { once: true }
-    );
-  } else {
-    initialize();
-  }  
+  ======================================================== */ 
 
   function toInputNumberFromPaise(value) {
     const number = Number(value);
@@ -3182,7 +3234,6 @@
    * bindBaseEvents() already runs during initialize().
    * This guard prevents duplicate modal bindings.
    */
-  let productEventsBound = false;
 
   function ensureProductEventsBound() {
     if (productEventsBound) {
@@ -3673,8 +3724,6 @@
      Final event initialization
   ======================================================== */
 
-  let finalEventsBound = false;
-
   function bindFinalEvents() {
     if (finalEventsBound) {
       return;
@@ -3724,5 +3773,39 @@
       }
     }
   );
+
+  /* ========================================================
+     Start application only after the complete script has
+    finished defining and initializing its dependencies.
+  ======================================================== */
+
+  function startApplication() {
+    initialize().catch(function (error) {
+      console.error(
+        '[Retailer Products] Startup failed:',
+        error
+      );
+
+      if (UI.toastContainer) {
+        showToast(
+          cleanText(
+            error && error.message,
+            'Products page could not be initialized.'
+          ),
+          'error'
+        );
+      }
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener(
+      'DOMContentLoaded',
+      startApplication,
+      { once: true }
+    );
+  } else {
+    startApplication();
+  }
 
 })();
