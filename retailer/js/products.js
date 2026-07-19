@@ -131,6 +131,16 @@
   let productEventsBound = false;
   let finalEventsBound = false;
 
+  /*
+  * Protected retailer media cannot be loaded directly through
+  * <img src="..."> because browser image requests cannot attach
+  * the device-fingerprint header required by authRetailerWeb.
+  */
+  const protectedImageCache = new Map();
+  const protectedObjectUrls = new Set();
+
+  let unauthorizedImageHandled = false;
+
   /* ========================================================
      DOM references
 
@@ -608,6 +618,301 @@
       '/' +
       image.replace(/^\/+/, '')
     );
+  }
+
+  function isRetailerProtectedMediaUrl(value) {
+    const resolvedUrl = cleanText(value);
+
+    if (!resolvedUrl) {
+      return false;
+    }
+
+    try {
+      const parsedUrl = new URL(
+        resolvedUrl,
+        window.location.origin
+      );
+
+      return (
+        parsedUrl.origin ===
+          new URL(CONFIG.API_BASE).origin &&
+        parsedUrl.pathname.startsWith(
+          '/api/retailer-web/v1/media/'
+        )
+      );
+    } catch (_) {
+      return false;
+    }
+  }
+
+  async function readImageErrorResponse(response) {
+    const contentType =
+      response.headers.get('content-type') || '';
+
+    try {
+      if (contentType.includes('application/json')) {
+        const payload = await response.json();
+
+        return cleanText(
+          payload &&
+            (
+              payload.message ||
+              payload.error ||
+              payload.detail
+            )
+        );
+      }
+
+      return cleanText(
+        await response.text()
+      );
+    } catch (_) {
+      return '';
+    }
+  }
+
+  async function fetchProtectedImageObjectUrl(imageUrl) {
+    const resolvedUrl =
+      resolveImageUrl(imageUrl);
+
+    if (!isRetailerProtectedMediaUrl(resolvedUrl)) {
+      return resolvedUrl;
+    }
+
+    /*
+    * Reuse one request and one Blob URL when the same image is
+    * rendered more than once.
+    */
+    if (protectedImageCache.has(resolvedUrl)) {
+      return protectedImageCache.get(resolvedUrl);
+    }
+
+    const requestPromise = (async function () {
+      const headers = new Headers();
+
+      headers.set(
+        'Accept',
+        'image/avif,image/webp,image/apng,image/svg+xml,image/,/*;q=0.8'
+      );
+
+      headers.set(
+        'X-Requested-With',
+        'XMLHttpRequest'
+      );
+
+      if (State.fingerprint) {
+        headers.set(
+          'x-device-fingerprint',
+          State.fingerprint
+        );
+      }
+
+      let response;
+
+      try {
+        response = await fetch(resolvedUrl, {
+          method: 'GET',
+          headers,
+          credentials: 'include',
+          cache: 'no-store',
+          redirect: 'follow',
+          referrerPolicy:
+            'strict-origin-when-cross-origin'
+        });
+      } catch (_) {
+        const networkError = new Error(
+          'Unable to load product image.'
+        );
+
+        networkError.status = 0;
+        throw networkError;
+      }
+
+      if (!response.ok) {
+        const backendMessage =
+          await readImageErrorResponse(response);
+
+        const error = new Error(
+          backendMessage ||
+            (
+              response.status === 401
+                ? 'Retailer session expired while loading images.'
+                : response.status === 403
+                  ? 'Image access was denied.'
+                  : response.status === 404
+                    ? 'Image was not found.'
+                    : 'Unable to load image.'
+            )
+        );
+
+        error.status = response.status;
+        throw error;
+      }
+
+      const contentType =
+        response.headers.get('content-type') || '';
+
+      if (
+        contentType &&
+        !contentType.toLowerCase().startsWith('image/')
+      ) {
+        const contentError = new Error(
+          'The media endpoint returned an invalid image response.'
+        );
+
+        contentError.status = 502;
+        throw contentError;
+      }
+
+      const blob = await response.blob();
+
+      if (!blob || blob.size < 1) {
+        const emptyImageError = new Error(
+          'The image response was empty.'
+        );
+
+        emptyImageError.status = 502;
+        throw emptyImageError;
+      }
+
+      const objectUrl =
+        URL.createObjectURL(blob);
+
+      protectedObjectUrls.add(objectUrl);
+
+      return objectUrl;
+    })();
+
+    protectedImageCache.set(
+      resolvedUrl,
+      requestPromise
+    );
+
+    try {
+      return await requestPromise;
+    } catch (error) {
+      /*
+      * Failed requests must not remain permanently cached,
+      * allowing a later refresh to retry the image.
+      */
+      protectedImageCache.delete(resolvedUrl);
+      throw error;
+    }
+  }
+
+  function handleProtectedImageError(error) {
+    const status = Number(
+      error && error.status
+    );
+
+    console.error(
+      '[Retailer Products] Protected image error:',
+      {
+        status,
+        message:
+          error && error.message
+      }
+    );
+
+    /*
+    * Many images can fail together when the session expires.
+    * Redirect only once instead of showing one error per image.
+    */
+    if (
+      status === 401 &&
+      !unauthorizedImageHandled
+    ) {
+      unauthorizedImageHandled = true;
+
+      showToast(
+        cleanText(
+          error && error.message,
+          'Retailer session expired. Please login again.'
+        ),
+        'error'
+      );
+
+      window.setTimeout(
+        redirectToLogin,
+        900
+      );
+    }
+  }
+
+  function setRetailerImageSource(
+    imageElement,
+    imageValue
+  ) {
+    if (!imageElement) {
+      return;
+    }
+
+    const resolvedUrl =
+      resolveImageUrl(imageValue);
+
+    setImageFallback(imageElement);
+
+    if (
+      !isRetailerProtectedMediaUrl(
+        resolvedUrl
+      )
+    ) {
+      imageElement.src = resolvedUrl;
+      return;
+    }
+
+    /*
+    * Prevent an earlier asynchronous request from replacing a
+    * newer image assigned to the same element.
+    */
+    const requestId =
+      String(Date.now()) +
+      '-' +
+      String(Math.random());
+
+    imageElement.dataset.imageRequestId =
+      requestId;
+
+    imageElement.removeAttribute('src');
+    imageElement.classList.add(
+      'is-image-loading'
+    );
+
+    fetchProtectedImageObjectUrl(
+      resolvedUrl
+    )
+      .then(function (objectUrl) {
+        if (
+          !imageElement.isConnected ||
+          imageElement.dataset.imageRequestId !==
+            requestId
+        ) {
+          return;
+        }
+
+        imageElement.src = objectUrl;
+
+        imageElement.classList.remove(
+          'is-image-loading'
+        );
+      })
+      .catch(function (error) {
+        if (
+          imageElement.dataset.imageRequestId !==
+          requestId
+        ) {
+          return;
+        }
+
+        imageElement.classList.remove(
+          'is-image-loading'
+        );
+
+        imageElement.src =
+          CONFIG.FALLBACK_IMAGE;
+
+        handleProtectedImageError(error);
+      });
   }
 
   function setImageFallback(imageElement) {
@@ -1225,15 +1530,16 @@
 
     const image = document.createElement('img');
     image.className = 'category-image';
-    image.src = resolveImageUrl(
-      category.image ||
+    image.alt = categoryName;
+    image.loading = 'lazy';
+
+    setRetailerImageSource(
+      image,
+    category.image ||
       category.imageUrl ||
       category.icon ||
       category.thumbnail
     );
-    image.alt = categoryName;
-    image.loading = 'lazy';
-    setImageFallback(image);
 
     const info = document.createElement('span');
     info.className = 'category-info';
@@ -1476,15 +1782,16 @@
 
     const image = document.createElement('img');
     image.className = 'subcategory-image';
-    image.src = resolveImageUrl(
-      subcategory.image ||
-      subcategory.imageUrl ||
-      subcategory.icon ||
-      subcategory.thumbnail
-    );
     image.alt = subcategoryName;
     image.loading = 'lazy';
-    setImageFallback(image);
+
+    setRetailerImageSource(
+      image,
+      subcategory.image ||
+        subcategory.imageUrl ||
+        subcategory.icon ||
+        subcategory.thumbnail
+    );
 
     const info = document.createElement('span');
     info.className = 'subcategory-info';
@@ -1847,10 +2154,22 @@
 
     const image = document.createElement('img');
     image.className = 'product-image';
-    image.src = getPrimaryProductImage(product);
-    image.alt = cleanText(product.name, 'Product');
+    image.alt = cleanText(
+      product.name,
+      'Product'
+    );
+
     image.loading = 'lazy';
-    setImageFallback(image);
+
+    const productImages =
+      getProductImages(product);
+
+    setRetailerImageSource(
+      image,
+      productImages.length
+        ? productImages[0]
+        : CONFIG.FALLBACK_IMAGE
+    );
 
     imageWrapper.appendChild(image);
 
@@ -2436,12 +2755,19 @@
         'image-preview-card' +
         (isRemoved ? ' is-removed' : '');
 
-      const imageElement = document.createElement('img');
-      imageElement.src = resolveImageUrl(image);
+      const imageElement =
+        document.createElement('img');
+
       imageElement.alt =
-        'Existing product image ' + String(index + 1);
+        'Existing product image ' +
+        String(index + 1);
+
       imageElement.loading = 'lazy';
-      setImageFallback(imageElement);
+
+      setRetailerImageSource(
+        imageElement,
+        image
+      );
 
       const actions = document.createElement('div');
       actions.className = 'image-preview-actions';
@@ -3861,8 +4187,26 @@
   ======================================================== */
 
   
+  function revokeProtectedImageUrls() {
+    protectedObjectUrls.forEach(
+      function (objectUrl) {
+        try {
+          URL.revokeObjectURL(
+            objectUrl
+          );
+        } catch (_) {
+          // Ignore URLs already released by the browser.
+        }
+      }
+    );
+
+    protectedObjectUrls.clear();
+    protectedImageCache.clear();
+  }
+
   function handleBeforeUnload() {
     revokeSelectedFilePreviews();
+    revokeProtectedImageUrls();
   }
   
   /* ========================================================
