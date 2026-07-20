@@ -632,214 +632,6 @@ body.modal-open {
 
 }
 
-/* ========================================================== */
-
-.product-title{
-
-    font-size:17px;
-
-    font-weight:700;
-
-    color:#222;
-
-    line-height:1.4;
-
-    min-height:48px;
-
-}
-
-/* ========================================================== */
-
-.product-prices{
-
-    display:flex;
-
-    flex-wrap:wrap;
-
-    gap:10px;
-
-}
-
-.price-chip{
-
-    background:#f5f7fb;
-
-    border-radius:8px;
-
-    padding:6px 10px;
-
-    font-size:13px;
-
-    font-weight:600;
-
-}
-
-.price-chip.rev{
-
-    color:#0d6efd;
-
-}
-
-.price-chip.offer{
-
-    color:#16a34a;
-
-}
-
-.price-chip.mrp{
-
-    color:#dc3545;
-
-}
-
-/* ========================================================== */
-
-.product-stock{
-
-    display:flex;
-
-    justify-content:space-between;
-
-    align-items:center;
-
-}
-
-/* ========================================================== */
-
-.stock-badge{
-
-    padding:6px 12px;
-
-    border-radius:20px;
-
-    font-size:13px;
-
-    font-weight:600;
-
-    background:#eef8ef;
-
-    color:#16a34a;
-
-}
-
-.stock-badge.low{
-
-    background:#fff6e5;
-
-    color:#f59e0b;
-
-}
-
-.stock-badge.out{
-
-    background:#ffecec;
-
-    color:#dc3545;
-
-}
-
-/* ========================================================== */
-
-.availability{
-
-    font-size:13px;
-
-    color:#666;
-
-}
-
-/* ========================================================== */
-
-.product-footer{
-
-    margin-top:auto;
-
-    display:flex;
-
-    gap:10px;
-
-}
-
-/* ========================================================== */
-
-.btn-edit{
-
-    flex:1;
-
-    border:none;
-
-    background:#0d6efd;
-
-    color:#fff;
-
-    height:42px;
-
-    border-radius:10px;
-
-    cursor:pointer;
-
-    transition:.25s;
-
-}
-
-.btn-edit:hover{
-
-    background:#084fc7;
-
-}
-
-/* ========================================================== */
-
-.btn-delete{
-
-    flex:1;
-
-    border:none;
-
-    background:#dc3545;
-
-    color:#fff;
-
-    height:42px;
-
-    border-radius:10px;
-
-    cursor:pointer;
-
-}
-
-.btn-delete:hover{
-
-    background:#b51f2e;
-
-}
-
-/* ========================================================== */
-
-.btn-restore{
-
-    flex:1;
-
-    border:none;
-
-    background:#16a34a;
-
-    color:#fff;
-
-    height:42px;
-
-    border-radius:10px;
-
-    cursor:pointer;
-
-}
-
-.btn-restore:hover{
-
-    background:#11813b;
-
-}
-
 /* ==========================================================
    ACCESSIBILITY
 ========================================================== */
@@ -978,28 +770,22 @@ body.modal-open {
    MODAL
 ========================================================== */
 
-.modal{
+.modal {
+  position: fixed;
+  inset: 0;
+  z-index: 6000;
 
-    display:none;
+  display: none;
+  align-items: center;
+  justify-content: center;
 
-    position:fixed;
+  padding: 18px;
 
-    inset:0;
-
-    background:rgba(0,0,0,.45);
-
-    z-index:6000;
-
-    align-items:center;
-
-    justify-content:center;
-
+  background: rgba(0, 0, 0, 0.45);
 }
 
-.modal.show{
-
-    display:flex;
-
+.modal.show {
+  display: flex;
 }
 
 .modal-content {
@@ -1029,26 +815,8 @@ body.modal-open {
   overscroll-behavior: contain;
 }
 
-.modal-header {
-  flex: 0 0 auto;
-}
-
 .modal-footer {
   flex: 0 0 auto;
-}
-
-.modal-header{
-
-    display:flex;
-
-    justify-content:space-between;
-
-    align-items:center;
-
-    padding:20px;
-
-    border-bottom:1px solid var(--border);
-
 }
 
 .icon-btn{
@@ -1524,17 +1292,6 @@ body.modal-open {
   min-height: 300px;
 }
 
-.loading-content {
-  display: grid;
-  justify-items: center;
-  gap: 14px;
-}
-
-.loading-content p {
-  color: var(--text);
-  font-weight: 600;
-}
-
 .pagination {
   display: flex;
   align-items: center;
@@ -1576,10 +1333,6 @@ body.modal-open {
   font-weight: 700;
 }
 
-.modal {
-  padding: 18px;
-}
-
 .modal.show {
   display: flex;
 }
@@ -1593,7 +1346,31 @@ body.modal-open {
   position: sticky;
   top: 0;
   z-index: 3;
-  background: #fff;
+
+  flex: 0 0 auto;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+
+  padding: 20px;
+
+  border-bottom: 1px solid var(--border);
+  background: var(--card);
+}
+
+.modal-header h2 {
+  min-width: 0;
+  margin: 0;
+
+  color: var(--text);
+
+  font-size: 1.25rem;
+  font-weight: 700;
+  line-height: 1.3;
+
+  overflow-wrap: anywhere;
 }
 
 .btn-secondary {
@@ -1616,23 +1393,20 @@ body.modal-open {
   min-width: 0;
 }
 
-.product-title,
-.product-name {
-  overflow-wrap: anywhere;
+.product-name{
+    overflow-wrap:anywhere;
 }
 
 .product-image {
   display: block;
 }
 
-.product-footer,
 .product-actions {
   display: flex;
   gap: 10px;
   margin-top: auto;
 }
 
-.product-footer button,
 .product-actions button {
   flex: 1;
 }

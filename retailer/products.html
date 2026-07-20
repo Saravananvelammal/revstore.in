@@ -242,172 +242,391 @@
         />
 
         <div class="form-body">
-          <div class="form-grid">
 
-            <!-- Product name -->
-            <div class="form-group form-group-wide">
-              <label for="productName">
-                Product Name
-              </label>
+          <section class="product-form-section">
+            <div class="product-form-section-header">
+              <div>
+                <h3>Product Information</h3>
+                <p>Enter the customer-facing product details.</p>
+              </div>
+            </div>
 
+            <div class="form-grid">
+
+              <div class="form-group form-group-wide">
+                <label for="productName">
+                  Product Name
+                </label>
+
+                <input
+                  id="productName"
+                  class="form-control"
+                  type="text"
+                  maxlength="200"
+                  autocomplete="off"
+                  required
+                />
+
+                <p
+                  class="field-error"
+                  id="productNameError"
+                ></p>
+              </div>
+
+              <div class="form-group form-group-wide">
+                <label for="productDescription">
+                  Description
+                </label>
+
+                <textarea
+                  id="productDescription"
+                  class="form-control form-textarea"
+                  rows="4"
+                  maxlength="3000"
+                  placeholder="Enter product description"
+                ></textarea>
+
+                <p
+                  class="field-error"
+                  id="productDescriptionError"
+                ></p>
+              </div>
+
+              <div class="form-group">
+                <label for="productCategory">
+                  Category
+                </label>
+
+                <select
+                  id="productCategory"
+                  class="form-control"
+                  disabled
+                ></select>
+              </div>
+
+              <div class="form-group">
+                <label for="productSubcategory">
+                  Subcategory
+                </label>
+
+                <select
+                  id="productSubcategory"
+                  class="form-control"
+                  disabled
+                ></select>
+              </div>
+            </div>
+          </section>
+
+          <section class="product-form-section">
+            <div class="product-form-section-header">
+              <div>
+                <h3>Pricing</h3>
+                <p>All values are entered in rupees.</p>
+              </div>
+            </div>
+
+            <div class="form-grid">
+
+              <div class="form-group">
+                <label for="productPrice">
+                  Customer Price
+                </label>
+
+                <input
+                  id="productPrice"
+                  class="form-control"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  inputmode="decimal"
+                  required
+                />
+
+                <p
+                  class="field-error"
+                  id="productPriceError"
+                ></p>
+              </div>
+
+              <div class="form-group">
+                <label for="productActualPrice">
+                  Actual Price / MRP
+                </label>
+
+                <input
+                  id="productActualPrice"
+                  class="form-control"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  inputmode="decimal"
+                  required
+                />
+
+                <p
+                  class="field-error"
+                  id="productActualPriceError"
+                ></p>
+              </div>
+
+              <div class="form-group">
+                <label for="productRevPrice">
+                  Rev App Price
+                </label>
+
+                <input
+                  id="productRevPrice"
+                  class="form-control"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  inputmode="decimal"
+                  required
+                />
+
+                <p
+                  class="field-error"
+                  id="productRevPriceError"
+                ></p>
+              </div>
+
+              <div class="form-group">
+                <label for="productOfferPrice">
+                  Customer Offer
+                </label>
+
+                <input
+                  id="productOfferPrice"
+                  class="form-control"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  inputmode="decimal"
+                  required
+                />
+
+                <p
+                  class="field-error"
+                  id="productOfferPriceError"
+                ></p>
+              </div>
+
+              <div class="form-group form-group-wide">
+                <div class="offer-preview-row">
+                  <span>Offer %</span>
+
+                  <strong id="productOfferPercent">
+                    0.00%
+                  </strong>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section class="product-form-section">
+            <div class="product-form-section-header">
+              <div>
+                <h3>GST / Tax</h3>
+
+                <p>
+                  When manual override is off, tax values are
+                  inherited from category and subcategory.
+                </p>
+              </div>
+            </div>
+
+            <label class="tax-override-control">
               <input
-                id="productName"
-                class="form-control"
-                type="text"
-                maxlength="180"
-                autocomplete="off"
-                required
+                id="productManualTaxOverride"
+                type="checkbox"
               />
 
-              <p
-                class="field-error"
-                id="productNameError"
-              ></p>
+              <span>Manual tax override</span>
+            </label>
+
+            <div class="form-grid tax-fields">
+
+              <div class="form-group">
+                <label for="productHsnCode">
+                  HSN Code
+                </label>
+
+                <input
+                  id="productHsnCode"
+                  class="form-control"
+                  type="text"
+                  maxlength="20"
+                  autocomplete="off"
+                />
+
+                <p
+                  class="field-error"
+                  id="productHsnCodeError"
+                ></p>
+              </div>
+
+              <div class="form-group">
+                <label for="productGstRate">
+                  GST Rate %
+                </label>
+
+                <input
+                  id="productGstRate"
+                  class="form-control"
+                  type="number"
+                  min="0"
+                  max="100"
+                  step="0.01"
+                  inputmode="decimal"
+                />
+
+                <p
+                  class="field-error"
+                  id="productGstRateError"
+                ></p>
+                </div>
+
+              <div class="form-group">
+                <label for="productCessRate">
+                  Cess Rate %
+                </label>
+
+                <input
+                  id="productCessRate"
+                  class="form-control"
+                  type="number"
+                  min="0"
+                  max="100"
+                  step="0.01"
+                  inputmode="decimal"
+                />
+
+                <p
+                  class="field-error"
+                  id="productCessRateError"
+                ></p>
+              </div>
+
+              <div class="form-group">
+                <label for="productCessPerUnit">
+                  Cess Per Unit (₹)
+                </label>
+
+                <input
+                  id="productCessPerUnit"
+                  class="form-control"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  inputmode="decimal"
+                />
+
+                <p
+                  class="field-error"
+                  id="productCessPerUnitError"
+                ></p>
+              </div>
+
+              <div class="form-group form-group-wide">
+                <label for="productTaxSource">
+                  Tax Source
+                </label>
+
+                <input
+                  id="productTaxSource"
+                  class="form-control"
+                  type="text"
+                  maxlength="100"
+                  readonly
+                />
+              </div>
+            </div>
+          </section>
+
+          <section class="product-form-section">
+            <div class="product-form-section-header">
+              <div>
+                <h3>Inventory and Availability</h3>
+                <p>Control stock and ordering schedule.</p>
+              </div>
             </div>
 
-            <!-- Stock -->
-            <div class="form-group">
-              <label for="productStock">
-                Stock
-              </label>
+            <div class="form-grid">
+              <div class="form-group">
+                <label for="productStock">
+                  Stock
+                </label>
 
-              <input
-                id="productStock"
-                class="form-control"
-                type="number"
-                min="0"
-                step="1"
-                inputmode="numeric"
-                required
-              />
+                <input
+                  id="productStock"
+                  class="form-control"
+                  type="number"
+                  min="0"
+                  step="1"
+                  inputmode="numeric"
+                  required
+                />
 
-              <p
-                class="field-error"
-                id="productStockError"
-              ></p>
+                <p
+                  class="field-error"
+                  id="productStockError"
+                ></p>
+              </div>
+
+              <div class="form-group form-group-wide">
+                <span class="form-label">
+                  Product Availability
+                </span>
+
+                <div class="availability-mode-row">
+                  <label>
+                    <input
+                      id="availabilityAlways"
+                      type="radio"
+                      name="availabilityMode"
+                      value="always"
+                      checked
+                    />
+
+                    <span>Always</span>
+                  </label>
+
+                  <label>
+                    <input
+                      id="availabilityCustom"
+                      type="radio"
+                      name="availabilityMode"
+                      value="custom"
+                    />
+
+                    <span>Custom</span>
+                  </label>
+                </div>
+              </div>
+
+              <div
+                id="customAvailabilitySection"
+                class="form-group form-group-wide hidden"
+              >
+                <div id="availabilityWeeklyGrid"></div>
+
+                <p class="field-help">
+                  Custom weekly availability is preserved when supplied
+                  by the product API.
+                </p>
+              </div>
+            </div>
+          </section>
+
+          <section class="product-form-section">
+            <div class="product-form-section-header">
+              <div>
+                <h3>Images</h3>
+                <p>Maximum combined existing and new images: 7.</p>
+              </div>
             </div>
 
-            <!-- Category -->
-            <div class="form-group">
-              <label for="productCategory">
-                Category
-              </label>
-
-              <select id="productCategory" class="form-control" disabled></select>
-            </div>
-
-            <!-- Subcategory -->
-            <div class="form-group">
-              <label for="productSubcategory">
-                Subcategory
-              </label>
-
-              <select id="productSubcategory" class="form-control" disabled></select>
-            </div>
-
-            <!-- Rev price -->
-            <div class="form-group">
-              <label for="productRevPrice">
-                Rev Price
-              </label>
-
-              <input
-                id="productRevPrice"
-                class="form-control"
-                type="number"
-                min="0"
-                step="0.01"
-                inputmode="decimal"
-                required
-              />
-
-              <p
-                class="field-error"
-                id="productRevPriceError"
-              ></p>
-            </div>
-
-            <!-- Offer price -->
-            <div class="form-group">
-              <label for="productOfferPrice">
-                Offer Price
-              </label>
-
-              <input
-                id="productOfferPrice"
-                class="form-control"
-                type="number"
-                min="0"
-                step="0.01"
-                inputmode="decimal"
-                required
-              />
-
-              <p
-                class="field-error"
-                id="productOfferPriceError"
-              ></p>
-            </div>
-
-            <!-- Display price -->
-            <div class="form-group">
-              <label for="productPrice">
-                Display Price
-              </label>
-
-              <input
-                id="productPrice"
-                class="form-control"
-                type="number"
-                min="0"
-                step="0.01"
-                inputmode="decimal"
-                required
-              />
-
-              <p
-                class="field-error"
-                id="productPriceError"
-              ></p>
-            </div>
-
-            <!-- Actual price -->
-            <div class="form-group">
-              <label for="productActualPrice">
-                Actual Price / MRP
-              </label>
-
-              <input
-                id="productActualPrice"
-                class="form-control"
-                type="number"
-                min="0"
-                step="0.01"
-                inputmode="decimal"
-                required
-              />
-
-              <p
-                class="field-error"
-                id="productActualPriceError"
-              ></p>
-            </div>
-
-            <!-- Description -->
-            <div class="form-group form-group-wide">
-              <label for="productDescription">
-                Description
-              </label>
-
-              <textarea
-                id="productDescription"
-                class="form-control form-textarea"
-                rows="4"
-                maxlength="1000"
-              ></textarea>
-            </div>
-
-            <!-- Images -->
             <div class="form-group form-group-wide">
               <label for="productImages">
                 Add Product Images
@@ -423,52 +642,109 @@
 
               <p class="field-help">
                 JPEG, PNG and WebP images are supported.
-                Maximum combined existing and new images: 7.
               </p>
             </div>
-          </div>
 
-          <!-- Existing images -->
-          <section
-            id="existingImagesSection"
-            class="image-section hidden"
-          >
-            <div class="image-section-head">
-              <div>
-                <h3>Existing Images</h3>
+            <section
+              id="existingImagesSection"
+              class="image-section hidden"
+            >
+              <div class="image-section-head">
+                <div>
+                  <h3>Existing Images</h3>
 
-                <p>
-                  Select Remove for images that should be deleted
-                  when the product is updated.
-                </p>
+                  <p>
+                    Removed images are deleted only after saving.
+                  </p>
+                </div>
               </div>
-            </div>
 
-            <div
-              id="existingImagePreview"
-              class="preview-grid"
-            ></div>
+              <div
+                id="existingImagePreview"
+                class="preview-grid"
+              ></div>
+            </section>
+
+            <section
+              id="newImagesSection"
+              class="image-section hidden"
+            >
+              <div class="image-section-head">
+                <div>
+                  <h3>New Images</h3>
+
+                  <p>
+                    These images will be uploaded when saved.
+                  </p>
+                </div>
+             </div>
+
+              <div
+                id="newImagePreview"
+                class="preview-grid"
+              ></div>
+            </section>
           </section>
 
-          <!-- New images -->
-          <section
-            id="newImagesSection"
-            class="image-section hidden"
-          >
-            <div class="image-section-head">
+          <section class="product-form-section">
+            <div class="product-form-section-header">
               <div>
-                <h3>New Images</h3>
+                <h3>Location</h3>
 
                 <p>
-                  These images will be uploaded when the product is saved.
+                  Product location is inherited from the retailer unless
+                  the backend supplies product-specific coordinates.
                 </p>
               </div>
             </div>
 
-            <div
-              id="newImagePreview"
-              class="preview-grid"
-            ></div>
+            <div class="form-grid">
+              <div class="form-group form-group-wide">
+                <label for="productLocationAddress">
+                  Address
+                </label>
+
+                <textarea
+                  id="productLocationAddress"
+                  class="form-control"
+                  rows="3"
+                  maxlength="500"
+                  readonly
+                ></textarea>
+              </div>
+
+              <div class="form-group">
+                <label for="productLatitude">
+                  Latitude
+                </label>
+
+                <input
+                  id="productLatitude"
+                  class="form-control"
+                  type="number"
+                  min="-90"
+                  max="90"
+                  step="any"
+                  readonly
+                />
+              </div>
+
+              <div class="form-group">
+                <label for="productLongitude">
+                  Longitude
+                </label>
+
+                <input
+                  id="productLongitude"
+                  class="form-control"
+                  type="number"
+                  min="-180"
+                  max="180"
+                  step="any"
+                  readonly
+                />
+              </div>
+            </div>
           </section>
         </div>
 
@@ -492,10 +768,11 @@
       </form>
     </div>
   </div>
-
-  <script
-    src="js/products.js"
-    defer
-  ></script>
+  <script defer src="js/products/get-product.js"></script>
+  <script defer src="js/products/add-product.js"></script>
+  <script defer src="js/products/edit-product.js"></script>
+  <script defer src="js/products/delete-product.js"></script>
+  <script defer src="js/products/restore-product.js"></script>
+  <script defer src="js/products.js"></script>
 </body>
 </html>

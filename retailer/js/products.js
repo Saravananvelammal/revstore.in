@@ -125,7 +125,10 @@
 
     existingImages: [],
     removedImages: [],
-    selectedNewFiles: []
+    selectedNewFiles: [],
+    availabilityWeekly: [],
+    taxProfile: null,
+    productLocation: null
   };
 
   let productEventsBound = false;
@@ -140,6 +143,12 @@
   const protectedObjectUrls = new Set();
 
   let unauthorizedImageHandled = false;
+
+  let getProductModule = null;
+  let addProductModule = null;
+  let editProductModule = null;
+  let deleteProductModule = null;
+  let restoreProductModule = null;
 
   /* ========================================================
      DOM references
@@ -209,6 +218,21 @@
     productOfferPrice: document.getElementById('productOfferPrice'),
     productPrice: document.getElementById('productPrice'),
     productActualPrice: document.getElementById('productActualPrice'),
+    productOfferPercent: document.getElementById('productOfferPercent'),
+    productManualTaxOverride: document.getElementById('productManualTaxOverride'),
+    productHsnCode: document.getElementById('productHsnCode'),
+    productGstRate: document.getElementById('productGstRate'),
+    productCessRate: document.getElementById('productCessRate'),
+    productCessPerUnit: document.getElementById('productCessPerUnit'),
+    productTaxSource: document.getElementById('productTaxSource'),
+    availabilityAlways: document.getElementById('availabilityAlways'),
+    availabilityCustom: document.getElementById('availabilityCustom'),
+    customAvailabilitySection: document.getElementById('customAvailabilitySection'),
+
+    availabilityWeeklyGrid: document.getElementById('availabilityWeeklyGrid'),
+    productLocationAddress: document.getElementById('productLocationAddress'),
+    productLatitude: document.getElementById('productLatitude'),
+    productLongitude: document.getElementById('productLongitude'),
 
     productImages: document.getElementById('productImages'),
 
@@ -692,7 +716,7 @@
 
       headers.set(
         'Accept',
-        'image/avif,image/webp,image/apng,image/svg+xml,image/,/*;q=0.8'
+        'image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8'
       );
 
       headers.set(
@@ -2241,43 +2265,151 @@
         ? 'Stock: ' + String(stock)
         : 'Stock: —';
 
-    const updatedElement = document.createElement('span');
-    updatedElement.className = 'product-updated';
-    updatedElement.textContent =
-      'Updated: ' + formatDate(product.updatedAt);
-
     meta.appendChild(stockElement);
-    meta.appendChild(updatedElement);
 
     const actions = document.createElement('div');
-    actions.className = 'product-actions';
+    actions.className = 'product-actions compact-actions';
 
+    /* Edit icon */
     const editButton = document.createElement('button');
     editButton.type = 'button';
-    editButton.className = 'btn btn-primary edit-product-btn';
-    editButton.textContent = 'Edit';
+    editButton.className =
+      'product-icon-action edit-product-btn';
+
+    editButton.setAttribute(
+      'aria-label',
+      'Edit ' + cleanText(product.name, 'product')
+    );
+
+    editButton.setAttribute(
+      'title',
+      deleted
+        ? 'Restore product before editing'
+        : 'Edit product'
+    );
+
     editButton.disabled = deleted;
 
-    editButton.addEventListener('click', function () {
-      openEditModal(product);
-    });
+    const editIcon =
+      document.createElement('i');
 
-    const toggleButton = document.createElement('button');
-    toggleButton.type = 'button';
-    toggleButton.className = deleted
-      ? 'btn btn-success toggle-product-btn'
-      : 'btn btn-danger toggle-product-btn';
+    editIcon.className =
+      'fa-solid fa-pen-to-square';
 
-    toggleButton.textContent = deleted
-      ? 'Restore'
-      : 'Delete';
+    editIcon.setAttribute(
+      'aria-hidden',
+      'true'
+    );
 
-    toggleButton.addEventListener('click', function () {
-      toggleProductDeletion(product);
-    });
+    editButton.appendChild(editIcon);
+
+    editButton.addEventListener(
+      'click',
+      function () {
+        editProductModule.openEditModal(
+          product
+        );
+      }
+    );
+
+    /* Active/deleted switch */
+    const switchWrapper =
+      document.createElement('label');
+
+    switchWrapper.className =
+      'product-status-switch';
+
+    switchWrapper.setAttribute(
+      'title',
+      deleted
+        ? 'Restore product'
+        : 'Delete product'
+    );
+
+    const switchInput =
+      document.createElement('input');
+
+    switchInput.type = 'checkbox';
+    switchInput.checked = !deleted;
+
+    switchInput.setAttribute(
+      'role',
+      'switch'
+    );
+
+    switchInput.setAttribute(
+      'aria-label',
+      deleted
+        ? 'Restore ' +
+            cleanText(product.name, 'product')
+        : 'Delete ' +
+            cleanText(product.name, 'product')
+    );
+
+    const switchSlider =
+      document.createElement('span');
+
+    switchSlider.className =
+      'product-status-slider';
+
+    const switchText =
+      document.createElement('span');
+
+    switchText.className =
+      'product-status-text';
+
+    switchText.textContent =
+      deleted ? 'Deleted' : 'Active';
+
+    switchInput.addEventListener(
+      'change',
+      async function () {
+        const requestedActive =
+          switchInput.checked;
+
+        switchInput.disabled = true;
+
+        try {
+          let completed = false;
+
+          if (requestedActive) {
+            completed =
+              await restoreProductModule
+                .restoreProduct(product);
+          } else {
+            completed =
+              await deleteProductModule
+                .deleteProduct(product);
+          }
+
+          /*
+          * The list reloads after successful action.
+          * Revert the switch when cancelled or failed.
+          */
+          if (completed !== true) {
+            switchInput.checked =
+              !requestedActive;
+          }
+        } finally {
+          switchInput.disabled = false;
+        }
+      }
+    );
+
+    switchWrapper.appendChild(
+      switchInput
+    );
+
+    switchWrapper.appendChild(
+      switchSlider
+    );
+
+    switchWrapper.appendChild(
+      switchText
+    );
 
     actions.appendChild(editButton);
-    actions.appendChild(toggleButton);
+    actions.appendChild(switchWrapper);
 
     body.appendChild(name);
     body.appendChild(description);
@@ -2358,6 +2490,97 @@
     }    
   }
 
+  function initializeProductActionModules() {
+    const modules =
+      window.RevstoreRetailerProductModules || {};
+
+    const requiredFactories = [
+      'createGetProductModule',
+      'createAddProductModule',
+      'createEditProductModule',
+      'createDeleteProductModule',
+      'createRestoreProductModule'
+    ];
+
+    const missingFactories =
+      requiredFactories.filter(
+        function (factoryName) {
+          return (
+            typeof modules[factoryName] !==
+            'function'
+          );
+        }
+      );
+
+    if (missingFactories.length) {
+      throw new Error(
+        'Product operation modules are missing: ' +
+          missingFactories.join(', ')
+      );
+    }
+
+    const sharedContext = {
+      State,
+      UI,
+      API,
+
+      apiFetch,
+      loadProducts,
+
+      cleanText,
+      normalizeKey,
+      getProductId,
+      getProductImages,
+      toInputNumberFromPaise,
+
+      getProductTaxProfile,
+      getProductAvailability,
+      getProductLocation,
+      updateFormOfferPercent,
+      syncTaxOverrideState,
+      syncAvailabilityMode,
+
+      showToast,
+      handleError,
+
+      setPageLoading,
+      setProductLoading,
+      setSubmitLoading,
+
+      resetProductModal,
+      openProductModal,
+
+      renderExistingImages,
+      renderNewImages
+    };
+
+    getProductModule =
+      modules.createGetProductModule(
+        sharedContext
+      );
+
+    addProductModule =
+      modules.createAddProductModule(
+        sharedContext
+      );
+
+    editProductModule =
+      modules.createEditProductModule({
+        ...sharedContext,
+        getProductModule
+      });
+
+    deleteProductModule =
+      modules.createDeleteProductModule(
+        sharedContext
+      );
+
+    restoreProductModule =
+      modules.createRestoreProductModule(
+        sharedContext
+      );
+  }
+
   /* ========================================================
      Refresh and initialization
   ======================================================== */
@@ -2405,6 +2628,8 @@
 
     try {
       assertRequiredElements();
+
+      initializeProductActionModules();
 
       bindBaseEvents();
       ensureProductEventsBound();
@@ -2492,6 +2717,285 @@
     return Number.isFinite(number)
       ? number
       : null;
+  }
+
+  function firstFiniteNumber(values, fallback) {
+    for (
+      let index = 0;
+      index < values.length;
+      index += 1
+    ) {
+      const number = Number(values[index]);
+
+      if (Number.isFinite(number)) {
+        return number;
+      }
+    }
+
+    return fallback;
+  }
+
+  function toRatePercent(value, basisPointsValue) {
+    const direct = Number(value);
+
+    if (Number.isFinite(direct)) {
+      return direct;
+    }
+
+    const basisPoints =
+      Number(basisPointsValue);
+
+    if (Number.isFinite(basisPoints)) {
+      return basisPoints / 100;
+    }
+
+    return 0;
+  }
+
+  function toCessPerUnitRupees(
+    value,
+    paiseValue
+  ) {
+    const direct = Number(value);
+
+    if (Number.isFinite(direct)) {
+      return direct;
+    }
+
+    const paise = Number(paiseValue);
+
+    if (Number.isFinite(paise)) {
+      return paise / 100;
+    }
+
+    return 0;
+  }
+
+  function getProductTaxProfile(product) {
+    const taxProfile =
+      product &&
+      product.taxProfile &&
+      typeof product.taxProfile === 'object'
+        ? product.taxProfile
+        : {};
+
+    return {
+      manualOverride:
+        taxProfile.manualOverride === true ||
+        taxProfile.isManualOverride === true,
+
+      hsnCode: cleanText(
+        taxProfile.hsnCode ||
+        taxProfile.hsn ||
+        product?.hsnCode
+      ),
+
+      gstRatePercent:
+        toRatePercent(
+          taxProfile.gstRatePercent ??
+            taxProfile.gstRate ??
+            product?.gstRate,
+          taxProfile.gstRateBps ??
+            taxProfile.gstBps
+        ),
+
+      cessRatePercent:
+        toRatePercent(
+          taxProfile.cessRatePercent ??
+            taxProfile.cessRate,
+          taxProfile.cessRateBps ??
+            taxProfile.cessBps
+        ),
+
+      cessPerUnitRupees:
+        toCessPerUnitRupees(
+          taxProfile.cessPerUnitRupees ??
+            taxProfile.cessPerUnit,
+          taxProfile.cessPerUnitPaise
+        ),
+
+      taxSource: cleanText(
+        taxProfile.taxSource ||
+        taxProfile.source ||
+        product?.taxSource
+      ),
+
+      raw: taxProfile
+    };
+  }
+
+  function normalizeLocationCoordinates(
+    location
+  ) {
+    const source =
+      location &&
+      typeof location === 'object'
+        ? location
+        : {};
+
+    let longitude = null;
+    let latitude = null;
+
+    if (
+      Array.isArray(source.coordinates) &&
+      source.coordinates.length >= 2
+    ) {
+      longitude =
+        Number(source.coordinates[0]);
+
+      latitude =
+        Number(source.coordinates[1]);
+    } else if (
+      source.geo &&
+      Array.isArray(source.geo.coordinates) &&
+      source.geo.coordinates.length >= 2
+    ) {
+      longitude =
+        Number(source.geo.coordinates[0]);
+
+      latitude =
+        Number(source.geo.coordinates[1]);
+    } else {
+      latitude = firstFiniteNumber(
+        [
+          source.latitude,
+          source.lat
+        ],
+        null
+      );
+
+      longitude = firstFiniteNumber(
+        [
+          source.longitude,
+          source.lng,
+          source.lon
+        ],
+        null
+      );
+    }
+
+    return {
+      latitude:
+        Number.isFinite(latitude)
+          ? latitude
+          : null,
+
+      longitude:
+        Number.isFinite(longitude)
+          ? longitude
+          : null
+    };
+  }
+
+  function getProductLocation(product) {
+    const source =
+      product?.location ||
+      product?.productLocation ||
+      product?.geoLocation ||
+      {};
+
+    const coordinates =
+      normalizeLocationCoordinates(source);
+
+    const address = cleanText(
+      source.formattedAddress ||
+      source.address ||
+      product?.address ||
+      product?.locationAddress
+    );
+
+    return {
+      address,
+      latitude: coordinates.latitude,
+      longitude: coordinates.longitude,
+      raw: source
+    };
+  }
+
+  function getProductAvailability(product) {
+    const availability =
+      product &&
+      product.availability &&
+      typeof product.availability === 'object'
+        ? product.availability
+        : {};
+
+    const mode =
+      normalizeKey(availability.mode) ===
+        'custom'
+        ? 'custom'
+        : 'always';
+
+    return {
+      mode,
+
+      weekly:
+        Array.isArray(availability.weekly)
+          ? structuredCloneSafe(
+              availability.weekly
+            )
+          : []
+    };
+  }
+
+  function structuredCloneSafe(value) {
+    if (
+      typeof window.structuredClone ===
+      'function'
+    ) {
+      try {
+        return window.structuredClone(value);
+      } catch (_) {
+        // Fall through to JSON copy.
+      }
+    }
+
+    try {
+      return JSON.parse(
+        JSON.stringify(value)
+      );
+    } catch (_) {
+      return Array.isArray(value)
+        ? []
+      : {};
+    }
+  }
+
+  function updateFormOfferPercent() {
+    if (!UI.productOfferPercent) {
+      return;
+    }
+
+    const actualPrice =
+      toSafeNumber(
+        UI.productActualPrice?.value
+      );
+
+    const offerPrice =
+      toSafeNumber(
+        UI.productOfferPrice?.value
+      );
+
+    let percent = 0;
+
+    if (
+      actualPrice !== null &&
+      offerPrice !== null &&
+      actualPrice > 0 &&
+      offerPrice < actualPrice
+    ) {
+      percent =
+        (
+          (
+            actualPrice -
+            offerPrice
+          ) /
+          actualPrice
+        ) * 100;
+    }
+
+    UI.productOfferPercent.textContent =
+      percent.toFixed(2) + '%';
   }
 
   function revokeSelectedFilePreviews() {
@@ -2606,6 +3110,7 @@
         State.submitLoading ||
         State.pageLoading;
     }
+    syncTaxOverrideState();
   }
 
   function resetProductModal() {
@@ -2615,10 +3120,62 @@
     State.existingImages = [];
     State.removedImages = [];
     State.selectedNewFiles = [];
+    State.availabilityWeekly = [];
+    State.taxProfile = null;
+    State.productLocation = null;
 
     if (UI.productForm) {
       UI.productForm.reset();
     }
+
+    if (UI.productManualTaxOverride) {
+      UI.productManualTaxOverride.checked =
+        false;
+    }
+
+    if (UI.productHsnCode) {
+      UI.productHsnCode.value = '';
+    }
+
+    if (UI.productGstRate) {
+      UI.productGstRate.value = '';
+    }
+
+    if (UI.productCessRate) {
+      UI.productCessRate.value = '0';
+    }
+
+    if (UI.productCessPerUnit) {
+      UI.productCessPerUnit.value = '0';
+    }
+
+    if (UI.productTaxSource) {
+      UI.productTaxSource.value = '';
+    }
+
+    if (UI.availabilityAlways) {
+      UI.availabilityAlways.checked = true;
+    }
+
+    if (UI.availabilityCustom) {
+      UI.availabilityCustom.checked = false;
+    }
+
+    if (UI.productLocationAddress) {
+      UI.productLocationAddress.value = '';
+    }
+
+    if (UI.productLatitude) {
+      UI.productLatitude.value = '';
+    }
+
+    if (UI.productLongitude) {
+      UI.productLongitude.value = '';
+    }
+
+    updateFormOfferPercent();
+    syncAvailabilityMode();
+    syncTaxOverrideState();
 
     resetFormErrors();
 
@@ -2686,44 +3243,7 @@
     document.body.classList.remove('modal-open');
 
     resetProductModal();
-  }
-
-  function openAddModal() {
-    if (
-      !State.selectedCategory ||
-      !State.selectedSubcategory
-    ) {
-      showToast(
-        'Select a category and subcategory before adding a product.',
-        'warning'
-      );
-
-      return;
-    }
-
-    resetProductModal();
-
-    if (UI.modalTitle) {
-      UI.modalTitle.textContent = 'Add Product';
-    }
-
-    if (UI.productCategory) {
-      UI.productCategory.value =
-        State.selectedCategory;
-    }
-
-    if (UI.productSubcategory) {
-      UI.productSubcategory.value =
-        State.selectedSubcategory;
-    }
-
-    if (UI.productStock) {
-      UI.productStock.value = '0';
-    }
-
-    setSubmitLoading(false);
-    openProductModal();
-  }
+  }  
 
   /* ========================================================
      Existing-image rendering
@@ -3030,163 +3550,7 @@
 
     rebuildFileInputFromSelectedFiles();
     renderNewImages();
-  }
-
-  /* ========================================================
-     Edit product loading
-  ======================================================== */
-
-  async function fetchProductDetail(productId) {
-    const payload = await apiFetch(
-      API.product(productId),
-      { method: 'GET' }
-    );
-
-    const product =
-      payload &&
-      payload.product &&
-      typeof payload.product === 'object'
-        ? payload.product
-        : payload;
-
-    if (
-      !product ||
-      typeof product !== 'object' ||
-      !getProductId(product)
-    ) {
-      throw new Error(
-        'Product details could not be loaded.'
-      );
-    }
-
-    return product;
-  }
-
-  async function openEditModal(productSummary) {
-    const productId = getProductId(productSummary);
-
-    if (!productId) {
-      showToast(
-        'Invalid product selected.',
-        'error'
-      );
-
-      return;
-    }
-
-    if (productSummary.isDeleted === true) {
-      showToast(
-        'Restore this product before editing it.',
-        'warning'
-      );
-
-      return;
-    }
-
-    setPageLoading(true, 'Loading product details...');
-
-    try {
-      const product =
-        await fetchProductDetail(productId);
-
-      resetProductModal();
-
-      State.editingProduct = product;
-      State.existingImages =
-        getProductImages(product);
-
-      if (UI.modalTitle) {
-        UI.modalTitle.textContent = 'Edit Product';
-      }
-
-      if (UI.productId) {
-        UI.productId.value = productId;
-      }
-
-      if (UI.productName) {
-        UI.productName.value =
-          cleanText(product.name);
-      }
-
-      if (UI.productDescription) {
-        UI.productDescription.value =
-          cleanText(product.description);
-      }
-
-      if (UI.productStock) {
-        const stock = Number(product.stock);
-
-        UI.productStock.value =
-          Number.isFinite(stock)
-            ? String(Math.max(0, stock))
-            : '0';
-      }
-
-      if (UI.productCategory) {
-        UI.productCategory.value =
-          cleanText(
-            product.category,
-            State.selectedCategory
-          );
-      }
-
-      if (UI.productSubcategory) {
-        const productSubcategory =
-          cleanText(
-            product.subCategory,
-            State.selectedSubcategory
-          );
-
-        const optionExists =
-          Array.from(UI.productSubcategory.options)
-            .some(function (option) {
-              return (
-                normalizeKey(option.value) ===
-                normalizeKey(productSubcategory)
-              );
-            });
-
-        if (!optionExists && productSubcategory) {
-          const option = document.createElement('option');
-          option.value = productSubcategory;
-          option.textContent = productSubcategory;
-          UI.productSubcategory.appendChild(option);
-        }
-
-        UI.productSubcategory.value =
-          productSubcategory;
-      }
-
-      if (UI.productRevPrice) {
-        UI.productRevPrice.value =
-          toInputNumberFromPaise(product.priceRev);
-      }
-
-      if (UI.productOfferPrice) {
-        UI.productOfferPrice.value =
-          toInputNumberFromPaise(product.offerPrice);
-      }
-
-      if (UI.productPrice) {
-        UI.productPrice.value =
-          toInputNumberFromPaise(product.price);
-      }
-
-      if (UI.productActualPrice) {
-        UI.productActualPrice.value =
-          toInputNumberFromPaise(product.priceActual);
-      }
-
-      renderExistingImages();
-      renderNewImages();
-      setSubmitLoading(false);
-      openProductModal();
-    } catch (error) {
-      handleError(error);
-    } finally {
-      setPageLoading(false);
-    }
-  }
+  }  
 
   /* ========================================================
      Product-form validation
@@ -3227,6 +3591,85 @@
       UI.productActualPrice &&
         UI.productActualPrice.value
     );
+
+    const manualTaxOverride =
+      Boolean(
+        UI.productManualTaxOverride &&
+        UI.productManualTaxOverride.checked
+      );
+
+    if (manualTaxOverride) {
+      const hsnCode =
+        cleanText(
+          UI.productHsnCode?.value
+        );
+
+      const gstRate =
+        toSafeNumber(
+          UI.productGstRate?.value
+        );
+
+      const cessRate =
+        toSafeNumber(
+          UI.productCessRate?.value
+        );
+
+      const cessPerUnit =
+        toSafeNumber(
+          UI.productCessPerUnit?.value
+        );
+
+      if (!hsnCode) {
+        setFieldError(
+          UI.productHsnCode,
+          'productHsnCodeError',
+          'HSN code is required for manual tax override.'
+        );
+
+        valid = false;
+      }
+
+      if (
+        gstRate === null ||
+        gstRate < 0 ||
+        gstRate > 100
+      ) {
+        setFieldError(
+          UI.productGstRate,
+          'productGstRateError',
+          'GST rate must be between 0 and 100.'
+        );
+
+        valid = false;
+      }
+
+      if (
+        cessRate === null ||
+        cessRate < 0 ||
+        cessRate > 100
+      ) {
+        setFieldError(
+          UI.productCessRate,
+          'productCessRateError',
+          'Cess rate must be between 0 and 100.'
+        );
+
+        valid = false;
+      }
+
+      if (
+        cessPerUnit === null ||
+        cessPerUnit < 0
+      ) {
+        setFieldError(
+          UI.productCessPerUnit,
+          'productCessPerUnitError',
+          'Cess per unit must be zero or greater.'
+        );
+
+        valid = false;
+      }
+    }
 
     let valid = true;
 
@@ -3368,7 +3811,8 @@
   }
 
   function buildProductPayload() {
-    const isEdit = Boolean(State.editingProduct);
+    const isEdit =
+      Boolean(State.editingProduct);
 
     const category = isEdit
       ? cleanText(
@@ -3386,19 +3830,39 @@
         )
       : State.selectedSubcategory;
 
+    const manualTaxOverride =
+      Boolean(
+        UI.productManualTaxOverride &&
+        UI.productManualTaxOverride.checked
+      );
+
+    const availabilityMode =
+      UI.availabilityCustom &&
+      UI.availabilityCustom.checked
+        ? 'custom'
+        : 'always';
+
     const payload = {
-      name: cleanText(UI.productName.value),
+      name: cleanText(
+        UI.productName.value
+      ),
 
       description: cleanText(
         UI.productDescription.value
       ),
 
-      stock: Number(UI.productStock.value),
+      stock: Number(
+        UI.productStock.value
+      ),
 
       category,
-
       subCategory,
 
+      /*
+      * Inputs contain rupees.
+      * Existing merge/validation middleware is expected to
+      * convert these values into stored paise, as before.
+      */
       priceRev: Number(
         UI.productRevPrice.value
       ),
@@ -3416,10 +3880,88 @@
       ),
 
       availability: {
-        mode: 'always',
-        weekly: []
+        mode: availabilityMode,
+
+        weekly:
+          availabilityMode === 'custom'
+            ? structuredCloneSafe(
+                State.availabilityWeekly
+              )
+            : []
+      },
+
+      taxProfile: {
+        /*
+        * Keep both common field forms only when your
+        * validateProduct middleware accepts them.
+        */
+        manualOverride:
+          manualTaxOverride,
+
+        hsnCode: cleanText(
+          UI.productHsnCode &&
+            UI.productHsnCode.value
+        ),
+
+        gstRateBps:
+          Math.round(
+            Number(
+              UI.productGstRate?.value || 0
+            ) * 100
+          ),
+
+        cessRateBps:
+          Math.round(
+            Number(
+              UI.productCessRate?.value || 0
+            ) * 100
+          ),
+
+        cessPerUnitPaise:
+          Math.round(
+            Number(
+              UI.productCessPerUnit?.value || 0
+            ) * 100
+          ),
+
+        taxSource: cleanText(
+          UI.productTaxSource?.value
+        )
       }
     };
+
+    /*
+    * Preserve backend-generated inherited tax metadata when the
+    * retailer does not manually override tax.
+    */
+    if (
+      !manualTaxOverride &&
+      State.taxProfile &&
+      typeof State.taxProfile === 'object'
+    ) {
+      payload.taxProfile = {
+        ...structuredCloneSafe(
+          State.taxProfile
+        ),
+
+        manualOverride: false
+      };
+    }
+
+    /*
+    * Preserve an existing product-specific location.
+    * Do not manufacture a location for a new product when the
+    * backend normally inherits it from the retailer.
+    */
+    if (
+      State.productLocation &&
+      typeof State.productLocation === 'object'
+    ) {
+      payload.location =
+        structuredCloneSafe(
+          State.productLocation
+        );
+    }
 
     if (
       isEdit &&
@@ -3525,96 +4067,7 @@
     } finally {
       setSubmitLoading(false);
     }
-  }
-
-  /* ========================================================
-     Delete and restore
-  ======================================================== */
-
-  function buildProductActionMessage(product, restoring) {
-    const productName = cleanText(
-      product && product.name,
-      'this product'
-    );
-
-    return restoring
-      ? 'Restore "' + productName + '"?'
-      : 'Delete "' +
-          productName +
-          '"? It can be restored later.';
-  }
-
-  async function toggleProductDeletion(product) {
-    if (
-      State.productLoading ||
-      State.submitLoading
-    ) {
-      return;
-    }
-
-    const productId = getProductId(product);
-
-    if (!productId) {
-      showToast(
-        'Invalid product selected.',
-        'error'
-      );
-
-      return;
-    }
-
-    const restoring =
-      product.isDeleted === true;
-
-    const confirmed = window.confirm(
-      buildProductActionMessage(
-        product,
-        restoring
-      )
-    );
-
-    if (!confirmed) {
-      return;
-    }
-
-    setProductLoading(
-      true,
-      restoring
-        ? 'Restoring product...'
-        : 'Deleting product...'
-    );
-
-    try {
-      const endpoint = restoring
-        ? API.restoreProduct(productId)
-        : API.product(productId);
-
-      const response = await apiFetch(
-        endpoint,
-        {
-          method: restoring
-            ? 'PUT'
-            : 'DELETE'
-        }
-      );
-
-      showToast(
-        cleanText(
-          response.message,
-          restoring
-            ? 'Product restored successfully.'
-            : 'Product deleted successfully.'
-        ),
-        'success'
-      );
-
-      await loadProducts(State.page);
-    } catch (error) {
-      handleError(error);
-    } finally {
-      setProductLoading(false);
-    }
-  }
+  }    
 
   /* ========================================================
      Logout
@@ -3664,7 +4117,9 @@
   function bindProductEvents() {
     UI.addProductBtn.addEventListener(
       'click',
-      openAddModal
+      function () {
+        addProductModule.openAddModal();
+      }
     );
 
     if (UI.closeModalBtn) {
@@ -4151,6 +4606,18 @@
       );
     });
 
+    [
+      UI.productActualPrice,
+      UI.productOfferPrice
+    ]
+      .filter(Boolean)
+      .forEach(function (input) {
+      input.addEventListener(
+          'input',
+          updateFormOfferPercent
+        );
+    });
+
     if (UI.productName) {
       UI.productName.addEventListener(
         'input',
@@ -4179,6 +4646,29 @@
             );
         }
       );
+    }
+  }
+
+  function syncTaxOverrideState() {
+    const manual =
+      UI.productManualTaxOverride &&
+      UI.productManualTaxOverride.checked;
+
+    [
+      UI.productHsnCode,
+      UI.productGstRate,
+      UI.productCessRate,
+      UI.productCessPerUnit
+    ]
+      .filter(Boolean)
+      .forEach(function (input) {
+        input.disabled =
+          State.submitLoading ||
+          !manual;
+      });
+
+    if (UI.productTaxSource) {
+      UI.productTaxSource.readOnly = true;
     }
   }
 
@@ -4221,6 +4711,14 @@
     finalEventsBound = true;
 
     bindNumericInputSafety();
+
+    if (UI.productManualTaxOverride) {
+      UI.productManualTaxOverride
+        .addEventListener(
+          'change',
+          syncTaxOverrideState
+        );
+    }   
 
     window.addEventListener(
       'beforeunload',
