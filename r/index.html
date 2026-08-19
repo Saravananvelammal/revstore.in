@@ -2,56 +2,52 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta
+    name="viewport"
+    content="width=device-width,initial-scale=1"
+  >
   <meta name="robots" content="noindex,nofollow">
+
   <title>Opening RevStore…</title>
 </head>
 
 <body>
+
+<p>Opening RevStore…</p>
+
 <script>
 (function () {
   "use strict";
 
-  const match = window.location.pathname.match(
-    /^\/r\/([A-Za-z0-9_-]{10,16})\/?$/
-  );
+  const match =
+    window.location.pathname.match(
+      /^\/r\/([A-Za-z0-9_-]{10,16})\/?$/
+    );
 
   if (!match) {
     window.location.replace("/");
     return;
   }
 
-  const referralCode = match[1];
+  const referralCode =
+    match[1];
 
-  const installReferrer = new URLSearchParams({
-    rev_ref: referralCode
-  }).toString();
+  const backendUrl =
+    "https://api.revstore.in" +
+    "/api/customer/v1/referral/open/" +
+    encodeURIComponent(referralCode);
 
-  const playUrl = new URL(
-    "https://play.google.com/store/apps/details"
+  window.location.replace(
+    backendUrl
   );
-
-  playUrl.searchParams.set(
-    "id",
-    "com.revstore.customer"
-  );
-
-  playUrl.searchParams.set(
-    "referrer",
-    installReferrer
-  );
-
-  playUrl.searchParams.set(
-    "pcampaignid",
-    "revstore_referral"
-  );
-
-  window.location.replace(playUrl.toString());
 })();
 </script>
 
 <noscript>
-  <p>JavaScript is required to continue to RevStore.</p>
+  <p>
+    JavaScript is required to open this referral link.
+  </p>
 </noscript>
+
 </body>
 </html>
