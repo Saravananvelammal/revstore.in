@@ -1,16 +1,29 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
+    <meta charset="utf-8">
 
-  <meta
-    name="viewport"
-    content="width=device-width,initial-scale=1"
-  >
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1"
+    >
 
-  <meta name="robots" content="noindex,nofollow">
+    <meta
+        name="robots"
+        content="noindex,nofollow"
+    >
 
-  <title>Opening RevStore…</title>
+    <meta
+        http-equiv="Cache-Control"
+        content="no-store, no-cache, must-revalidate"
+    >
+
+    <meta
+        http-equiv="Pragma"
+        content="no-cache"
+    >
+
+    <title>Opening RevStore…</title>
 </head>
 
 <body>
@@ -19,33 +32,72 @@
 
 <script>
 (function () {
-  "use strict";
+    "use strict";
 
-  const match =
-    window.location.pathname.match(
-      /^\/r\/([A-Za-z0-9_-]{10,16})\/?$/
+    /*
+     * Supported referral URL:
+     *
+     * https://revstore.in/r/ABCDEFGHIJ
+     *
+     * Referral code:
+     * - 10 to 16 characters
+     * - A-Z
+     * - a-z
+     * - 0-9
+     * - underscore
+     * - hyphen
+     */
+
+    const pathname =
+        window.location.pathname || "";
+
+    const match =
+        pathname.match(
+            /^\/r\/([A-Za-z0-9_-]{10,16})\/?$/
+        );
+
+    /*
+     * This was not a valid RevStore referral route.
+     *
+     * Do not forward arbitrary paths to the backend.
+     */
+    if (!match) {
+        window.location.replace("/");
+        return;
+    }
+
+    const referralCode =
+        match[1];
+
+    if (!referralCode) {
+        window.location.replace("/");
+        return;
+    }
+
+    /*
+     * Only a validated referral code reaches the backend.
+     */
+    const backendUrl =
+        "https://api.revstore.in" +
+        "/api/customer/v1/referral/open/" +
+        encodeURIComponent(
+            referralCode
+        );
+
+    /*
+     * replace() prevents this intermediate redirect page
+     * remaining in browser history.
+     */
+    window.location.replace(
+        backendUrl
     );
-
-  if (!match) {
-    window.location.replace("/");
-    return;
-  }
-
-  const referralCode = match[1];
-
-  const backendUrl =
-    "https://api.revstore.in" +
-    "/api/customer/v1/referral/open/" +
-    encodeURIComponent(referralCode);
-
-  window.location.replace(backendUrl);
 })();
 </script>
 
 <noscript>
-  <p>
-    JavaScript is required to open this referral link.
-  </p>
+    <p>
+        JavaScript is required to open this RevStore referral link.
+    </p>
 </noscript>
 
 </body>

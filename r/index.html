@@ -1,19 +1,19 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
+    <meta charset="utf-8">
 
-  <meta
-    name="viewport"
-    content="width=device-width,initial-scale=1"
-  >
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1"
+    >
 
-  <meta
-    name="robots"
-    content="noindex,nofollow"
-  >
+    <meta
+        name="robots"
+        content="noindex,nofollow"
+    >
 
-  <title>Opening RevStore…</title>
+    <title>RevStore Referral</title>
 </head>
 
 <body>
@@ -22,33 +22,60 @@
 
 <script>
 (function () {
-  "use strict";
+    "use strict";
 
-  const match =
-    window.location.pathname.match(
-      /^\/r\/([A-Za-z0-9_-]{10,16})\/?$/
+    /*
+     * Normally referral links use:
+     *
+     * /r/REFERRAL_CODE
+     *
+     * GitHub Pages sends that missing static path to
+     * the repository-root 404.html.
+     *
+     * This /r/index.html remains only as a safe
+     * fallback for /r/ itself.
+     */
+
+    const params =
+        new URLSearchParams(
+            window.location.search
+        );
+
+    const referralCode =
+        (
+            params.get("rev_ref") ||
+            ""
+        ).trim();
+
+    const referralPattern =
+        /^[A-Za-z0-9_-]{10,16}$/;
+
+    if (
+        !referralPattern.test(
+            referralCode
+        )
+    ) {
+        window.location.replace("/");
+        return;
+    }
+
+    const backendUrl =
+        "https://api.revstore.in" +
+        "/api/customer/v1/referral/open/" +
+        encodeURIComponent(
+            referralCode
+        );
+
+    window.location.replace(
+        backendUrl
     );
-
-  if (!match) {
-    window.location.replace("/");
-    return;
-  }
-
-  const referralCode = match[1];
-
-  const backendUrl =
-    "https://api.revstore.in" +
-    "/api/customer/v1/referral/open/" +
-    encodeURIComponent(referralCode);
-
-  window.location.replace(backendUrl);
 })();
 </script>
 
 <noscript>
-  <p>
-    JavaScript is required to open this referral link.
-  </p>
+    <p>
+        JavaScript is required to open this RevStore referral link.
+    </p>
 </noscript>
 
 </body>
